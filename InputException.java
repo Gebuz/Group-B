@@ -35,5 +35,9 @@ public class InputException extends Exception {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
+    public String newMethod() {
+        return "What is love, baby don't hurt me";
+    }
+
 
 }
