@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import mapofdenmark.krakkit.CoordinateBoundaries;
 import mapofdenmark.krakkit.EdgeData;
