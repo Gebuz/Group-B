@@ -5,7 +5,9 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import mapofdenmark.krakkit.CoordinateBoundaries;
 import mapofdenmark.krakkit.EdgeData;
 import mapofdenmark.krakkit.KrakLoader;
 import mapofdenmark.krakkit.NodeData;
@@ -28,18 +30,12 @@ public class X
         KrakLoader loader = new KrakLoader()
         {
             @Override
-            public void processNode(NodeData nd)
-            {
-                nodes.put(nd.KDV, nd);
-            }
+            public void processNode(NodeData nd) { nodes.put(nd.KDV, nd); }
 
             @Override
-            public void processEdge(EdgeData ed)
-            {
-                edges.add(ed);
-            }
+            public void processEdge(EdgeData ed) { edges.add(ed); }
         };
-
+        
         // If your machine slows to a crawl doing inputting, try
         // uncommenting this. 
         // Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
@@ -48,6 +44,7 @@ public class X
         loader.load(dir + "kdv_node_unload.txt",
                 dir + "kdv_unload.txt");
 
+        CoordinateBoundaries.findBoundaries(nodes);
 
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
@@ -71,10 +68,10 @@ public class X
                     NodeData tn = nodes.get(ed.TNODE);
                     int type = ed.TYP;
 
-                    double fnX = (fn.X_COORD) / k;
-                    double fnY = (fn.Y_COORD) / k;
-                    double tnX = (tn.X_COORD) / k;
-                    double tnY = (tn.Y_COORD) / k;
+                    double fnX = (fn.X_COORD - CoordinateBoundaries.xMin) / k;
+                    double fnY = (CoordinateBoundaries.yMax - fn.Y_COORD) / k;
+                    double tnX = (tn.X_COORD - CoordinateBoundaries.xMin) / k;
+                    double tnY = (CoordinateBoundaries.yMax - tn.Y_COORD) / k;
 
                     Line2D line = new Line2D.Double(fnX, fnY, tnX, tnY);
                     switch (type) {
