@@ -103,6 +103,12 @@ public abstract class KrakLoader
         MemoryMXBean mxbean = ManagementFactory.getMemoryMXBean();
         System.out.printf("Heap memory usage: %d MB%n",
                 mxbean.getHeapMemoryUsage().getUsed() / (1000000));
+        
+        CoordinateBoundaries.findBoundaries(nodes);
+        System.out.println("yMax = " + CoordinateBoundaries.yMax);
+        System.out.println("yMin = " + CoordinateBoundaries.yMin);
+        System.out.println("xMax = " + CoordinateBoundaries.xMax);
+        System.out.println("xMin = " + CoordinateBoundaries.xMin);
 
         for (int i = 0; i < 812301; i++) {
             NodeData fn = nodes.get(edges.get(i).FNODE);
