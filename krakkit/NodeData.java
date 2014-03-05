@@ -17,11 +17,13 @@ public class NodeData {
 	 */
 	public NodeData(String line) {
 		DataLine dl = new DataLine(line);
+                double MIN_X = 442254.35659;
+                double MAX_Y = 6402050.98297;
 		ARC = dl.getInt();
 		KDV = dl.getInt();
 		KDV_ID = dl.getInt();
-		X_COORD = dl.getDouble();
-		Y_COORD = dl.getDouble();
+		X_COORD = dl.getDouble() - MIN_X;
+		Y_COORD = MAX_Y - dl.getDouble();
 	}
 
 	/**

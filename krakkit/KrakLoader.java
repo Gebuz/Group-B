@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import javax.xml.soap.Node;
 
 /**
  * Parse Krak data files (kdv_node_unload.txt, kdv_unload.txt).
@@ -74,7 +74,7 @@ public abstract class KrakLoader
 
         // For this example, we'll simply load the raw data into
         // ArrayLists.
-        final HashMap<Integer, NodeData> nodes = new HashMap<Integer, NodeData>(); 
+        final HashMap<Integer, NodeData> nodes = new HashMap<Integer, NodeData>();
         final ArrayList<EdgeData> edges = new ArrayList<EdgeData>();
 
         // For that, we need to inherit from KrakLoader and override
@@ -88,7 +88,7 @@ public abstract class KrakLoader
             @Override
             public void processEdge(EdgeData ed) { edges.add(ed); }
         };
-        
+
         // If your machine slows to a crawl doing inputting, try
         // uncommenting this. 
         // Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
@@ -103,13 +103,7 @@ public abstract class KrakLoader
         MemoryMXBean mxbean = ManagementFactory.getMemoryMXBean();
         System.out.printf("Heap memory usage: %d MB%n",
                 mxbean.getHeapMemoryUsage().getUsed() / (1000000));
-        
-        CoordinateBoundaries.findBoundaries(nodes);
-        System.out.println("Y Max: " + CoordinateBoundaries.yMax);
-        System.out.println("Y Min: " + CoordinateBoundaries.yMin);
-        System.out.println("X Max: " + CoordinateBoundaries.xMax);
-        System.out.println("X Min: " + CoordinateBoundaries.xMin);
-        
+
         for (int i = 0; i < 812301; i++) {
             NodeData fn = nodes.get(edges.get(i).FNODE);
             NodeData tn = nodes.get(edges.get(i).TNODE);
