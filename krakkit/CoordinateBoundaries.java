@@ -51,12 +51,12 @@ public class CoordinateBoundaries
     
     private static void setXSupremum(double x) {
         if (x > xMax) xMax = x;
-        else if (x < xMin) xMin = x;
+        if (x < xMin) xMin = x;
     }
     
     private static void setYSupremum(double y) {
       if (y > yMax) yMax = y;
-      else if (y < yMin) yMin = y;
+      if (y < yMin) yMin = y;
     }
     
 }
