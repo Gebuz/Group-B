@@ -46,27 +46,27 @@ public class QuadTree {
                 NodeData fn = nodes.get(e.FNODE);
                 NodeData tn = nodes.get(e.TNODE);
 
-                if (fn.X_COORD <= midx && fn.Y_COORD <= midy) {
+                if (fn.getX() <= midx && fn.getY() <= midy) {
                     enw.add(e);
-                } else if (fn.X_COORD > midx && fn.Y_COORD <= midy) {
+                } else if (fn.getX() > midx && fn.getY() <= midy) {
                     ene.add(e);
-                } else if (fn.X_COORD <= midx && fn.Y_COORD > midy) {
+                } else if (fn.getX() <= midx && fn.getY() > midy) {
                     esw.add(e);
                 } else {
                     ese.add(e);
                 }
 
-                if (tn.X_COORD <= midx && tn.Y_COORD <= midy 
-                        && !(fn.X_COORD <= midx && fn.Y_COORD <= midy)) 
+                if (tn.getX() <= midx && tn.getY() <= midy 
+                        && !(fn.getX() <= midx && fn.getY() <= midy)) 
                     { enw.add(e); 
-                } else if (tn.X_COORD > midx && tn.Y_COORD <= midy 
-                        && !(fn.X_COORD > midx && fn.Y_COORD <= midy)) 
+                } else if (tn.getX() > midx && tn.getY() <= midy 
+                        && !(fn.getX() > midx && fn.getY() <= midy)) 
                     { ene.add(e); 
-                } else if (tn.X_COORD <= midx && tn.Y_COORD > midy 
-                        && !(fn.X_COORD <= midx && fn.Y_COORD > midy)) 
+                } else if (tn.getX() <= midx && tn.getY() > midy 
+                        && !(fn.getX() <= midx && fn.getY() > midy)) 
                     { esw.add(e); 
-                } else if (tn.X_COORD > midx && tn.Y_COORD > midy 
-                        && !(fn.X_COORD > midx && fn.Y_COORD > midy)) 
+                } else if (tn.getX() > midx && tn.getY() > midy 
+                        && !(fn.getX() > midx && fn.getY() > midy)) 
                     { ese.add(e); 
                 }
             }

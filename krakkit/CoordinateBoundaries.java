@@ -29,8 +29,8 @@ public class CoordinateBoundaries
         while (it.hasNext()) {
             Map.Entry<Integer, NodeData> e = it.next();
             NodeData nd = e.getValue();
-            double x = nd.X_COORD;
-            double y = nd.Y_COORD;
+            double x = nd.getX();
+            double y = nd.getY();
             setXSupremum(x);
             setYSupremum(y);
         }
@@ -42,8 +42,8 @@ public class CoordinateBoundaries
      */
     public static void findBoundaries(List<NodeData> nodes) {
         for (NodeData nd : nodes) {
-            double x = nd.X_COORD;
-            double y = nd.Y_COORD;
+            double x = nd.getX();
+            double y = nd.getY();
             setXSupremum(x);
             setYSupremum(y);
         }

@@ -111,10 +111,10 @@ public abstract class KrakLoader
         for (int i = 0; i < 812301; i++) {
             NodeData fn = nodes.get(edges.get(i).FNODE);
             NodeData tn = nodes.get(edges.get(i).TNODE);
-            double fnX = fn.X_COORD;
-            double fnY = fn.Y_COORD;
-            double tnX = fn.X_COORD;
-            double tnY = fn.X_COORD;
+            double fnX = fn.getX();
+            double fnY = fn.getY();
+            double tnX = fn.getX();
+            double tnY = fn.getY();
             //drawLine(fnX, fnY, tnX, tnY);
             //System.out.println("Edge " + edges.get(i));
         }

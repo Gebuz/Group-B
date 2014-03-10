@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.CookieHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import krakkit.CoordinateBoundaries;
 import krakkit.KrakLoader;
 import krakkit.EdgeData;
@@ -51,6 +53,15 @@ public class QuadTreeGuiTest
                 dir + "kdv_unload.txt");
 
         CoordinateBoundaries.findBoundaries(nodes);
+        
+        // Spejlvend alle y værdier:
+        Iterator<Map.Entry<Integer, NodeData>> it = nodes.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, NodeData> e = it.next();
+            NodeData nd = e.getValue();
+            nd.setY(CoordinateBoundaries.yMax - nd.getY() + 
+                    CoordinateBoundaries.yMin);
+        }
 
         System.out.println("XMAX = " + CoordinateBoundaries.xMax);
         System.out.println("XMIN = " + CoordinateBoundaries.xMin);
@@ -64,7 +75,7 @@ public class QuadTreeGuiTest
                         CoordinateBoundaries.yMax-CoordinateBoundaries.yMin);
         root.split();
 
-        final QuadTree branch = root.getBranch(2);
+        final QuadTree branch = root.getBranch(1);
         final ArrayList<EdgeData> edges2 = branch.getEdges();
         
         System.out.println("\nID for branch 0 = " + root.getBranch(0).id);
@@ -101,10 +112,10 @@ public class QuadTreeGuiTest
                     NodeData tn = nodes.get(ed.TNODE);
                     int type = ed.TYP;
 
-                    double fnX = (fn.X_COORD - CoordinateBoundaries.xMin) / k;
-                    double fnY = (CoordinateBoundaries.yMax - fn.Y_COORD) / k;
-                    double tnX = (tn.X_COORD - CoordinateBoundaries.xMin) / k;
-                    double tnY = (CoordinateBoundaries.yMax - tn.Y_COORD) / k;
+                    double fnX = (fn.getX() - CoordinateBoundaries.xMin) / k;
+                    double fnY = (fn.getY() - CoordinateBoundaries.yMin) / k;
+                    double tnX = (tn.getX() - CoordinateBoundaries.xMin) / k;
+                    double tnY = (tn.getY() - CoordinateBoundaries.yMin) / k;
 
                     Line2D line = new Line2D.Double(fnX, fnY, tnX, tnY);
                     switch (type) {

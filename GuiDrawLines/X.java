@@ -67,10 +67,10 @@ public class X
                     NodeData tn = nodes.get(ed.TNODE);
                     int type = ed.TYP;
 
-                    double fnX = (fn.X_COORD - CoordinateBoundaries.xMin) / k;
-                    double fnY = (CoordinateBoundaries.yMax - fn.Y_COORD) / k;
-                    double tnX = (tn.X_COORD - CoordinateBoundaries.xMin) / k;
-                    double tnY = (CoordinateBoundaries.yMax - tn.Y_COORD) / k;
+                    double fnX = (fn.getX() - CoordinateBoundaries.xMin) / k;
+                    double fnY = (CoordinateBoundaries.yMax - fn.getY()) / k;
+                    double tnX = (tn.getX() - CoordinateBoundaries.xMin) / k;
+                    double tnY = (CoordinateBoundaries.yMax - tn.getY()) / k;
 
                     Line2D line = new Line2D.Double(fnX, fnY, tnX, tnY);
                     switch (type) {
