@@ -1,4 +1,4 @@
-package mapofdenmark.GuiDrawLines;
+package GuiDrawLines;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,7 +87,7 @@ public class QuadTree {
 
     //bliver ikke brugt, måske noget med at lade være med at gå ned i træet
     //når hele eller store dele af kortet skal tegnes.
-    public double sizeMatch(double x1, double x2, double y1, double y2) {
+    public double sizeMatch(double x1, double y1, double x2, double y2) {
         if (x1 > x
                 || y1 > y
                 || x2 < x + length
@@ -172,30 +172,30 @@ public class QuadTree {
                 ||  y1 < y + height);
     }
 
-    private boolean canZoom(double x1, double x2, double y1, double y2) {
+    private boolean canZoom(double x1, double y1, double x2, double y2) {
         return (x1 > x
                 || y1 > y
                 || x2 < x + length
                 || y2 < y + height);
     }
 
-    public ArrayList<EdgeData> getRoads(double x1, double x2, double y1, double y2) {
-        if (nw.canZoom(x1, x2, y1, y2)) {
-            return nw.getRoads(x1, x2, y1, y2);
+    public ArrayList<EdgeData> getRoads(double x1, double y1, double x2, double y2) {
+        if (nw.canZoom(x1, y1, x2, y2)) {
+            return nw.getRoads(x1, y1, x2, y2);
         }
-        if (ne.canZoom(x1, x2, y1, y2)) {
-            return ne.getRoads(x1, x2, y1, y2);
+        if (ne.canZoom(x1, y1, x2, y2)) {
+            return ne.getRoads(x1, y1, x2, y2);
         }
-        if (sw.canZoom(x1, x2, y1, y2)) {
-            return sw.getRoads(x1, x2, y1, y2);
+        if (sw.canZoom(x1, y1, x2, y2)) {
+            return sw.getRoads(x1, y1, x2, y2);
         }
-        if (se.canZoom(x1, x2, y1, y2)) {
-            return se.getRoads(x1, x2, y1, y2);
+        if (se.canZoom(x1, y1, x2, y2)) {
+            return se.getRoads(x1, y1, x2, y2);
         }
         return edges;
     }
 
-    public ArrayList<EdgeData> getRoadsImproved(double x1, double x2, double y1, double y2) {
+    public ArrayList<EdgeData> getRoadsImproved(double x1, double y1, double x2, double y2) {
         int topLeft = getID(x1, y1);
         int botRight = getID(x2, y2);
         if (topLeft == botRight) {
@@ -300,7 +300,7 @@ public class QuadTree {
         return Direction.SE;
     }
 
-    public void doStuff(double x1, double x2, double y1, double y2) {
+    public void doStuff(double x1, double y1, double x2, double y2) {
         if (x2 < x
                 || y2 < y
                 || x1 > x + length
@@ -309,16 +309,16 @@ public class QuadTree {
         }
         //dostuff to data
         if (nw != null) {
-            nw.doStuff(x1, x2, y1, y2);
+            nw.doStuff(x1, y1, x2, y2);
         }
         if (ne != null) {
-            ne.doStuff(x1, x2, y1, y2);
+            ne.doStuff(x1, y1, x2, y2);
         }
         if (sw != null) {
-            sw.doStuff(x1, x2, y1, y2);
+            sw.doStuff(x1, y1, x2, y2);
         }
         if (se != null) {
-            se.doStuff(x1, x2, y1, y2);
+            se.doStuff(x1, y1, x2, y2);
         }
     }
 
