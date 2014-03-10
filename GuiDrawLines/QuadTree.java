@@ -16,7 +16,7 @@ public class QuadTree {
     private final HashMap<Integer, NodeData> nodes;
     private final ArrayList<EdgeData> edges;
     private double x, y, length, height;
-    public final int id;
+    public final int id; // Unique ID
 
     public QuadTree(ArrayList edges, HashMap nodes, int id) {
         this.edges = edges;
@@ -24,6 +24,14 @@ public class QuadTree {
         this.id = id;
     }
 
+    /**
+     * Set the top left XY-coordinates of the QuadTree rectangle as well as setting
+     * the length and height of the rectangle.
+     * @param x The x-coordinate of the top left corner
+     * @param y The y-coordinate of the top left corner
+     * @param length The length of the rectangle.
+     * @param height The height of the rectangle.
+     */
     public void addCoords(double x, double y, double length, double height) {
         this.x = x;
         this.y = y;
@@ -31,9 +39,12 @@ public class QuadTree {
         this.height = height;
     }
 
+    /**
+     * Split the QuadTree into SubQuadTrees. This method is called recursively
+     * until the smallest QuadTree has less than 500 edges.
+     */
     public void split() {
-        int i = edges.size();
-        if (i > 500) {
+        if (edges.size() > 500) {
             double midx = x + length / 2;
             double midy = y + height / 2;
 
@@ -115,6 +126,11 @@ public class QuadTree {
         return sizematch;
     }
 
+    /**
+     * Get a branch by its id.
+     * @param id    The id of the branch/QuadTree we are looking for.
+     * @return returns the QuadTree with the given id.
+     */
     public QuadTree getBranch(int id) {
         if (this.id == id) {
             return this;
@@ -154,18 +170,24 @@ public class QuadTree {
         return qt;
     }
 
-    public int getID(double x1, double y1) {
-        if (nw.canZoom(x1, y1)) {
-            return nw.getID(x1, y1);
+    /**
+     * Get the id of the QuadTree that contains the point (x, y).
+     * @param x The x coordinate of the point.
+     * @param y The y coordinate of the point.
+     * @return Returns the id of the QuadTree that contains the point (x, y).
+     */
+    public int getID(double x, double y) {
+        if (nw.canZoom(x, y)) {
+            return nw.getID(x, y);
         }
-        if (ne.canZoom(x1, y1)) {
-            return ne.getID(x1, y1);
+        if (ne.canZoom(x, y)) {
+            return ne.getID(x, y);
         }
-        if (sw.canZoom(x1, y1)) {
-            return sw.getID(x1, y1);
+        if (sw.canZoom(x, y)) {
+            return sw.getID(x, y);
         }
-        if (se.canZoom(x1, y1)) {
-            return se.getID(x1, y1);
+        if (se.canZoom(x, y)) {
+            return se.getID(x, y);
         }
         return id;
     }
@@ -178,12 +200,21 @@ public class QuadTree {
     }
 
     private boolean canZoom(double x1, double y1, double x2, double y2) {
-        return (x1 > x
-                || y1 > y
-                || x2 < x + length
-                || y2 < y + height);
+        return (    x1 > x
+                ||  y1 > y
+                ||  x2 < x + length
+                ||  y2 < y + height);
     }
 
+    /**
+     * Return all the edges in the QuadTree found by two points. ??
+     * @param x1    The x coordinate of the top left corner of the
+     * @param y1    The y coordinate of the top left corner of the 
+     * @param x2    The x coordinate of the lower right corner of the 
+     * @param y2    The y coordinate of the lower right corner of the
+     * @return Returns an ArrayList&lt;{@link EdgeData}&gt; of all edges that
+     * are inside the lowest QuadTree based on coordinates.
+     */
     public ArrayList<EdgeData> getRoads(double x1, double y1, double x2, double y2) {
         if (nw.canZoom(x1, y1, x2, y2)) {
             return nw.getRoads(x1, y1, x2, y2);
@@ -285,49 +316,26 @@ public class QuadTree {
         return neighbor;
     }
 
+    /**
+     * Get the parent of the current QuadTree.
+     * @return Returns the parent of the current QuadTree.
+     */
     private QuadTree getParent()
     {
         return getBranch((id - 1) / 4);
     }
 
+    /**
+     * Get the direction of the current QuadTree.
+     * @return Returns the direction of the current QuadTree.
+     */
     private Direction getDirection()
     {
-        if (id == 0) {
-            return Direction.None;
-        }
-        if (id % 4 == 0) {
-            return Direction.NW;
-        }
-        if (id % 4 == 1) {
-            return Direction.NE;
-        }
-        if (id % 4 == 2) {
-            return Direction.SW;
-        }
-        return Direction.SE;
-    }
-
-    public void doStuff(double x1, double y1, double x2, double y2)
-    {
-        if (x2 < x
-                || y2 < y
-                || x1 > x + length
-                || y1 > y + length) {
-            return;
-        }
-        //dostuff to data
-        if (nw != null) {
-            nw.doStuff(x1, y1, x2, y2);
-        }
-        if (ne != null) {
-            ne.doStuff(x1, y1, x2, y2);
-        }
-        if (sw != null) {
-            sw.doStuff(x1, y1, x2, y2);
-        }
-        if (se != null) {
-            se.doStuff(x1, y1, x2, y2);
-        }
+        if      (id     == 0)   return Direction.None;
+        else if (id % 4 == 0)   return Direction.NW;
+        else if (id % 4 == 1)   return Direction.NE;
+        else if (id % 4 == 2)   return Direction.SW;
+        else                    return Direction.SE;
     }
 
     public HashMap<Integer, NodeData> getNodes()
