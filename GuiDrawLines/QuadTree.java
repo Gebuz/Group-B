@@ -2,8 +2,8 @@ package GuiDrawLines;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import mapofdenmark.krakkit.EdgeData;
-import mapofdenmark.krakkit.NodeData;
+import krakkit.EdgeData;
+import krakkit.NodeData;
 
 /**
  * top left corner (x,y) and (x1, y1) bottom right corner (x2, y2)
@@ -13,8 +13,8 @@ import mapofdenmark.krakkit.NodeData;
 public class QuadTree {
 
     private QuadTree nw, ne, sw, se;
-    public final HashMap<Integer, NodeData> nodes;
-    public final ArrayList<EdgeData> edges;
+    private final HashMap<Integer, NodeData> nodes;
+    private final ArrayList<EdgeData> edges;
     private double x, y, length, height;
     public final int id;
 
@@ -43,41 +43,46 @@ public class QuadTree {
             ArrayList<EdgeData> ese = new ArrayList<>();
 
             for (EdgeData e : edges) {
-                NodeData n = nodes.get(e.FNODE);
-                NodeData m = nodes.get(e.TNODE);
+                NodeData fn = nodes.get(e.FNODE);
+                NodeData tn = nodes.get(e.TNODE);
 
-                if (n.X_COORD <= midx && n.Y_COORD <= midy) {
+                if (fn.X_COORD <= midx && fn.Y_COORD <= midy) {
                     enw.add(e);
-                } else if (n.X_COORD > midx && n.Y_COORD <= midy) {
+                } else if (fn.X_COORD > midx && fn.Y_COORD <= midy) {
                     ene.add(e);
-                } else if (n.X_COORD <= midx && n.Y_COORD > midy) {
+                } else if (fn.X_COORD <= midx && fn.Y_COORD > midy) {
                     esw.add(e);
                 } else {
                     ese.add(e);
                 }
 
-                if (m.X_COORD <= midx && m.Y_COORD <= midy
-                        || !(n.X_COORD <= midx && n.Y_COORD <= midy)) {
-                    enw.add(e);
-                } else if (m.X_COORD > midx && m.Y_COORD <= midy
-                        || !(n.X_COORD > midx && n.Y_COORD <= midy)) {
-                    ene.add(e);
-                } else if (m.X_COORD <= midx && m.Y_COORD > midy
-                        || (n.X_COORD <= midx && n.Y_COORD > midy)) {
-                    esw.add(e);
-                } else if (!(n.X_COORD > midx && n.Y_COORD > midy)) {
-                    ese.add(e);
+                if (tn.X_COORD <= midx && tn.Y_COORD <= midy 
+                        && !(fn.X_COORD <= midx && fn.Y_COORD <= midy)) 
+                    { enw.add(e); 
+                } else if (tn.X_COORD > midx && tn.Y_COORD <= midy 
+                        && !(fn.X_COORD > midx && fn.Y_COORD <= midy)) 
+                    { ene.add(e); 
+                } else if (tn.X_COORD <= midx && tn.Y_COORD > midy 
+                        && !(fn.X_COORD <= midx && fn.Y_COORD > midy)) 
+                    { esw.add(e); 
+                } else if (tn.X_COORD > midx && tn.Y_COORD > midy 
+                        && !(fn.X_COORD > midx && fn.Y_COORD > midy)) 
+                    { ese.add(e); 
                 }
             }
+            
             nw = new QuadTree(enw, nodes, 4 * id + 1);
             nw.addCoords(x, y, length / 2, height / 2);
             nw.split();
+            
             ne = new QuadTree(ene, nodes, 4 * id + 2);
             ne.addCoords(midx, y, length / 2, height / 2);
             ne.split();
+            
             sw = new QuadTree(esw, nodes, 4 * id + 3);
             sw.addCoords(x, midy, length / 2, height / 2);
             sw.split();
+            
             se = new QuadTree(ese, nodes, 4 * id + 4);
             se.addCoords(midx, midy, length / 2, height / 2);
             se.split();
@@ -129,16 +134,16 @@ public class QuadTree {
             id = (id - 1) / 4;
         }
         while (s.length() > 0 && qt != null) {
-            if (0 == s.charAt(s.length() - 1)) {
+            if ('0' == s.charAt(s.length() - 1)) {
                 qt = qt.nw;
             }
-            if (0 == s.charAt(s.length() - 1)) {
+            if ('1' == s.charAt(s.length() - 1)) {
                 qt = qt.ne;
             }
-            if (0 == s.charAt(s.length() - 1)) {
+            if ('2' == s.charAt(s.length() - 1)) {
                 qt = qt.sw;
             }
-            if (0 == s.charAt(s.length() - 1)) {
+            if ('3' == s.charAt(s.length() - 1)) {
                 qt = qt.se;
             }
             s = s.substring(0, s.length() - 1);
@@ -280,11 +285,13 @@ public class QuadTree {
         return neighbor;
     }
 
-    private QuadTree getParent() {
+    private QuadTree getParent()
+    {
         return getBranch((id - 1) / 4);
     }
 
-    private Direction getDirection() {
+    private Direction getDirection()
+    {
         if (id == 0) {
             return Direction.None;
         }
@@ -300,7 +307,8 @@ public class QuadTree {
         return Direction.SE;
     }
 
-    public void doStuff(double x1, double y1, double x2, double y2) {
+    public void doStuff(double x1, double y1, double x2, double y2)
+    {
         if (x2 < x
                 || y2 < y
                 || x1 > x + length
@@ -322,4 +330,13 @@ public class QuadTree {
         }
     }
 
+    public HashMap<Integer, NodeData> getNodes()
+    {
+        return nodes;
+    }
+
+    public ArrayList<EdgeData> getEdges()
+    {
+        return edges;
+    }
 }

@@ -4,14 +4,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
 import java.io.IOException;
+import java.net.CookieHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import krakkit.CoordinateBoundaries;
-import krakkit.EdgeData;
 import krakkit.KrakLoader;
+import krakkit.EdgeData;
 import krakkit.NodeData;
 
-public class X
+public class QuadTreeGuiTest
 {
 
     public static void main(String[] args) throws IOException
@@ -29,10 +30,16 @@ public class X
         KrakLoader loader = new KrakLoader()
         {
             @Override
-            public void processNode(NodeData nd) { nodes.put(nd.KDV, nd); }
+            public void processNode(NodeData nd)
+            {
+                nodes.put(nd.KDV, nd);
+            }
 
             @Override
-            public void processEdge(EdgeData ed) { edges.add(ed); }
+            public void processEdge(EdgeData ed)
+            {
+                edges.add(ed);
+            }
         };
 
         // If your machine slows to a crawl doing inputting, try
@@ -44,6 +51,33 @@ public class X
                 dir + "kdv_unload.txt");
 
         CoordinateBoundaries.findBoundaries(nodes);
+
+        System.out.println("XMAX = " + CoordinateBoundaries.xMax);
+        System.out.println("XMIN = " + CoordinateBoundaries.xMin);
+        System.out.println("YMAX = " + CoordinateBoundaries.yMax);
+        System.out.println("YMIN = " + CoordinateBoundaries.yMin);
+        
+        QuadTree root = new QuadTree(edges, nodes, 0);
+        root.addCoords( CoordinateBoundaries.xMin,
+                        CoordinateBoundaries.yMin, 
+                        CoordinateBoundaries.xMax-CoordinateBoundaries.xMin, 
+                        CoordinateBoundaries.yMax-CoordinateBoundaries.yMin);
+        root.split();
+
+        final QuadTree branch = root.getBranch(2);
+        final ArrayList<EdgeData> edges2 = branch.getEdges();
+        
+        System.out.println("\nID for branch 0 = " + root.getBranch(0).id);
+        System.out.println("Size of edges in branch 0 = " + root.getBranch(0).getEdges().size());
+        System.out.println("\nID for branch 1 = " + root.getBranch(1).id);
+        System.out.println("Size of edges in branch 1 = " + root.getBranch(1).getEdges().size());
+        System.out.println("\nID for branch 2 = " + root.getBranch(2).id);
+        System.out.println("Size of edges in branch 2 = " + root.getBranch(2).getEdges().size());
+        System.out.println("\nID for branch 3 = " + root.getBranch(3).id);
+        System.out.println("Size of edges in branch 3 = " + root.getBranch(3).getEdges().size());
+        System.out.println("\nID for branch 4 = " + root.getBranch(4).id);
+        System.out.println("Size of edges in branch 4 = " + root.getBranch(4).getEdges().size());
+        
 
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
@@ -61,8 +95,8 @@ public class X
                 int k = 550;
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
-                for (int i = 1; i < 812301; i++) {
-                    EdgeData ed = edges.get(i);
+
+                for (EdgeData ed : edges2) {
                     NodeData fn = nodes.get(ed.FNODE);
                     NodeData tn = nodes.get(ed.TNODE);
                     int type = ed.TYP;

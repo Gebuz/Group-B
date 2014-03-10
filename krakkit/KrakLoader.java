@@ -1,4 +1,4 @@
-package mapofdenmark.krakkit;
+package krakkit;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import javax.xml.soap.Node;
 
 /**
  * Parse Krak data files (kdv_node_unload.txt, kdv_unload.txt).
