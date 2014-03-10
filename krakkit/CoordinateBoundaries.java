@@ -1,4 +1,4 @@
-package mapofdenmark.krakkit;
+package krakkit;
 
 import java.util.Iterator;
 import java.util.List;

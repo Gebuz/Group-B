@@ -1,4 +1,4 @@
-package mapofdenmark.krakkit;
+package krakkit;
 
 /**
  * An object storing the raw node data from the krak data file.

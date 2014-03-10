@@ -1,4 +1,4 @@
-package mapofdenmark.krakkit;
+package krakkit;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

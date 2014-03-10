@@ -1,10 +1,12 @@
-package maptest;
+package gui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import krakkit.NodeData;
+import krakkit.EdgeData;
 
 /**
  * top left corner (x,y) and (x1, y1) bottom right corner (x2, y2)
@@ -23,7 +25,7 @@ public class QuadTree {
         this.edges = edges;
         this.nodes = nodes;
         this.id = id;
-        MapTest.branches.add(id); //fiks navn her, tilføj som private static final i main
+        //MapTest.branches.add(id); //fiks navn her, tilføj som private static final i main
     }
 
     public void addCoords(double x, double y, double length, double height) {

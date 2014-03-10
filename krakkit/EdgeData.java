@@ -1,4 +1,4 @@
-package mapofdenmark.krakkit;
+package krakkit;
 
 /**
  * Represents the raw data from a line in kdv_unload.txt.
