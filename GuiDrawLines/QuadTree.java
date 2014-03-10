@@ -166,23 +166,17 @@ public class QuadTree {
     }
 
     private boolean canZoom(double x1, double y1) {
-        if (x1 > x
-                || y1 > y
-                || x1 < x + length
-                || y1 < y + height) {
-            return true;
-        }
-        return false;
+        return (    x1 > x
+                ||  y1 > y
+                ||  x1 < x + length
+                ||  y1 < y + height);
     }
 
     private boolean canZoom(double x1, double x2, double y1, double y2) {
-        if (x1 > x
+        return (x1 > x
                 || y1 > y
                 || x2 < x + length
-                || y2 < y + height) {
-            return true;
-        }
-        return false;
+                || y2 < y + height);
     }
 
     public ArrayList<EdgeData> getRoads(double x1, double x2, double y1, double y2) {
