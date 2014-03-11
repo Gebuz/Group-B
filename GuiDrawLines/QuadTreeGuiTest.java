@@ -75,7 +75,10 @@ public class QuadTreeGuiTest
                         CoordinateBoundaries.yMax-CoordinateBoundaries.yMin);
         root.split();
 
-        final QuadTree branch = root.getBranch(1);
+        final QuadTree branch = root.findNeighbor(root.getBranch(1), Direction.E);
+        System.out.println("\nRoot neighbour branch id = " + branch.id);
+        System.out.println("");
+        
         final ArrayList<EdgeData> edges2 = branch.getEdges();
         
         System.out.println("\nID for branch 0 = " + root.getBranch(0).id);

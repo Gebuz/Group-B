@@ -150,20 +150,15 @@ public class QuadTree {
             id = (id - 1) / 4;
         }
         while (s.length() > 0 && qt != null) {
-            if ('0' == s.charAt(s.length() - 1)) {
-                qt = qt.nw;
-            }
-            if ('1' == s.charAt(s.length() - 1)) {
-                qt = qt.ne;
-            }
-            if ('2' == s.charAt(s.length() - 1)) {
-                qt = qt.sw;
-            }
-            if ('3' == s.charAt(s.length() - 1)) {
-                qt = qt.se;
-            }
+            if ('0' == s.charAt(s.length() - 1)) qt = qt.nw;
+            if ('1' == s.charAt(s.length() - 1)) qt = qt.ne;
+            if ('2' == s.charAt(s.length() - 1)) qt = qt.sw;
+            if ('3' == s.charAt(s.length() - 1)) qt = qt.se;
+
             s = s.substring(0, s.length() - 1);
         }
+        
+        // Null Pointer Dereference.
         if (qt == null) {
             qt = qt.getParent();
         }
@@ -177,18 +172,10 @@ public class QuadTree {
      * @return Returns the id of the QuadTree that contains the point (x, y).
      */
     public int getID(double x, double y) {
-        if (nw.canZoom(x, y)) {
-            return nw.getID(x, y);
-        }
-        if (ne.canZoom(x, y)) {
-            return ne.getID(x, y);
-        }
-        if (sw.canZoom(x, y)) {
-            return sw.getID(x, y);
-        }
-        if (se.canZoom(x, y)) {
-            return se.getID(x, y);
-        }
+        if (nw.canZoom(x, y)) return nw.getID(x, y);
+        if (ne.canZoom(x, y)) return ne.getID(x, y);
+        if (sw.canZoom(x, y)) return sw.getID(x, y);
+        if (se.canZoom(x, y)) return se.getID(x, y);
         return id;
     }
 
@@ -208,31 +195,23 @@ public class QuadTree {
 
     /**
      * Return all the edges in the QuadTree found by two points. ??
-     * @param x1    The x coordinate of the top left corner of the
-     * @param y1    The y coordinate of the top left corner of the 
-     * @param x2    The x coordinate of the lower right corner of the 
-     * @param y2    The y coordinate of the lower right corner of the
+     * @param x1 The x coordinate of the top left corner of the
+     * @param y1 The y coordinate of the top left corner of the 
+     * @param x2 The x coordinate of the lower right corner of the 
+     * @param y2 The y coordinate of the lower right corner of the
      * @return Returns an ArrayList&lt;{@link EdgeData}&gt; of all edges that
      * are inside the lowest QuadTree based on coordinates.
      */
     public ArrayList<EdgeData> getRoads(double x1, double y1, double x2, double y2) {
-        if (nw.canZoom(x1, y1, x2, y2)) {
-            return nw.getRoads(x1, y1, x2, y2);
-        }
-        if (ne.canZoom(x1, y1, x2, y2)) {
-            return ne.getRoads(x1, y1, x2, y2);
-        }
-        if (sw.canZoom(x1, y1, x2, y2)) {
-            return sw.getRoads(x1, y1, x2, y2);
-        }
-        if (se.canZoom(x1, y1, x2, y2)) {
-            return se.getRoads(x1, y1, x2, y2);
-        }
+        if (nw.canZoom(x1, y1, x2, y2)) return nw.getRoads(x1, y1, x2, y2);
+        if (ne.canZoom(x1, y1, x2, y2)) return ne.getRoads(x1, y1, x2, y2);
+        if (sw.canZoom(x1, y1, x2, y2)) return sw.getRoads(x1, y1, x2, y2);
+        if (se.canZoom(x1, y1, x2, y2)) return se.getRoads(x1, y1, x2, y2);
         return edges;
     }
 
     public ArrayList<EdgeData> getRoadsImproved(double x1, double y1, double x2, double y2) {
-        int topLeft = getID(x1, y1);
+        int topLeft  = getID(x1, y1);
         int botRight = getID(x2, y2);
         if (topLeft == botRight) {
             return getBranch(topLeft).edges;
@@ -242,74 +221,61 @@ public class QuadTree {
         return zoomEdges;
     }
 
-    private QuadTree findNeighbor(QuadTree qt, Direction d) {
+    /**
+     * Find the neighbour QuadTree of a QuadTree qt in the Direction d.
+     * @param qt    The QuadTree whose neighbour we want to find.
+     * @param d     The {@link Direction} of the neighbour.
+     * @return Returns the neighbour of the QuadTree in the specified Direction.
+     */
+    public QuadTree findNeighbor(QuadTree qt, Direction d) {
+        
+        // This part works as it should.
         if (qt.getDirection() == Direction.None) {
             throw new RuntimeException("FindNeighbor on root.");
         }
+        
+        // Haven't tested this part yet.
         if (!Direction.contains(qt.getDirection(), d)) {
             QuadTree p = getParent();
             Direction e = Direction.minus(qt.getDirection(), Direction.opposite(d));
             Direction f = Direction.plus(d, e);
-            if (e == Direction.NW) {
-                return p.nw;
-            }
-            if (e == Direction.NE) {
-                return p.ne;
-            }
-            if (e == Direction.SW) {
-                return p.sw;
-            }
-            if (e == Direction.SE) {
-                return p.se;
-            }
+            if      (e == Direction.NW) return p.nw;
+            else if (e == Direction.NE) return p.ne;
+            else if (e == Direction.SW) return p.sw;
+            else if (e == Direction.SE) return p.se;
         }
+        
         QuadTree neighbor = this;
         QuadTree p = qt;
         String s = "";
-        while (p.getDirection() != Direction.None && !Direction.contains(p.getDirection(), d)) { //skal stoppe ved fælles forældre (virker ikke)
-            if (0 == (p.id - 1) % 4) {
-                s = s + "0";
-            } else if (1 == (p.id - 1) % 4) {
-                s = s + "1";
-            } else if (2 == (p.id - 1) % 4) {
-                s = s + "2";
-            } else {
-                s = s + "3";
-            }
+        while (p.getDirection() != Direction.None && 
+                !Direction.contains(p.getDirection(), d)) { //skal stoppe ved fælles forældre (virker ikke)
+            if      (0 == (p.id - 1) % 4)   s = s + "0";
+            else if (1 == (p.id - 1) % 4)   s = s + "1";
+            else if (2 == (p.id - 1) % 4)   s = s + "2";
+            else                            s = s + "3";
         }
         if (d == Direction.N || d == Direction.S) {
             while (s.length() > 0 && neighbor != null) {
-                if (0 == s.charAt(s.length() - 1)) {
-                    neighbor = neighbor.sw;
-                }
-                if (0 == s.charAt(s.length() - 1)) {
-                    neighbor = neighbor.se;
-                }
-                if (0 == s.charAt(s.length() - 1)) {
-                    neighbor = neighbor.nw;
-                }
-                if (0 == s.charAt(s.length() - 1)) {
-                    neighbor = neighbor.ne;
-                }
+                if ('0' == s.charAt(s.length() - 1)) neighbor = neighbor.sw;
+                if ('1' == s.charAt(s.length() - 1)) neighbor = neighbor.se;
+                if ('2' == s.charAt(s.length() - 1)) neighbor = neighbor.nw;
+                if ('3' == s.charAt(s.length() - 1)) neighbor = neighbor.ne;
+                
                 s = s.substring(0, s.length() - 1);
             }
-        } else {
+        } else { // (d == Direction.W || d == Direction.E)
             while (s.length() > 0 && neighbor != null) {
-                if (0 == s.charAt(s.length() - 1)) {
-                    neighbor = neighbor.ne;
-                }
-                if (0 == s.charAt(s.length() - 1)) {
-                    neighbor = neighbor.nw;
-                }
-                if (0 == s.charAt(s.length() - 1)) {
-                    neighbor = neighbor.se;
-                }
-                if (0 == s.charAt(s.length() - 1)) {
-                    neighbor = neighbor.sw;
-                }
+                if ('0' == s.charAt(s.length() - 1)) neighbor = neighbor.ne;
+                if ('1' == s.charAt(s.length() - 1)) neighbor = neighbor.nw;
+                if ('2' == s.charAt(s.length() - 1)) neighbor = neighbor.se;
+                if ('3' == s.charAt(s.length() - 1)) neighbor = neighbor.sw;
+                
                 s = s.substring(0, s.length() - 1);
             }
         }
+        
+        // Null Pointer Dereference.
         if (neighbor == null) {
             neighbor = neighbor.getParent();
         }
@@ -326,8 +292,8 @@ public class QuadTree {
     }
 
     /**
-     * Get the direction of the current QuadTree.
-     * @return Returns the direction of the current QuadTree.
+     * Get the {@link Direction} of the current QuadTree.
+     * @return Returns the Direction of the current QuadTree.
      */
     private Direction getDirection()
     {
