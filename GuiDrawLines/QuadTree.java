@@ -2,6 +2,7 @@ package GuiDrawLines;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import krakkit.EdgeData;
 import krakkit.NodeData;
 
@@ -101,7 +102,6 @@ public class QuadTree {
         }
     }
 
-
     /**
      * Get a branch by its id.
      * @param ID    The id of the branch/QuadTree we are looking for.
@@ -115,9 +115,10 @@ public class QuadTree {
         ID = ID.substring(1);
         while (ID.length() > 0 && qt.nw != null) {
             if ('0' == ID.charAt(0)) qt = qt.nw;
-            if ('1' == ID.charAt(0)) qt = qt.ne;
-            if ('2' == ID.charAt(0)) qt = qt.sw;
-            if ('3' == ID.charAt(0)) qt = qt.se;
+            else if ('1' == ID.charAt(0)) qt = qt.ne;
+            else if ('2' == ID.charAt(0)) qt = qt.sw;
+            else if ('3' == ID.charAt(0)) qt = qt.se;
+            else throw new RuntimeException("|" + id + "|");
 
             ID = ID.substring(1);
         }
@@ -140,17 +141,17 @@ public class QuadTree {
     }
 
     private boolean canZoom(double x1, double y1) {
-        return (    x1 > x
-                ||  y1 > y
-                ||  x1 <= x + length
-                ||  y1 <= y + height);
+        return (    x1 >= x
+                &&  y1 >= y
+                &&  x1 <= x + length
+                &&  y1 <= y + height);
     }
 
     private boolean canZoom(double x1, double y1, double x2, double y2) {
         return (    x1 > x
-                ||  y1 > y
-                ||  x2 <= x + length
-                ||  y2 <= y + height);
+                &&  y1 > y
+                &&  x2 <= x + length
+                &&  y2 <= y + height);
     }
 
     /**
@@ -173,28 +174,37 @@ public class QuadTree {
     public ArrayList<EdgeData> getRoadsImproved(double x1, double y1, double x2, double y2) {
         String topLeft  = getID(x1, y1);
         String botRight = getID(x2, y2);
-        if (topLeft.equals(botRight)) return getBranch(topLeft).edges;
+        if (topLeft.equals(botRight) || isParent(topLeft, botRight)) return getBranch(topLeft).edges;
+        if (isParent(botRight, topLeft)) return getBranch(botRight).edges;
         
-        ArrayList<EdgeData> zoomEdges = new ArrayList<>();
-        String botLeft = findNeighbor(getBranch(getID(x1, y2)), Direction.S).id;
+        HashSet<String> trees = new HashSet<>();
+        String botLeft = getID(x1, y2);
+        if(botLeft.length() > topLeft.length()) botLeft = botLeft.substring(0,topLeft.length());
+        botLeft = findNeighbor(getBranch(botLeft), Direction.S).id;
         if(botLeft.length() > topLeft.length()) botLeft = botLeft.substring(0,topLeft.length());
         String tempLeft = topLeft;
-        while(!botLeft.equals(tempLeft)){
+        String farRight = getID(x2, y1);
+        if(farRight.length() > topLeft.length()) farRight = farRight.substring(0,topLeft.length());
+        farRight = findNeighbor(getBranch(farRight), Direction.E).id;
+        while(!(botLeft.equals(tempLeft) || isParent(tempLeft, botLeft))){
             String tempRight = tempLeft;
-            String farRight = getID(getBranch(tempLeft).getMidX(), getBranch(tempLeft).getMidX());
-            farRight = findNeighbor(getBranch(farRight), Direction.E).id;
+            
             if(farRight.length() > tempLeft.length()) farRight = farRight.substring(0,tempLeft.length());
-            while(!farRight.equals(tempRight)){
+            while(!(farRight.equals(tempRight) || isParent(tempRight, farRight))){
+                trees.add(tempRight);
                 QuadTree qtRight = getBranch(tempRight);
-                zoomEdges.addAll(qtRight.getEdges());
+                System.out.println(qtRight.getEdges().size());
                 tempRight = findNeighbor(qtRight, Direction.E).id;
                 
             }
-            QuadTree qtLeft = getBranch(tempLeft);
-            tempLeft = findNeighbor(qtLeft, Direction.S).id;
+            tempLeft = findNeighbor(getBranch(tempLeft), Direction.S).id;
+            farRight = findNeighbor(getBranch(farRight), Direction.S).id;
 
         }
-        
+        ArrayList<EdgeData> zoomEdges = new ArrayList<>();
+        for(String s: trees) {
+            zoomEdges.addAll(getBranch(s).edges);
+        }
         return zoomEdges;
     }
 
@@ -219,12 +229,12 @@ public class QuadTree {
         int n = tempID.length()-1;
         while(n >= 0) {
             String s;
-            if(d == Direction.N) s = qt.getNorth();
-            else if(d == Direction.S) s = qt.getSouth();
-            else if(d == Direction.W) s = qt.getWest();
-            else if(d == Direction.E) s = qt.getEast();
+            if(d == Direction.N) s = getNorth(tempID.charAt(n));
+            else if(d == Direction.S) s = getSouth(tempID.charAt(n));
+            else if(d == Direction.W) s = getWest(tempID.charAt(n));
+            else if(d == Direction.E) s = getEast(tempID.charAt(n));
             else throw new RuntimeException("tried to get direction of root.");
-            tempID = tempID.substring(0, n-1) + s.substring(0, 1) + tempID.substring(n);
+            tempID = tempID.substring(0, n) + s.substring(0, 1) + tempID.substring(n+1);
             if(s.contains("halt")) break;
             n--;
         }
@@ -244,6 +254,12 @@ public class QuadTree {
         int i = qtFather.id.length();
         return qtFather.id.equals(qtSon.id.substring(0,i));
     }
+    
+    private boolean isParent(String father, String son) {
+        int i = father.length();
+        if (i > son.length()) return false;
+        return father.equals(son.substring(0,i));
+    }
 
     /**
      * Get the {@link Direction} of the current QuadTree.
@@ -258,31 +274,31 @@ public class QuadTree {
         else                    return Direction.SE;
     }
     
-    public String getNorth() {
-        if ('0' == id.charAt(0)) return "2, N";
-        if ('1' == id.charAt(0)) return "3, N";
-        if ('2' == id.charAt(0)) return "0, halt";
+    private String getNorth(char a) {
+        if ('0' == a) return "2, N";
+        if ('1' == a) return "3, N";
+        if ('2' == a) return "0, halt";
         return "1, halt";
     }
     
-    public String getSouth() {
-        if ('0' == id.charAt(0)) return "2, halt";
-        if ('1' == id.charAt(0)) return "3, halt";
-        if ('2' == id.charAt(0)) return "0, S";
+    private String getSouth(char a) {
+        if ('0' == a) return "2, halt";
+        if ('1' == a) return "3, halt";
+        if ('2' == a) return "0, S";
         return "1, S";
     }
     
-    public String getWest() {
-        if ('0' == id.charAt(0)) return "1, W";
-        if ('1' == id.charAt(0)) return "0, halt";
-        if ('2' == id.charAt(0)) return "3, W";
+    private String getWest(char a) {
+        if ('0' == a) return "1, W";
+        if ('1' == a) return "0, halt";
+        if ('2' == a) return "3, W";
         return "2, halt";
     }
     
-    public String getEast() {
-        if ('0' == id.charAt(0)) return "1, halt";
-        if ('1' == id.charAt(0)) return "0, E";
-        if ('2' == id.charAt(0)) return "3, halt";
+    private String getEast(char a) {
+        if ('0' == a) return "1, halt";
+        if ('1' == a) return "0, E";
+        if ('2' == a) return "3, halt";
         return "2, E";
     }
 
@@ -303,4 +319,5 @@ public class QuadTree {
     {
         return edges;
     }
+    
 }
