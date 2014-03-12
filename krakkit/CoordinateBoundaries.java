@@ -17,8 +17,10 @@ public class CoordinateBoundaries
     public static double xMax = Double.MIN_VALUE;
     public static double xMin = Double.MAX_VALUE;
     
-    private CoordinateBoundaries() {
-    }
+    /**
+     * Private constructor so the class cannot be instantiated.
+     */
+    private CoordinateBoundaries() {}
     
     /**
      * Find the coordinate supremum of a Map&lt;NodeData&gt;.
