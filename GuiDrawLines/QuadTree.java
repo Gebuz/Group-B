@@ -225,7 +225,7 @@ public class QuadTree {
      * Find the neighbour QuadTree of a QuadTree qt in the Direction d.
      * @param qt    The QuadTree whose neighbour we want to find.
      * @param d     The {@link Direction} of the neighbour.
-     * @return Returns the neighbour of the QuadTree in the specified Direction.
+     * @return Returns the neighbour of a QuadTree in a specified Direction.
      */
     public QuadTree findNeighbor(QuadTree qt, Direction d) {
         
@@ -246,15 +246,17 @@ public class QuadTree {
         }
         
         QuadTree neighbor = this;
-        QuadTree p = qt;
+        
         String s = "";
-        while (p.getDirection() != Direction.None && 
-                !Direction.contains(p.getDirection(), d)) { //skal stoppe ved fælles forældre (virker ikke)
-            if      (0 == (p.id - 1) % 4)   s = s + "0";
-            else if (1 == (p.id - 1) % 4)   s = s + "1";
-            else if (2 == (p.id - 1) % 4)   s = s + "2";
-            else                            s = s + "3";
+        while (qt.getDirection() != Direction.None && 
+                !Direction.contains(qt.getDirection(), d)) { //skal stoppe ved fælles forældre (virker ikke)
+            if      (0 == (qt.id - 1) % 4)   s = s + "0";
+            else if (1 == (qt.id - 1) % 4)   s = s + "1";
+            else if (2 == (qt.id - 1) % 4)   s = s + "2";
+            else  /*(3 == (qt.id - 1) % 4)*/ s = s + "3";
         }
+        
+        System.out.println("s = '" + s + "'");
         if (d == Direction.N || d == Direction.S) {
             while (s.length() > 0 && neighbor != null) {
                 if ('0' == s.charAt(s.length() - 1)) neighbor = neighbor.sw;
@@ -279,6 +281,7 @@ public class QuadTree {
         if (neighbor == null) {
             neighbor = neighbor.getParent();
         }
+        
         return neighbor;
     }
 
@@ -301,7 +304,7 @@ public class QuadTree {
         else if (id % 4 == 0)   return Direction.NW;
         else if (id % 4 == 1)   return Direction.NE;
         else if (id % 4 == 2)   return Direction.SW;
-        else                    return Direction.SE;
+        else  /*(id % 4 == 3)*/ return Direction.SE;
     }
 
     public HashMap<Integer, NodeData> getNodes()
