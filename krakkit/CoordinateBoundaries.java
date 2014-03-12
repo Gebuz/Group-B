@@ -19,6 +19,7 @@ public class CoordinateBoundaries
     
     /**
      * Private constructor so the class cannot be instantiated.
+     * 
      */
     private CoordinateBoundaries() {}
     
