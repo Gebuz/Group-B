@@ -24,14 +24,14 @@ public class QuadTree {
         this.id = id;
     }
 
-    /**
-* Set the top left XY-coordinates of the QuadTree rectangle as well as setting
-* the length and height of the rectangle.
-* @param x The x-coordinate of the top left corner
-* @param y The y-coordinate of the top left corner
-* @param length The length of the rectangle.
-* @param height The height of the rectangle.
-*/
+   /**
+    * Set the top left XY-coordinates of the QuadTree rectangle as well as setting
+    * the length and height of the rectangle.
+    * @param x The x-coordinate of the top left corner
+    * @param y The y-coordinate of the top left corner
+    * @param length The length of the rectangle.
+    * @param height The height of the rectangle.
+    */
     public void addCoords(double x, double y, double length, double height) {
         this.x = x;
         this.y = y;
@@ -39,10 +39,10 @@ public class QuadTree {
         this.height = height;
     }
 
-    /**
-* Split the QuadTree into SubQuadTrees. This method is called recursively
-* until the smallest QuadTree has less than 500 edges.
-*/
+   /**
+    * Split the QuadTree into SubQuadTrees. This method is called recursively
+    * until the smallest QuadTree has less than 500 edges.
+    */
     public void split() {
         if (edges.size() > 500) {
             double midx = x + length / 2;
@@ -126,11 +126,11 @@ public class QuadTree {
         return sizematch;
     }
 
-    /**
-* Get a branch by its id.
-* @param ID The id of the branch/QuadTree we are looking for.
-* @return returns the QuadTree with the given id.
-*/
+   /**
+    * Get a branch by its id.
+    * @param ID The id of the branch/QuadTree we are looking for.
+    * @return returns the QuadTree with the given id.
+    */
     public QuadTree getBranch(String ID) {
         if (id.equals(ID)) {
             return this;
@@ -147,12 +147,12 @@ public class QuadTree {
         return qt;
     }
 
-    /**
-* Get the id of the QuadTree that contains the point (x, y).
-* @param x The x coordinate of the point.
-* @param y The y coordinate of the point.
-* @return Returns the id of the QuadTree that contains the point (x, y).
-*/
+   /**
+    * Get the id of the QuadTree that contains the point (x, y).
+    * @param x The x coordinate of the point.
+    * @param y The y coordinate of the point.
+    * @return Returns the id of the QuadTree that contains the point (x, y).
+    */
     public String getID(double x, double y) {
         if (nw.canZoom(x, y)) return nw.getID(x, y);
         if (ne.canZoom(x, y)) return ne.getID(x, y);
@@ -175,15 +175,15 @@ public class QuadTree {
                 || y2 < y + height);
     }
 
-    /**
-* Return all the edges in the QuadTree found by two points. ??
-* @param x1 The x coordinate of the top left corner of the
-* @param y1 The y coordinate of the top left corner of the
-* @param x2 The x coordinate of the lower right corner of the
-* @param y2 The y coordinate of the lower right corner of the
-* @return Returns an ArrayList&lt;{@link EdgeData}&gt; of all edges that
-* are inside the lowest QuadTree based on coordinates.
-*/
+   /**
+    * Return all the edges in the QuadTree found by two points. ??
+    * @param x1 The x coordinate of the top left corner of the
+    * @param y1 The y coordinate of the top left corner of the
+    * @param x2 The x coordinate of the lower right corner of the
+    * @param y2 The y coordinate of the lower right corner of the
+    * @return Returns an ArrayList&lt;{@link EdgeData}&gt; of all edges that
+    * are inside the lowest QuadTree based on coordinates.
+    */
     public ArrayList<EdgeData> getRoads(double x1, double y1, double x2, double y2) {
         if (nw.canZoom(x1, y1, x2, y2)) return nw.getRoads(x1, y1, x2, y2);
         if (ne.canZoom(x1, y1, x2, y2)) return ne.getRoads(x1, y1, x2, y2);
@@ -203,12 +203,12 @@ public class QuadTree {
         return zoomEdges;
     }
 
-     /**
-* Find the neighbour QuadTree of a QuadTree qt in the Direction d.
-* @param qt The QuadTree whose neighbour we want to find.
-* @param d The {@link Direction} of the neighbour.
-* @return Returns the neighbour of the QuadTree in the specified Direction.
-*/
+   /**
+    * Find the neighbour QuadTree of a QuadTree qt in the Direction d.
+    * @param qt The QuadTree whose neighbour we want to find.
+    * @param d The {@link Direction} of the neighbour.
+    * @return Returns the neighbour of the QuadTree in the specified Direction.
+    */
     public QuadTree findNeighbor(QuadTree qt, Direction d) {
         
         // This part works as it should.
@@ -234,12 +234,12 @@ public class QuadTree {
         return getBranch(tempID);
     }
     
-     /**
-* Find the neighbour QuadTree of a QuadTree qt in the Direction d.
-* @param qt The QuadTree whose neighbour we want to find.
-* @param d The {@link Direction} of the neighbour.
-* @return Returns the neighbour of the QuadTree in the specified Direction.
-*/
+   /**
+    * Find the neighbour QuadTree of a QuadTree qt in the Direction d.
+    * @param qt The QuadTree whose neighbour we want to find.
+    * @param d The {@link Direction} of the neighbour.
+    * @return Returns the neighbour of the QuadTree in the specified Direction.
+    */
     public QuadTree findNeighborOld(QuadTree qt, Direction d) {
         
         // This part works as it should.
@@ -295,19 +295,19 @@ public class QuadTree {
         return neighbor;
     }
 
-    /**
-* Get the parent of the current QuadTree.
-* @return Returns the parent of the current QuadTree.
-*/
+   /**
+    * Get the parent of the current QuadTree.
+    * @return Returns the parent of the current QuadTree.
+    */
     private QuadTree getParent()
     {
         return getBranch(id.substring(0, id.length()-1));
     }
 
-    /**
-* Get the {@link Direction} of the current QuadTree.
-* @return Returns the Direction of the current QuadTree.
-*/
+   /**
+    * Get the {@link Direction} of the current QuadTree.
+    * @return Returns the Direction of the current QuadTree.
+    */
     private Direction getDirection()
     {
         if (Integer.parseInt(id) == 0) return Direction.None;
