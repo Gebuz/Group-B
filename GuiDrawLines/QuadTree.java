@@ -6,10 +6,10 @@ import krakkit.EdgeData;
 import krakkit.NodeData;
 
 /**
-* top left corner (x,y) and (x1, y1) bottom right corner (x2, y2)
-*
-* @author Johan
-*/
+ * top left corner (x,y) and (x1, y1) bottom right corner (x2, y2)
+ *
+ * @author Johan
+ */
 public class QuadTree {
 
     private QuadTree nw, ne, sw, se;
@@ -24,14 +24,14 @@ public class QuadTree {
         this.id = id;
     }
 
-   /**
-    * Set the top left XY-coordinates of the QuadTree rectangle as well as setting
-    * the length and height of the rectangle.
-    * @param x The x-coordinate of the top left corner
-    * @param y The y-coordinate of the top left corner
-    * @param length The length of the rectangle.
-    * @param height The height of the rectangle.
-    */
+    /**
+     * Set the top left XY-coordinates of the QuadTree rectangle as well as setting
+     * the length and height of the rectangle.
+     * @param x The x-coordinate of the top left corner
+     * @param y The y-coordinate of the top left corner
+     * @param length The length of the rectangle.
+     * @param height The height of the rectangle.
+     */
     public void addCoords(double x, double y, double length, double height) {
         this.x = x;
         this.y = y;
@@ -39,10 +39,10 @@ public class QuadTree {
         this.height = height;
     }
 
-   /**
-    * Split the QuadTree into SubQuadTrees. This method is called recursively
-    * until the smallest QuadTree has less than 500 edges.
-    */
+    /**
+     * Split the QuadTree into SubQuadTrees. This method is called recursively
+     * until the smallest QuadTree has less than 500 edges.
+     */
     public void split() {
         if (edges.size() > 500) {
             double midx = x + length / 2;
@@ -67,18 +67,18 @@ public class QuadTree {
                     ese.add(e);
                 }
 
-                if (tn.getX() <= midx && tn.getY() <= midy
-                        && !(fn.getX() <= midx && fn.getY() <= midy))
-                    { enw.add(e);
-                } else if (tn.getX() > midx && tn.getY() <= midy
-                        && !(fn.getX() > midx && fn.getY() <= midy))
-                    { ene.add(e);
-                } else if (tn.getX() <= midx && tn.getY() > midy
-                        && !(fn.getX() <= midx && fn.getY() > midy))
-                    { esw.add(e);
-                } else if (tn.getX() > midx && tn.getY() > midy
-                        && !(fn.getX() > midx && fn.getY() > midy))
-                    { ese.add(e);
+                if (tn.getX() <= midx && tn.getY() <= midy 
+                        && !(fn.getX() <= midx && fn.getY() <= midy)) 
+                    { enw.add(e); 
+                } else if (tn.getX() > midx && tn.getY() <= midy 
+                        && !(fn.getX() > midx && fn.getY() <= midy)) 
+                    { ene.add(e); 
+                } else if (tn.getX() <= midx && tn.getY() > midy 
+                        && !(fn.getX() <= midx && fn.getY() > midy)) 
+                    { esw.add(e); 
+                } else if (tn.getX() > midx && tn.getY() > midy 
+                        && !(fn.getX() > midx && fn.getY() > midy)) 
+                    { ese.add(e); 
                 }
             }
             
@@ -126,17 +126,18 @@ public class QuadTree {
         return sizematch;
     }
 
-   /**
-    * Get a branch by its id.
-    * @param ID The id of the branch/QuadTree we are looking for.
-    * @return returns the QuadTree with the given id.
-    */
+    /**
+     * Get a branch by its id.
+     * @param ID    The id of the branch/QuadTree we are looking for.
+     * @return returns the QuadTree with the given id.
+     */
     public QuadTree getBranch(String ID) {
         if (id.equals(ID)) {
             return this;
         }
         QuadTree qt = this;
-        while (ID.length() > 0 && qt != null) {
+        ID = ID.substring(1);
+        while (ID.length() > 0 && qt.nw != null) {
             if ('0' == ID.charAt(0)) qt = qt.nw;
             if ('1' == ID.charAt(0)) qt = qt.ne;
             if ('2' == ID.charAt(0)) qt = qt.sw;
@@ -147,13 +148,14 @@ public class QuadTree {
         return qt;
     }
 
-   /**
-    * Get the id of the QuadTree that contains the point (x, y).
-    * @param x The x coordinate of the point.
-    * @param y The y coordinate of the point.
-    * @return Returns the id of the QuadTree that contains the point (x, y).
-    */
+    /**
+     * Get the id of the QuadTree that contains the point (x, y).
+     * @param x The x coordinate of the point.
+     * @param y The y coordinate of the point.
+     * @return Returns the id of the QuadTree that contains the point (x, y).
+     */
     public String getID(double x, double y) {
+        if (nw == null) return this.id;
         if (nw.canZoom(x, y)) return nw.getID(x, y);
         if (ne.canZoom(x, y)) return ne.getID(x, y);
         if (sw.canZoom(x, y)) return sw.getID(x, y);
@@ -162,28 +164,28 @@ public class QuadTree {
     }
 
     private boolean canZoom(double x1, double y1) {
-        return ( x1 > x
-                || y1 > y
-                || x1 < x + length
-                || y1 < y + height);
+        return (    x1 > x
+                ||  y1 > y
+                ||  x1 <= x + length
+                ||  y1 <= y + height);
     }
 
     private boolean canZoom(double x1, double y1, double x2, double y2) {
-        return ( x1 > x
-                || y1 > y
-                || x2 < x + length
-                || y2 < y + height);
+        return (    x1 > x
+                ||  y1 > y
+                ||  x2 <= x + length
+                ||  y2 <= y + height);
     }
 
-   /**
-    * Return all the edges in the QuadTree found by two points. ??
-    * @param x1 The x coordinate of the top left corner of the
-    * @param y1 The y coordinate of the top left corner of the
-    * @param x2 The x coordinate of the lower right corner of the
-    * @param y2 The y coordinate of the lower right corner of the
-    * @return Returns an ArrayList&lt;{@link EdgeData}&gt; of all edges that
-    * are inside the lowest QuadTree based on coordinates.
-    */
+    /**
+     * Return all the edges in the QuadTree found by two points. ??
+     * @param x1 The x coordinate of the top left corner of the
+     * @param y1 The y coordinate of the top left corner of the 
+     * @param x2 The x coordinate of the lower right corner of the 
+     * @param y2 The y coordinate of the lower right corner of the
+     * @return Returns an ArrayList&lt;{@link EdgeData}&gt; of all edges that
+     * are inside the lowest QuadTree based on coordinates.
+     */
     public ArrayList<EdgeData> getRoads(double x1, double y1, double x2, double y2) {
         if (nw.canZoom(x1, y1, x2, y2)) return nw.getRoads(x1, y1, x2, y2);
         if (ne.canZoom(x1, y1, x2, y2)) return ne.getRoads(x1, y1, x2, y2);
@@ -193,22 +195,39 @@ public class QuadTree {
     }
 
     public ArrayList<EdgeData> getRoadsImproved(double x1, double y1, double x2, double y2) {
-        String topLeft = getID(x1, y1);
+        String topLeft  = getID(x1, y1);
         String botRight = getID(x2, y2);
-        if (topLeft.equals(botRight)) {
-            return getBranch(topLeft).edges;
-        }
+        if (topLeft.equals(botRight)) return getBranch(topLeft).edges;
+        
         ArrayList<EdgeData> zoomEdges = new ArrayList<>();
-        //mangler resten af metoden.
+        String botLeft = findNeighbor(getBranch(getID(x1, y2)), Direction.S).id;
+        if(botLeft.length() > topLeft.length()) botLeft = botLeft.substring(0,topLeft.length());
+        String tempLeft = topLeft;
+        while(!botLeft.equals(tempLeft)){
+            String tempRight = tempLeft;
+            String farRight = getID(getBranch(tempLeft).getMidX(), getBranch(tempLeft).getMidX());
+            farRight = findNeighbor(getBranch(farRight), Direction.E).id;
+            if(farRight.length() > tempLeft.length()) farRight = farRight.substring(0,tempLeft.length());
+            while(!farRight.equals(tempRight)){
+                QuadTree qtRight = getBranch(tempRight);
+                zoomEdges.addAll(qtRight.getEdges());
+                tempRight = findNeighbor(qtRight, Direction.E).id;
+                
+            }
+            QuadTree qtLeft = getBranch(tempLeft);
+            tempLeft = findNeighbor(qtLeft, Direction.S).id;
+
+        }
+        
         return zoomEdges;
     }
 
-   /**
-    * Find the neighbour QuadTree of a QuadTree qt in the Direction d.
-    * @param qt The QuadTree whose neighbour we want to find.
-    * @param d The {@link Direction} of the neighbour.
-    * @return Returns the neighbour of the QuadTree in the specified Direction.
-    */
+     /**
+     * Find the neighbour QuadTree of a QuadTree qt in the Direction d.
+     * @param qt    The QuadTree whose neighbour we want to find.
+     * @param d     The {@link Direction} of the neighbour.
+     * @return Returns the neighbour of the QuadTree in the specified Direction.
+     */
     public QuadTree findNeighbor(QuadTree qt, Direction d) {
         
         // This part works as it should.
@@ -216,30 +235,32 @@ public class QuadTree {
             throw new RuntimeException("FindNeighbor on root.");
         }
         
-        if(d != Direction.N || d != Direction.S || d != Direction.W || d != Direction.E)
+        if(d != Direction.N && d != Direction.S && d != Direction.W && d != Direction.E) 
             throw new RuntimeException("Can only find N, S, W, or E neighbors");
         
         //skal testes.
         String tempID = qt.id;
-        int n = tempID.length();
+        int n = tempID.length()-1;
         while(n >= 0) {
             String s;
             if(d == Direction.N) s = qt.getNorth();
             else if(d == Direction.S) s = qt.getSouth();
             else if(d == Direction.W) s = qt.getWest();
-            else s = qt.getEast();
-            tempID = tempID.substring(0, n) + s.substring(0, 1) + tempID.substring(n+1);
+            else if(d == Direction.E) s = qt.getEast();
+            else throw new RuntimeException("tried to get direction of root.");
+            tempID = tempID.substring(0, n-1) + s.substring(0, 1) + tempID.substring(n);
             if(s.contains("halt")) break;
+            n--;
         }
         return getBranch(tempID);
     }
     
-   /**
-    * Find the neighbour QuadTree of a QuadTree qt in the Direction d.
-    * @param qt The QuadTree whose neighbour we want to find.
-    * @param d The {@link Direction} of the neighbour.
-    * @return Returns the neighbour of the QuadTree in the specified Direction.
-    */
+     /**
+     * Find the neighbour QuadTree of a QuadTree qt in the Direction d.
+     * @param qt    The QuadTree whose neighbour we want to find.
+     * @param d     The {@link Direction} of the neighbour.
+     * @return Returns the neighbour of the QuadTree in the specified Direction.
+     */
     public QuadTree findNeighborOld(QuadTree qt, Direction d) {
         
         // This part works as it should.
@@ -252,7 +273,7 @@ public class QuadTree {
             QuadTree p = getParent();
             Direction e = Direction.minus(qt.getDirection(), Direction.opposite(d));
             Direction f = Direction.plus(d, e);
-            if (e == Direction.NW) return p.nw;
+            if      (e == Direction.NW) return p.nw;
             else if (e == Direction.NE) return p.ne;
             else if (e == Direction.SW) return p.sw;
             else if (e == Direction.SE) return p.se;
@@ -261,12 +282,12 @@ public class QuadTree {
         QuadTree neighbor = this;
         QuadTree p = qt;
         String s = "";
-        while (p.getDirection() != Direction.None &&
+        while (p.getDirection() != Direction.None && 
                 !Direction.contains(p.getDirection(), d)) { //skal stoppe ved fælles forældre (virker ikke)
-            if (0 == (Integer.parseInt(p.id) - 1) % 4) s = s + "0";
-            else if (1 == (Integer.parseInt(p.id) - 1) % 4) s = s + "1";
-            else if (2 == (Integer.parseInt(p.id) - 1) % 4) s = s + "2";
-            else s = s + "3";
+            if      (id.substring(id.length()-1).equals("0"))   s = s + "0";
+            else if (id.substring(id.length()-1).equals("1"))   s = s + "1";
+            else if (id.substring(id.length()-1).equals("2"))   s = s + "2";
+            else                            s = s + "3";
         }
         if (d == Direction.N || d == Direction.S) {
             while (s.length() > 0 && neighbor != null) {
@@ -295,26 +316,31 @@ public class QuadTree {
         return neighbor;
     }
 
-   /**
-    * Get the parent of the current QuadTree.
-    * @return Returns the parent of the current QuadTree.
-    */
+    /**
+     * Get the parent of the current QuadTree.
+     * @return Returns the parent of the current QuadTree.
+     */
     private QuadTree getParent()
     {
         return getBranch(id.substring(0, id.length()-1));
     }
+    
+    private boolean isParent(QuadTree qtFather, QuadTree qtSon) {
+        int i = qtFather.id.length();
+        return qtFather.id.equals(qtSon.id.substring(0,i));
+    }
 
-   /**
-    * Get the {@link Direction} of the current QuadTree.
-    * @return Returns the Direction of the current QuadTree.
-    */
+    /**
+     * Get the {@link Direction} of the current QuadTree.
+     * @return Returns the Direction of the current QuadTree.
+     */
     private Direction getDirection()
     {
-        if (Integer.parseInt(id) == 0) return Direction.None;
-        else if (Integer.parseInt(id)%4 == 0) return Direction.NW;
-        else if (Integer.parseInt(id)%4 == 1) return Direction.NE;
-        else if (Integer.parseInt(id)%4 == 2) return Direction.SW;
-        else return Direction.SE;
+        if      (id.length() == 1)   return Direction.None;
+        else if (id.substring(id.length()-1).equals("0"))   return Direction.NW;
+        else if (id.substring(id.length()-1).equals("1"))   return Direction.NE;
+        else if (id.substring(id.length()-1).equals("2"))   return Direction.SW;
+        else                    return Direction.SE;
     }
     
     public String getNorth() {
@@ -343,6 +369,14 @@ public class QuadTree {
         if ('1' == id.charAt(0)) return "0, E";
         if ('2' == id.charAt(0)) return "3, halt";
         return "2, E";
+    }
+
+    public double getMidX() {
+        return (x+length)/2;
+    }
+
+    public double getMidY() {
+        return (y+height)/2;
     }
 
     public HashMap<Integer, NodeData> getNodes()

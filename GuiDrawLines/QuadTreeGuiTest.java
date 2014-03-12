@@ -68,29 +68,29 @@ public class QuadTreeGuiTest
         System.out.println("YMAX = " + CoordinateBoundaries.yMax);
         System.out.println("YMIN = " + CoordinateBoundaries.yMin);
         
-        QuadTree root = new QuadTree(edges, nodes, 0);
+        QuadTree root = new QuadTree(edges, nodes, "0");
         root.addCoords( CoordinateBoundaries.xMin,
                         CoordinateBoundaries.yMin, 
                         CoordinateBoundaries.xMax-CoordinateBoundaries.xMin, 
                         CoordinateBoundaries.yMax-CoordinateBoundaries.yMin);
         root.split();
 
-        final QuadTree branch = root.findNeighbor(root.getBranch(14), Direction.N);
+        final QuadTree branch = root.findNeighbor(root.getBranch("00"), Direction.E);
         System.out.println("\nRoot neighbour branch id = " + branch.id);
         System.out.println("");
         
         final ArrayList<EdgeData> edges2 = branch.getEdges();
         
-        System.out.println("\nID for branch 0 = " + root.getBranch(0).id);
-        System.out.println("Size of edges in branch 0 = " + root.getBranch(0).getEdges().size());
-        System.out.println("\nID for branch 1 = " + root.getBranch(1).id);
-        System.out.println("Size of edges in branch 1 = " + root.getBranch(1).getEdges().size());
-        System.out.println("\nID for branch 2 = " + root.getBranch(2).id);
-        System.out.println("Size of edges in branch 2 = " + root.getBranch(2).getEdges().size());
-        System.out.println("\nID for branch 3 = " + root.getBranch(3).id);
-        System.out.println("Size of edges in branch 3 = " + root.getBranch(3).getEdges().size());
-        System.out.println("\nID for branch 4 = " + root.getBranch(4).id);
-        System.out.println("Size of edges in branch 4 = " + root.getBranch(4).getEdges().size());
+        System.out.println("\nID for branch 0 = " + root.getBranch("0").id);
+        System.out.println("Size of edges in branch 0 = " + root.getBranch("0").getEdges().size());
+        System.out.println("\nID for branch 00 = " + root.getBranch("00").id);
+        System.out.println("Size of edges in branch 00 = " + root.getBranch("00").getEdges().size());
+        System.out.println("\nID for branch 01 = " + root.getBranch("01").id);
+        System.out.println("Size of edges in branch 01 = " + root.getBranch("01").getEdges().size());
+        System.out.println("\nID for branch 02 = " + root.getBranch("02").id);
+        System.out.println("Size of edges in branch 02 = " + root.getBranch("02").getEdges().size());
+        System.out.println("\nID for branch 03 = " + root.getBranch("03").id);
+        System.out.println("Size of edges in branch 03 = " + root.getBranch("03").getEdges().size());
         
 
         JFrame frame = new JFrame();
