@@ -101,30 +101,6 @@ public class QuadTree {
         }
     }
 
-    //bliver ikke brugt, måske noget med at lade være med at gå ned i træet
-    //når hele eller store dele af kortet skal tegnes.
-    public double sizeMatch(double x1, double y1, double x2, double y2) {
-        if (x1 > x
-                || y1 > y
-                || x2 < x + length
-                || y2 < y + height) {
-            return -1.0;
-        }
-        double sizematch = x2 / x;
-        double temp = x1 / (x + length);
-        if (temp > sizematch) {
-            sizematch = temp;
-        }
-        temp = y2 / y;
-        if (temp > sizematch) {
-            sizematch = temp;
-        }
-        temp = y1 / (y + height);
-        if (temp > sizematch) {
-            sizematch = temp;
-        }
-        return sizematch;
-    }
 
     /**
      * Get a branch by its id.
@@ -253,67 +229,6 @@ public class QuadTree {
             n--;
         }
         return getBranch(tempID);
-    }
-    
-     /**
-     * Find the neighbour QuadTree of a QuadTree qt in the Direction d.
-     * @param qt    The QuadTree whose neighbour we want to find.
-     * @param d     The {@link Direction} of the neighbour.
-     * @return Returns the neighbour of the QuadTree in the specified Direction.
-     */
-    public QuadTree findNeighborOld(QuadTree qt, Direction d) {
-        
-        // This part works as it should.
-        if (qt.getDirection() == Direction.None) {
-            throw new RuntimeException("FindNeighbor on root.");
-        }
-        
-        // Haven't tested this part yet.
-        if (!Direction.contains(qt.getDirection(), d)) {
-            QuadTree p = getParent();
-            Direction e = Direction.minus(qt.getDirection(), Direction.opposite(d));
-            Direction f = Direction.plus(d, e);
-            if      (e == Direction.NW) return p.nw;
-            else if (e == Direction.NE) return p.ne;
-            else if (e == Direction.SW) return p.sw;
-            else if (e == Direction.SE) return p.se;
-        }
-        
-        QuadTree neighbor = this;
-        QuadTree p = qt;
-        String s = "";
-        while (p.getDirection() != Direction.None && 
-                !Direction.contains(p.getDirection(), d)) { //skal stoppe ved fælles forældre (virker ikke)
-            if      (id.substring(id.length()-1).equals("0"))   s = s + "0";
-            else if (id.substring(id.length()-1).equals("1"))   s = s + "1";
-            else if (id.substring(id.length()-1).equals("2"))   s = s + "2";
-            else                            s = s + "3";
-        }
-        if (d == Direction.N || d == Direction.S) {
-            while (s.length() > 0 && neighbor != null) {
-                if ('0' == s.charAt(s.length() - 1)) neighbor = neighbor.sw;
-                if ('1' == s.charAt(s.length() - 1)) neighbor = neighbor.se;
-                if ('2' == s.charAt(s.length() - 1)) neighbor = neighbor.nw;
-                if ('3' == s.charAt(s.length() - 1)) neighbor = neighbor.ne;
-                
-                s = s.substring(0, s.length() - 1);
-            }
-        } else { // (d == Direction.W || d == Direction.E)
-            while (s.length() > 0 && neighbor != null) {
-                if ('0' == s.charAt(s.length() - 1)) neighbor = neighbor.ne;
-                if ('1' == s.charAt(s.length() - 1)) neighbor = neighbor.nw;
-                if ('2' == s.charAt(s.length() - 1)) neighbor = neighbor.se;
-                if ('3' == s.charAt(s.length() - 1)) neighbor = neighbor.sw;
-                
-                s = s.substring(0, s.length() - 1);
-            }
-        }
-        
-        // Null Pointer Dereference.
-        if (neighbor == null) {
-            neighbor = neighbor.getParent();
-        }
-        return neighbor;
     }
 
     /**

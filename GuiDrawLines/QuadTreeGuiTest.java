@@ -12,6 +12,7 @@ import java.util.Map;
 import krakkit.CoordinateBoundaries;
 import krakkit.KrakLoader;
 import krakkit.EdgeData;
+import krakkit.MirrorCoordinates;
 import krakkit.NodeData;
 
 public class QuadTreeGuiTest
@@ -54,14 +55,7 @@ public class QuadTreeGuiTest
 
         CoordinateBoundaries.findBoundaries(nodes);
         
-        // Spejlvend alle y værdier:
-        Iterator<Map.Entry<Integer, NodeData>> it = nodes.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<Integer, NodeData> e = it.next();
-            NodeData nd = e.getValue();
-            nd.setY(CoordinateBoundaries.yMax - nd.getY() + 
-                    CoordinateBoundaries.yMin);
-        }
+        MirrorCoordinates.MirrorY(nodes);
 
         System.out.println("XMAX = " + CoordinateBoundaries.xMax);
         System.out.println("XMIN = " + CoordinateBoundaries.xMin);
