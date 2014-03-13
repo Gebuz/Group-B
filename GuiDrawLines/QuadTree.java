@@ -172,31 +172,45 @@ public class QuadTree {
     }
 
     public ArrayList<EdgeData> getRoadsImproved(double x1, double y1, double x2, double y2) {
+        if(x1 > x2) {
+            double xtemp = x1;
+            x1 = x2;
+            x2 = xtemp;
+        }
+        if(y1 > y2) {
+            double ytemp = y1;
+            y1 = y2;
+            y2 = ytemp;
+        }
         String topLeft  = getID(x1, y1);
         String botRight = getID(x2, y2);
+        int maxLength = topLeft.length();
         if (topLeft.equals(botRight) || isParent(topLeft, botRight)) return getBranch(topLeft).edges;
         if (isParent(botRight, topLeft)) return getBranch(botRight).edges;
         
         HashSet<String> trees = new HashSet<>();
         String botLeft = getID(x1, y2);
-        if(botLeft.length() > topLeft.length()) botLeft = botLeft.substring(0,topLeft.length());
-        botLeft = findNeighbor(getBranch(botLeft), Direction.S).id;
-        if(botLeft.length() > topLeft.length()) botLeft = botLeft.substring(0,topLeft.length());
-        String tempLeft = topLeft;
+        if(botLeft.length() < maxLength) maxLength = botLeft.length();
+
         String farRight = getID(x2, y1);
-        if(farRight.length() > topLeft.length()) farRight = farRight.substring(0,topLeft.length());
-        farRight = findNeighbor(getBranch(farRight), Direction.E).id;
-        while(!(botLeft.equals(tempLeft) || isParent(tempLeft, botLeft))){
+        if(farRight.length() < maxLength) maxLength = farRight.length();
+        if(topLeft.length() > maxLength) topLeft = topLeft.substring(0,maxLength);
+        if(botLeft.length() > maxLength) botLeft = botLeft.substring(0,maxLength);
+        if(farRight.length() > maxLength) farRight = farRight.substring(0,maxLength);
+        String tempLeft = topLeft;
+        while(true){
             String tempRight = tempLeft;
             
             if(farRight.length() > tempLeft.length()) farRight = farRight.substring(0,tempLeft.length());
-            while(!(farRight.equals(tempRight) || isParent(tempRight, farRight))){
+            while(true){
                 trees.add(tempRight);
                 QuadTree qtRight = getBranch(tempRight);
                 System.out.println(qtRight.getEdges().size());
+                if(farRight.equals(tempRight) || isParent(tempRight, farRight)) break;
                 tempRight = findNeighbor(qtRight, Direction.E).id;
                 
             }
+            if(botLeft.equals(tempLeft) || isParent(tempLeft, botLeft)) break;
             tempLeft = findNeighbor(getBranch(tempLeft), Direction.S).id;
             farRight = findNeighbor(getBranch(farRight), Direction.S).id;
 
@@ -216,7 +230,6 @@ public class QuadTree {
      */
     public QuadTree findNeighbor(QuadTree qt, Direction d) {
         
-        // This part works as it should.
         if (qt.getDirection() == Direction.None) {
             throw new RuntimeException("FindNeighbor on root.");
         }
@@ -224,7 +237,6 @@ public class QuadTree {
         if(d != Direction.N && d != Direction.S && d != Direction.W && d != Direction.E) 
             throw new RuntimeException("Can only find N, S, W, or E neighbors");
         
-        //skal testes.
         String tempID = qt.id;
         int n = tempID.length()-1;
         while(n >= 0) {
