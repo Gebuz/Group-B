@@ -62,6 +62,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         }
         if (e.getComponent() == view.showFull) {
             map.defaultMap();
+            view.pack();
         }
         if (e.getComponent() == view.up) {
             if (map.getZoom() != 1 && map.getZoom() >= 0.4) {

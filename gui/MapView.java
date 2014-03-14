@@ -190,7 +190,6 @@ public class MapView extends JFrame {
         //Show window
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         pack();
-        //setSize(new Dimension(850, 670));
         setVisible(true);
     }
     

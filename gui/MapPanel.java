@@ -168,6 +168,7 @@ public class MapPanel extends JPanel implements Observer {
         yk = 0;
         xk = 0;
         k = 550;
+        setPreferredSize(new Dimension(850, 660));
         setVectorLastPress(0.0, 0.0);
         setVectorLastRelease(0.0, 0.0);
         repaint();
