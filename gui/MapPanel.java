@@ -1,9 +1,18 @@
 package gui;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.geom.*;
-import java.util.*;
+import GuiDrawLines.QuadTree;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
+import javax.swing.JPanel;
 import krakkit.CoordinateBoundaries;
 import krakkit.EdgeData;
 import krakkit.NodeData;
@@ -21,10 +30,11 @@ public class MapPanel extends JPanel implements Observer {
     private int k = 550;
     private double resizeConstant = 1;
     private double zoomConstant = 1;
+    private double xk = 0;
+    private double yk = 0;
     final double ratio;
     private Rectangle rect;
-    private Point2D.Double press;
-    private Point2D.Double release;
+    private Point2D.Double press, release;
     private Point2D.Double vectorLastPress;
     private Point2D.Double vectorLastRelease;
 
@@ -33,7 +43,7 @@ public class MapPanel extends JPanel implements Observer {
     public MapPanel() {
         loader = new DataLoader();
         edges = loader.edges;
-        //rect = new Rectangle(0, 0, 850, 660);
+        
         press = new Point2D.Double(0, 0); //new Point2D.Double(100, 100); 
         release = new Point2D.Double(850, 660); //new Point2D.Double(386.36363637, 300);
         
@@ -41,7 +51,7 @@ public class MapPanel extends JPanel implements Observer {
         vectorLastPress = new Point2D.Double(0.0, 0.0);
         vectorLastRelease = new Point2D.Double(0.0, 0.0);
         
-        updateZoom((release.y-press.y)/660.0); //IT WORKS!!
+        //updateZoom((release.y-press.y)/660.0); //IT WORKS!!
         setPreferredSize(new Dimension(850, 660));
         ratio = release.x/release.y;
     }
@@ -50,24 +60,31 @@ public class MapPanel extends JPanel implements Observer {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2D = (Graphics2D) g;
-        //g.drawRect(rect.x, rect.y, rect.width, rect.height);
-        //if(currentRect != null) {
-        //g.setXORMode(Color.white); //Color of line varies
-        //depending on image colors
-        //g.drawRect(rectToDraw.x, rectToDraw.y, rectToDraw.width - 1, rectToDraw.height - 1);
-        //}
-
+        NodeData fn;
+        NodeData tn;
+        int type;
+        double fnX, fnY, tnX, tnY;
+        
+        System.out.println("Draw within points:");
+        System.out.println("Press:    "+press.x + ", " + press.y);
+        System.out.println("Release:  "+release.x + ", " + release.y);
+        System.out.println("Zoom Cnst " + zoomConstant);
+        System.out.println("Resi Cnst " + resizeConstant);
+        System.out.println("Ratio     " + ratio);
+        System.out.println("K         " + k);
+        System.out.println("");
+            
         for (EdgeData ed : edges) {
-            NodeData fn = loader.nodes.get(ed.FNODE);
-            NodeData tn = loader.nodes.get(ed.TNODE);
-            int type = ed.TYP;
+            fn = loader.nodes.get(ed.FNODE);
+            tn = loader.nodes.get(ed.TNODE);
+            type = ed.TYP;
 
-            double fnX = ((fn.getX() - CoordinateBoundaries.xMin) / k);///constant;
-            double fnY = ((CoordinateBoundaries.yMax - fn.getY()) / k);///constant; 
-            double tnX = ((tn.getX() - CoordinateBoundaries.xMin) / k);///constant;
-            double tnY = ((CoordinateBoundaries.yMax - tn.getY()) / k);///constant;
+            fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);///constant;
+            fnY = (((CoordinateBoundaries.yMax - fn.getY()) / k) + yk);///constant;
+            tnX = (((tn.getX() - CoordinateBoundaries.xMin) / k) + xk);///constant;
+            tnY = (((CoordinateBoundaries.yMax - tn.getY()) / k) + yk);///constant;
 
-            //if these coordinates lies within the specified rectangle's bounds) 
+            //if these coordinates lies within the specified rectangle's bounds)
             if ((release.x > press.x && release.y > press.y)
                     && (fnX < release.x && tnX < release.x)
                     && (fnX > press.x && tnX > press.x)
@@ -88,10 +105,10 @@ public class MapPanel extends JPanel implements Observer {
     public void assignCoords(Point2D.Double press, Point2D.Double release, Rectangle r) {
         this.press = press;
         this.release = release;
-        this.rect = r;
-        updateZoom(Math.abs(release.y-press.y)/getHeight());
-        //setPreferredSize(new Dimension(r.width, r.height));
-        //this = new JPanel()
+
+        rect = r;
+
+        updateZoom(Math.abs(release.y - press.y) / getHeight());
         repaint();
     }
 
@@ -101,12 +118,12 @@ public class MapPanel extends JPanel implements Observer {
         fnY = fnY - press.y;
         tnX = tnX - press.x;
         tnY = tnY - press.y;
-        
+
         fnX /= zoomConstant;
         fnY /= zoomConstant;
         tnX /= zoomConstant;
         tnY /= zoomConstant;
-        
+
         fnX /= resizeConstant;
         fnY /= resizeConstant;
         tnX /= resizeConstant;
@@ -144,7 +161,6 @@ public class MapPanel extends JPanel implements Observer {
     
     public void updateZoom(double j) {
         zoomConstant = j;
-        System.out.println("ZC = " + zoomConstant);
         repaint();
     }
     
@@ -153,13 +169,19 @@ public class MapPanel extends JPanel implements Observer {
         release = new Point2D.Double(850, 660);
         zoomConstant = 1;
         resizeConstant = 1;
+        yk = 0;
+        xk = 0;
+        k = 550;
         
         setVectorLastPress(0.0, 0.0);
         setVectorLastRelease(0.0, 0.0);
         
-        k = 550;
+        setPreferredSize(new Dimension(850, 660));
+
         repaint();
     }
+
+
 
     /**
      * Center zoom in by a certain factor.
@@ -227,6 +249,16 @@ public class MapPanel extends JPanel implements Observer {
     public void setVectorLastRelease(double x, double y) {
         this.vectorLastRelease.setLocation(x, y);
         System.out.println("LReV = " + vectorLastRelease);
+    }
+    
+    public void changeX(double j) {
+        xk += j;
+        repaint();
+    }
+
+    public void changeY(double j) {
+        yk += j;
+        repaint();
     }
     
     public DataLoader getData() {

@@ -4,17 +4,15 @@
  */
 package gui;
 
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
-import java.beans.PropertyChangeListener;
 
 /**
  *
@@ -25,54 +23,36 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     private MapView view;
     private MapPanel map;
     private DataLoader loader;
-    private double initHeight;
-    private double initWidth;
+    private final double initHeigth, initWidth; // Initial heigth and width.
+    private double height, width; // current height and width.
     private double xPress, yPress;
 
     public Controller(MapView view) {
         this.view = view;
         this.map = (MapPanel) view.getMap();
         this.loader = map.getData();
-                
-        initHeight = map.getSize().height - 1;
-        initWidth = map.getSize().width - 1;
 
-        String upKey = "UP";
-        String downKey = "DOWN";
-        String leftKey = "LEFT";
-        String rightKey = "RIGHT";
-
-        KeyStroke up = KeyStroke.getKeyStroke("UP");
-        KeyStroke down = KeyStroke.getKeyStroke("DOWN");
-        KeyStroke left = KeyStroke.getKeyStroke("LEFT");
-        KeyStroke right = KeyStroke.getKeyStroke("RIGHT");
-
-        InputMap upInput = view.up.getInputMap();
-        ActionMap upAction = view.up.getActionMap();
-
-        InputMap downInput = view.down.getInputMap();
-        ActionMap downAction = view.down.getActionMap();
-
-        InputMap leftInput = view.left.getInputMap();
-        ActionMap leftAction = view.left.getActionMap();
-
-        InputMap rightInput = view.right.getInputMap();
-        ActionMap rightAction = view.right.getActionMap();
-
-        upInput.put(up, upKey);
-
+        this.height = map.getSize().height;
+        this.width = map.getSize().width;
+        
+        this.initHeigth = height;
+        this.initWidth = width;
 
         view.addComponentListener(this);
         view.zoomIn.addMouseListener(this);
         view.zoomOut.addMouseListener(this);
         view.showFull.addMouseListener(this);
+        view.up.addMouseListener(this);
+        view.down.addMouseListener(this);
+        view.left.addMouseListener(this);
+        view.right.addMouseListener(this);
 
         //map.addComponentListener(this);
         map.addMouseListener(this);
         map.addMouseMotionListener(this);
     }
 
-    @Override
+ @Override
     public void mouseClicked(MouseEvent e) {
         //This could assign a new list of edges to MapPanel
         if (e.getComponent() == view.zoomIn) {
@@ -81,8 +61,93 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         if (e.getComponent() == view.zoomOut) {
             map.zoomOut(0.10);
         }
-        if(e.getComponent() == view.showFull) {
+        if (e.getComponent() == view.showFull) {
             map.defaultMap();
+            view.pack();
+        }
+        if (e.getComponent() == view.up) {
+            double zoomConstant = map.getZoomConstant();
+            if (zoomConstant != 1 && zoomConstant >= 0.4) {
+                map.changeY(20);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.4
+                    && zoomConstant >= 0.15) {
+                map.changeY(10);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.15
+                    && zoomConstant >= 0.09) {
+                map.changeY(5);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.09
+                    && zoomConstant >= 0.03) {
+                map.changeY(1);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.03) {
+                map.changeY(0.2);
+            }
+        }
+        if (e.getComponent() == view.down) {
+            double zoomConstant = map.getZoomConstant();
+            if (zoomConstant != 1 && zoomConstant >= 0.4) {
+                map.changeY(-20);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.4
+                    && zoomConstant >= 0.15) {
+                map.changeY(-10);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.15
+                    && zoomConstant >= 0.09) {
+                map.changeY(-5);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.09
+                    && zoomConstant >= 0.03) {
+                map.changeY(-1);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.03) {
+                map.changeY(-0.2);
+            }
+        }
+        if (e.getComponent() == view.left) {
+            double zoomConstant = map.getZoomConstant();
+            if (zoomConstant != 1 && zoomConstant >= 0.4) {
+                map.changeX(20);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.4
+                    && zoomConstant >= 0.15) {
+                map.changeX(10);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.15
+                    && zoomConstant >= 0.09) {
+                map.changeX(5);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.09
+                    && zoomConstant >= 0.03) {
+                map.changeX(1);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.03) {
+                map.changeX(0.2);
+            }
+        }
+        if (e.getComponent() == view.right) {
+            double zoomConstant = map.getZoomConstant();
+            if (zoomConstant != 1 && zoomConstant >= 0.4) {
+                map.changeX(-20);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.4
+                    && zoomConstant >= 0.15) {
+                map.changeX(-10);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.15
+                    && zoomConstant >= 0.09) {
+                map.changeX(-5);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.09
+                    && zoomConstant >= 0.03) {
+                map.changeX(-1);
+            }
+            if (zoomConstant != 1 && zoomConstant < 0.03) {
+                map.changeX(-0.2);
+            }
         }
     }
 
@@ -152,11 +217,11 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                                         vectorLastPress.y + vectorNewPressY);
 
                 // Bottom right corner.
-                double vectorNewReleaseX = (release.x - initWidth)  * zoomConstant;
-                double vectorNewReleaseY = (release.y - initHeight) * zoomConstant;
+                double vectorNewReleaseX = (release.x - map.getWidth())  * zoomConstant;
+                double vectorNewReleaseY = (release.y - map.getHeight()) * zoomConstant;
 
-                release.setLocation(initWidth  + vectorLastRelease.x + vectorNewReleaseX , 
-                                    initHeight + vectorLastRelease.y + vectorNewReleaseY);
+                release.setLocation(map.getWidth()  + vectorLastRelease.x + vectorNewReleaseX , 
+                                    map.getHeight() + vectorLastRelease.y + vectorNewReleaseY);
 
                 map.setVectorLastRelease(   vectorLastRelease.x + vectorNewReleaseX, 
                                             vectorLastRelease.y + vectorNewReleaseY);
@@ -164,63 +229,8 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 // ***************
 
                 map.assignCoords(press, release, rect);
-                //view.pack(); Bliver ved med at resize hele programvinduet :(
             }
-            
         }
-        //view.pack();
-
-//        if(yRelease > yPress && xRelease > xPress) {
-//            release2 = new Point2D.Double(xPress+rectWidth, yRelease-rectHeight);
-//            press2 = new Point2D.Double(xPress, yPress+rectHeight);
-//            
-//            System.out.println("Release: " + xRelease + " " + yRelease);
-//            System.out.println("Press: " + xPress + " " + yPress);
-//            System.out.println("Release2: " + release2.x + " " + release2.y);
-//            System.out.println("Press2: " + press2.x + " " + press2.y);
-//            
-//            Rectangle rect = new Rectangle((int) xPress,(int) yPress,(int) rectWidth,(int) rectHeight);
-//            map.drawRect(rect, release2, press2);
-//        }
-//        if(yRelease < yPress && xRelease < xPress) {
-//            release2 = new Point2D.Double(xPress-rectWidth, yRelease+rectHeight);
-//            press2 = new Point2D.Double(xPress, yPress-rectHeight);
-//            
-//            System.out.println("Release: " + xRelease + " " + yRelease);
-//            System.out.println("Press: " + xPress + " " + yPress);
-//            System.out.println("Release: " + release2.x + " " + release2.y);
-//            System.out.println("Press: " + press2.x + " " + press2.y);
-//            
-//            Rectangle rect = new Rectangle((int) xPress,(int) yPress,(int) rectWidth,(int) rectHeight);
-//            map.drawRect(rect, release2, press2);
-//        }
-//        if(yRelease > yPress && xRelease < xPress) {
-//            release2 = new Point2D.Double(xPress-rectWidth, yRelease-rectHeight);
-//            press2 = new Point2D.Double(xPress, yPress+rectHeight);
-//            
-//            System.out.println("Release: " + xRelease + " " + yRelease);
-//            System.out.println("Press: " + xPress + " " + yPress);
-//            System.out.println("Release: " + release2.x + " " + release2.y);
-//            System.out.println("Press: " + press2.x + " " + press2.y);
-//            
-//            Rectangle rect = new Rectangle((int) xPress,(int) yPress,(int) rectWidth,(int) rectHeight);
-//            map.drawRect(rect, release2, press2);
-//        }
-//        if(yRelease < yPress && xRelease > xPress) {
-//            release2 = new Point2D.Double(xPress+rectWidth, yRelease+rectHeight);
-//            press2 = new Point2D.Double(xPress, yPress-rectHeight);
-//            
-//            System.out.println("Release: " + xRelease + " " + yRelease);
-//            System.out.println("Press: " + xPress + " " + yPress);
-//            System.out.println("Release: " + release2.x + " " + release2.y);
-//            System.out.println("Press: " + press2.x + " " + press2.y);
-//            
-//            Rectangle rect = new Rectangle((int) xPress,(int) yPress,(int) rectWidth,(int) rectHeight);
-//            map.drawRect(rect, release2, press2);
-//        }
-
-        //System.out.println("xReleased: " + xRelease + " yReleased: " + yRelease);
-        //System.out.println("Rectangle width: " + rectWidth + " Rectangle height: " + rectHeight);
     }
 
     @Override
@@ -245,11 +255,36 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
     @Override
     public void componentResized(ComponentEvent e) {
-        double resizeHeight = map.getSize().height - 1;
+        double resizeHeight = map.getSize().height;
+        double resizeWidth  = map.getSize().width;
+        
+        System.out.println("Height  = " + resizeHeight);
+        System.out.println("Width   = " + resizeWidth);
 
-        if (resizeHeight < initHeight || resizeHeight > initHeight) {
-            double constant = initHeight / resizeHeight;
-            map.updateResize(constant);
+        if (resizeHeight < height || resizeHeight > height) {
+            if (resizeHeight == initHeigth && resizeWidth == initWidth) {
+                map.updateResize(1.0);
+            } else {
+                double constant = height / resizeHeight; 
+                map.updateResize(constant);
+            }
+
+            // Difference in height and difference in width
+            double heightScale = resizeHeight / height;
+            double widthScale = resizeWidth / width;
+            
+            Point2D.Double vectorLastPress = map.getVectorLastPress();
+            Point2D.Double vectorLastRelease = map.getVectorLastRelease();
+            
+            map.setVectorLastPress( vectorLastPress.x*widthScale, 
+                                    vectorLastPress.y*heightScale);
+            map.setVectorLastRelease(   vectorLastRelease.x*widthScale,
+                                        vectorLastRelease.y*heightScale);
+            
+            this.height = resizeHeight;
+            this.width = resizeWidth;
+            
+            map.updateZoom(Math.abs(map.getRelease().y-map.getPress().y)/height);
         }
     }
 
