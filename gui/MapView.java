@@ -1,16 +1,25 @@
 
 package gui;
 
-import javax.swing.*;
-import java.awt.*;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.geom.*;
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 /**
- *
- * @author flemmingxu
- */
+*
+* @author flemmingxu
+*/
 
 public class MapView extends JFrame {
     private final JPanel mapPanel;
@@ -47,7 +56,7 @@ public class MapView extends JFrame {
         right = new JButton("→");
         
         //Mapping key inputs to button
-        KeyStroke keyUp = KeyStroke.getKeyStroke("UP"); 
+        KeyStroke keyUp = KeyStroke.getKeyStroke("UP");
         KeyStroke keyDown = KeyStroke.getKeyStroke("DOWN");
         KeyStroke keyLeft = KeyStroke.getKeyStroke("LEFT");
         KeyStroke keyRight = KeyStroke.getKeyStroke("RIGHT");
@@ -57,18 +66,19 @@ public class MapView extends JFrame {
         {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.4) 
+                double zoomConstant = mapPanel.getZoomConstant();
+                if(zoomConstant != 1 && zoomConstant >= 0.4)
                     mapPanel.changeY(20);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.4 
-                        && mapPanel.getZoom() >= 0.15) 
+                if(zoomConstant != 1 && zoomConstant < 0.4
+                        && zoomConstant >= 0.15)
                     mapPanel.changeY(10);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.15
-                        && mapPanel.getZoom() >= 0.09) 
+                if(zoomConstant != 1 && zoomConstant < 0.15
+                        && zoomConstant >= 0.09)
                     mapPanel.changeY(5);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.09
-                        && mapPanel.getZoom() >= 0.03) 
+                if(zoomConstant != 1 && zoomConstant < 0.09
+                        && zoomConstant >= 0.03)
                     mapPanel.changeY(1);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.03)
+                if(zoomConstant != 1 && zoomConstant < 0.03)
                     mapPanel.changeY(0.2);
             }
         });
@@ -77,18 +87,19 @@ public class MapView extends JFrame {
         {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.4) 
+                double zoomConstant = mapPanel.getZoomConstant();
+                if(zoomConstant != 1 && zoomConstant >= 0.4)
                     mapPanel.changeY(-20);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.4 
-                        && mapPanel.getZoom() >= 0.15) 
+                if(zoomConstant != 1 && zoomConstant < 0.4
+                        && zoomConstant >= 0.15)
                     mapPanel.changeY(-10);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.15
-                        && mapPanel.getZoom() >= 0.09) 
+                if(zoomConstant != 1 && zoomConstant < 0.15
+                        && zoomConstant >= 0.09)
                     mapPanel.changeY(-5);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.09
-                        && mapPanel.getZoom() >= 0.03) 
+                if(zoomConstant != 1 && zoomConstant < 0.09
+                        && zoomConstant >= 0.03)
                     mapPanel.changeY(-1);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.03)
+                if(zoomConstant != 1 && zoomConstant < 0.03)
                     mapPanel.changeY(-0.2);
             }
         });
@@ -97,18 +108,19 @@ public class MapView extends JFrame {
         {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.4) 
+                double zoomConstant = mapPanel.getZoomConstant();
+                if(zoomConstant != 1 && zoomConstant >= 0.4)
                     mapPanel.changeX(20);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.4 
-                        && mapPanel.getZoom() >= 0.15) 
+                if(zoomConstant != 1 && zoomConstant < 0.4
+                        && zoomConstant >= 0.15)
                     mapPanel.changeX(10);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.15
-                        && mapPanel.getZoom() >= 0.09) 
+                if(zoomConstant != 1 && zoomConstant < 0.15
+                        && zoomConstant >= 0.09)
                     mapPanel.changeX(5);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.09
-                        && mapPanel.getZoom() >= 0.03) 
+                if(zoomConstant != 1 && zoomConstant < 0.09
+                        && zoomConstant >= 0.03)
                     mapPanel.changeX(1);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.03)
+                if(zoomConstant != 1 && zoomConstant < 0.03)
                     mapPanel.changeX(0.2);
             }
         });
@@ -117,18 +129,19 @@ public class MapView extends JFrame {
         {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.4) 
+                double zoomConstant = mapPanel.getZoomConstant();
+                if(zoomConstant != 1 && zoomConstant >= 0.4)
                     mapPanel.changeX(-20);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.4 
-                        && mapPanel.getZoom() >= 0.15) 
+                if(zoomConstant != 1 && zoomConstant < 0.4
+                        && zoomConstant >= 0.15)
                     mapPanel.changeX(-10);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.15
-                        && mapPanel.getZoom() >= 0.09) 
+                if(zoomConstant != 1 && zoomConstant < 0.15
+                        && zoomConstant >= 0.09)
                     mapPanel.changeX(-5);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.09
-                        && mapPanel.getZoom() >= 0.03) 
+                if(zoomConstant != 1 && zoomConstant < 0.09
+                        && zoomConstant >= 0.03)
                     mapPanel.changeX(-1);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.03)
+                if(zoomConstant != 1 && zoomConstant < 0.03)
                     mapPanel.changeX(-0.2);
             }
         });
