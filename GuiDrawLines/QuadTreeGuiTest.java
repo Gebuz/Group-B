@@ -76,10 +76,10 @@ public class QuadTreeGuiTest {
         System.out.println("\nRoot neighbour branch id (01) = " + branch.id);
         System.out.println("");
 
-        final HashSet<String> trees = root.getRoadsImproved(CoordinateBoundaries.xMin,
-                CoordinateBoundaries.yMin,
-                CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
-                CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
+        final HashSet<String> trees = root.getRoadsImproved(CoordinateBoundaries.xMin + 100000,
+                CoordinateBoundaries.yMin + 100000,
+                CoordinateBoundaries.xMin + 200000,
+                CoordinateBoundaries.yMin + 200000);
 
         System.out.println("\nID for branch 0 = " + root.getBranch("0").id);
         System.out.println("Size of edges in branch 0 = " + root.getBranch("0").getEdges().size());
