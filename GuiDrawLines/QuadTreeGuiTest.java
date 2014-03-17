@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.CookieHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import krakkit.CoordinateBoundaries;
@@ -15,6 +16,7 @@ import krakkit.EdgeData;
 import krakkit.NodeData;
 
 public class QuadTreeGuiTest {
+    
 
     public static void main(String[] args) throws IOException {
         String dir = "";
@@ -23,6 +25,7 @@ public class QuadTreeGuiTest {
         // ArrayLists.
         final HashMap<Integer, NodeData> nodes = new HashMap<Integer, NodeData>();
         final ArrayList<EdgeData> edges = new ArrayList<EdgeData>();
+        final QuadTree root;
 
         // For that, we need to inherit from KrakLoader and override
         // processNode and processEdge. We do that with an 
@@ -62,7 +65,7 @@ public class QuadTreeGuiTest {
         System.out.println("YMAX = " + CoordinateBoundaries.yMax);
         System.out.println("YMIN = " + CoordinateBoundaries.yMin);
 
-        QuadTree root = new QuadTree(edges, nodes, "0");
+        root = new QuadTree(edges, nodes, "0");
         root.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
@@ -73,10 +76,10 @@ public class QuadTreeGuiTest {
         System.out.println("\nRoot neighbour branch id (01) = " + branch.id);
         System.out.println("");
 
-        final ArrayList<EdgeData> edges2 = root.getRoadsImproved(CoordinateBoundaries.xMin+200000,
-                CoordinateBoundaries.yMin+200000,
-                CoordinateBoundaries.xMax-200000,
-                CoordinateBoundaries.yMax-200000);
+        final HashSet<String> trees = root.getRoadsImproved(CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMin,
+                CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
 
         System.out.println("\nID for branch 0 = " + root.getBranch("0").id);
         System.out.println("Size of edges in branch 0 = " + root.getBranch("0").getEdges().size());
@@ -103,7 +106,12 @@ public class QuadTreeGuiTest {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
 
-                for (EdgeData ed : edges2) {
+                ArrayList<EdgeData> zoomEdges = new ArrayList<>();
+                for (String s : trees) {
+                    zoomEdges.addAll(root.getBranch(s).getEdges());
+                }
+                for (EdgeData ed : zoomEdges) {
+
                     NodeData fn = nodes.get(ed.FNODE);
                     NodeData tn = nodes.get(ed.TNODE);
                     int type = ed.TYP;
