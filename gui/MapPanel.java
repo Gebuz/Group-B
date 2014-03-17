@@ -1,18 +1,10 @@
 package gui;
 
-import GuiDrawLines.QuadTree;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.*;
+import java.awt.image.BufferedImage;
+import java.util.*;
 import krakkit.CoordinateBoundaries;
 import krakkit.EdgeData;
 import krakkit.NodeData;
@@ -28,70 +20,73 @@ public class MapPanel extends JPanel implements Observer {
     private DataLoader loader;
     private ArrayList<EdgeData> edges; //to be replaced by model through controller depending on how much data is needed.
     private int k = 550;
-    private double resizeConstant = 1;
-    private double zoomConstant = 1;
-    private double xk = 0;
-    private double yk = 0;
+    private double resizeConstant = 1, zoomConstant = 1;
+    private double xk = 0, yk = 0;
     final double ratio;
+    final float dash[] = {7.0f};
     private Rectangle rect;
-    private Point2D.Double press, release;
-    private Point2D.Double vectorLastPress;
-    private Point2D.Double vectorLastRelease;
+    private Point2D.Double press, release, vectorLastPress, vectorLastRelease;
+    //test
+//    BufferedImage map;
+//    JLabel view;
 
-    //Rectangle rectToDraw = null;
-    //Rectangle previousRectDrawn = new Rectangle();
     public MapPanel() {
+        //test
+//        map = new BufferedImage(850, 660, BufferedImage.TYPE_INT_RGB);
+//        view = new JLabel(new ImageIcon(map));
+//        Graphics g = map.getGraphics();
+//        g.setColor(Color.WHITE);
+//        g.fillRect(0, 0, 850, 660);
+        
         loader = new DataLoader();
         edges = loader.edges;
-        
-        press = new Point2D.Double(0, 0); //new Point2D.Double(100, 100); 
-        release = new Point2D.Double(850, 660); //new Point2D.Double(386.36363637, 300);
-        
-        // initial vectors are (0,0)
         vectorLastPress = new Point2D.Double(0.0, 0.0);
         vectorLastRelease = new Point2D.Double(0.0, 0.0);
-        
-        //updateZoom((release.y-press.y)/660.0); //IT WORKS!!
+        press = new Point2D.Double(0, 0);  
+        release = new Point2D.Double(850, 660); 
         setPreferredSize(new Dimension(850, 660));
-        ratio = release.x/release.y;
+        ratio = release.x / release.y;
+        
+//        drawMap();
+//        g.dispose();
     }
-
+    
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2D = (Graphics2D) g;
-        NodeData fn;
-        NodeData tn;
+        Graphics2D g2 = (Graphics2D) g;
+        
+        if(zoomConstant < 0.03){
+            RenderingHints rh = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+            rh.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHints(rh);
+        }
+        
+        NodeData fn, tn;
         int type;
         double fnX, fnY, tnX, tnY;
         
-        System.out.println("Draw within points:");
-        System.out.println("Press:    "+press.x + ", " + press.y);
-        System.out.println("Release:  "+release.x + ", " + release.y);
-        System.out.println("Zoom Cnst " + zoomConstant);
-        System.out.println("Resi Cnst " + resizeConstant);
-        System.out.println("Ratio     " + ratio);
-        System.out.println("K         " + k);
-        System.out.println("");
-            
         for (EdgeData ed : edges) {
             fn = loader.nodes.get(ed.FNODE);
             tn = loader.nodes.get(ed.TNODE);
             type = ed.TYP;
 
-            fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);///constant;
-            fnY = (((CoordinateBoundaries.yMax - fn.getY()) / k) + yk);///constant;
-            tnX = (((tn.getX() - CoordinateBoundaries.xMin) / k) + xk);///constant;
-            tnY = (((CoordinateBoundaries.yMax - tn.getY()) / k) + yk);///constant;
+            fnX = (((fn.X_COORD - CoordinateBoundaries.xMin) / k) + xk);
+            fnY = (((CoordinateBoundaries.yMax - fn.Y_COORD) / k) + yk); 
+            tnX = (((tn.X_COORD - CoordinateBoundaries.xMin) / k) + xk);
+            tnY = (((CoordinateBoundaries.yMax - tn.Y_COORD) / k) + yk);
 
-            //if these coordinates lies within the specified rectangle's bounds)
+            //if these coordinates lies within the specified rectangle's bounds) 
             if ((release.x > press.x && release.y > press.y)
                     && (fnX < release.x && tnX < release.x)
                     && (fnX > press.x && tnX > press.x)
                     && (fnY > press.y && tnY > press.y)
                     && (fnY < release.y && tnY < release.y)) {
-                drawSpecified(fnX, fnY, tnX, tnY, type, g2D);
+                drawSpecified(fnX, fnY, tnX, tnY, type, g2);
             }
+        }
+        if (rect != null) {
+            drawRect(rect, g2);
         }
     }
 
@@ -101,13 +96,21 @@ public class MapPanel extends JPanel implements Observer {
         g.draw(line);
     }
 
-
-    public void assignCoords(Point2D.Double press, Point2D.Double release, Rectangle r) {
+    public void assignRect(Rectangle r) {
+        rect = new Rectangle(r.x, r.y, r.width, r.height);
+        repaint();
+    }
+    
+    public void drawRect(Rectangle r, Graphics2D g2) {
+        g2.setColor(Color.GRAY);
+        g2.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10.0f, dash, 0.0f));
+        g2.drawRect(rect.x, rect.y, rect.width, rect.height);
+    }
+    
+    public void assignCoords(Point2D.Double press, Point2D.Double release) {
         this.press = press;
         this.release = release;
-
-        rect = r;
-
+        
         updateZoom(Math.abs(release.y - press.y) / getHeight());
         repaint();
     }
@@ -158,12 +161,13 @@ public class MapPanel extends JPanel implements Observer {
         resizeConstant = j;
         repaint();
     }
-    
+
     public void updateZoom(double j) {
+//        oldZoom = zoomConstant;
         zoomConstant = j;
         repaint();
     }
-    
+
     public void defaultMap() {
         press = new Point2D.Double(0, 0);
         release = new Point2D.Double(850, 660);
@@ -172,53 +176,50 @@ public class MapPanel extends JPanel implements Observer {
         yk = 0;
         xk = 0;
         k = 550;
-        
+        setPreferredSize(new Dimension(850, 660));
         setVectorLastPress(0.0, 0.0);
         setVectorLastRelease(0.0, 0.0);
-        
-        setPreferredSize(new Dimension(850, 660));
-
         repaint();
     }
 
-
-
     /**
      * Center zoom in by a certain factor.
+     *
      * @param factor How much to zoom in each time. The closer the number is to
      * zero, the slower the zoom will be.
      */
     public void zoomIn(double factor) {
-        double deltaX = (release.x-press.x);
-        double deltaY = (release.y-press.y);
-        press.setLocation(press.x+deltaX*factor, press.y+deltaY*factor);
-        release.setLocation(release.x-deltaX*factor, release.y-deltaY*factor);
-        
-        assignCoords(press, release, rect);
-        
-        setVectorLastPress(vectorLastPress.x + press.x*zoomConstant*factor, 
-                           vectorLastPress.y + press.y*zoomConstant*factor);
-        setVectorLastRelease(vectorLastRelease.x - release.x * zoomConstant*factor,
-                             vectorLastRelease.y - release.y * zoomConstant*factor);
+        double deltaX = (release.x - press.x);
+        double deltaY = (release.y - press.y);
+        press.setLocation(press.x + deltaX * factor, press.y + deltaY * factor);
+        release.setLocation(release.x - deltaX * factor, release.y - deltaY * factor);
+
+        assignCoords(press, release);
+
+        setVectorLastPress(vectorLastPress.x + press.x * zoomConstant * factor,
+                vectorLastPress.y + press.y * zoomConstant * factor);
+        setVectorLastRelease(vectorLastRelease.x - release.x * zoomConstant * factor,
+                vectorLastRelease.y - release.y * zoomConstant * factor);
     }
 
     /**
      * Center zoom out by a certain factor.
+     *
      * @param factor How much to zoom out each time. The closer the number is to
      * zero, the slower the zoom will be.
      */
     public void zoomOut(double factor) {
-        double deltaX = (release.x-press.x);
-        double deltaY = (release.y-press.y);
-        press.setLocation(press.x-deltaX*factor, press.y-deltaY*factor);
-        release.setLocation(release.x+deltaX*factor, release.y+deltaY*factor);
-        
-        assignCoords(press, release, rect);
-        
-        setVectorLastPress(vectorLastPress.x - press.x*zoomConstant*factor, 
-                           vectorLastPress.y - press.y*zoomConstant*factor);
-        setVectorLastRelease(vectorLastRelease.x + release.x * zoomConstant*factor,
-                             vectorLastRelease.y + release.y * zoomConstant*factor);
+        double deltaX = (release.x - press.x);
+        double deltaY = (release.y - press.y);
+        press.setLocation(press.x - deltaX * factor, press.y - deltaY * factor);
+        release.setLocation(release.x + deltaX * factor, release.y + deltaY * factor);
+
+        assignCoords(press, release);
+
+        setVectorLastPress(vectorLastPress.x - press.x * zoomConstant * factor,
+                vectorLastPress.y - press.y * zoomConstant * factor);
+        setVectorLastRelease(vectorLastRelease.x + release.x * zoomConstant * factor,
+                vectorLastRelease.y + release.y * zoomConstant * factor);
     }
 
     public Point2D.Double getPress() {
@@ -250,7 +251,7 @@ public class MapPanel extends JPanel implements Observer {
         this.vectorLastRelease.setLocation(x, y);
         System.out.println("LReV = " + vectorLastRelease);
     }
-    
+
     public void changeX(double j) {
         xk += j;
         repaint();
@@ -260,9 +261,17 @@ public class MapPanel extends JPanel implements Observer {
         yk += j;
         repaint();
     }
-    
+
     public DataLoader getData() {
         return loader;
+    }
+
+    public double getZoom() {
+        return zoomConstant;
+    }
+    
+    public void removeRect() {
+        rect = null;
     }
 
     @Override
