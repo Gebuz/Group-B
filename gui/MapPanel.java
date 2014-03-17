@@ -8,6 +8,7 @@ import java.util.*;
 import krakkit.CoordinateBoundaries;
 import krakkit.EdgeData;
 import krakkit.NodeData;
+import GuiDrawLines.QuadTree;
 
 /**
  *
@@ -17,8 +18,10 @@ import krakkit.NodeData;
 //Our model should return lists of edges to be drawn.
 public class MapPanel extends JPanel implements Observer {
 
+    private QuadTree qt;
     private DataLoader loader;
     private ArrayList<EdgeData> edges; //to be replaced by model through controller depending on how much data is needed.
+    private HashMap<Integer, NodeData> nodes;
     private int k = 550;
     private double resizeConstant = 1, zoomConstant = 1;
     private double xk = 0, yk = 0;
@@ -27,12 +30,14 @@ public class MapPanel extends JPanel implements Observer {
     private Rectangle rect;
     private Point2D.Double press, release, vectorLastPress, vectorLastRelease;
     //test
-//    BufferedImage map;
+    BufferedImage map;
+    JComponent view;
 //    JLabel view;
 
     public MapPanel() {
         //test
-//        map = new BufferedImage(850, 660, BufferedImage.TYPE_INT_RGB);
+        map = new BufferedImage(850, 660, BufferedImage.TYPE_INT_RGB);
+        view = new JLabel(new ImageIcon(map));
 //        view = new JLabel(new ImageIcon(map));
 //        Graphics g = map.getGraphics();
 //        g.setColor(Color.WHITE);
@@ -40,12 +45,20 @@ public class MapPanel extends JPanel implements Observer {
         
         loader = new DataLoader();
         edges = loader.edges;
+        nodes = loader.nodes;
         vectorLastPress = new Point2D.Double(0.0, 0.0);
         vectorLastRelease = new Point2D.Double(0.0, 0.0);
         press = new Point2D.Double(0, 0);  
         release = new Point2D.Double(850, 660); 
         setPreferredSize(new Dimension(850, 660));
         ratio = release.x / release.y;
+        
+        qt = new QuadTree(edges, nodes, "0");
+        qt.addCoords(CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMin,
+                CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
+        qt.split();
         
 //        drawMap();
 //        g.dispose();
@@ -54,7 +67,33 @@ public class MapPanel extends JPanel implements Observer {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        
         Graphics2D g2 = (Graphics2D) g;
+        
+        double pressX = (press.x*resizeConstant*zoomConstant*k) + xk + CoordinateBoundaries.xMin;
+        double pressY = (press.y*resizeConstant*zoomConstant*k) + yk + CoordinateBoundaries.yMin;
+        
+        double releaseX2 = CoordinateBoundaries.xMax; //(press.x*resizeConstant*zoomConstant*k) + xk;
+        double releaseY2 = CoordinateBoundaries.yMax;//(press.y*resizeConstant*zoomConstant*k) + yk;
+        
+        double pressX2 = CoordinateBoundaries.xMin;
+        double pressY2 = CoordinateBoundaries.yMin;
+        
+        double releaseX = (release.x*resizeConstant*zoomConstant*k) + xk + CoordinateBoundaries.xMin;
+        double releaseY = (release.y*resizeConstant*zoomConstant*k) + yk + CoordinateBoundaries.yMin;
+        
+        System.out.println("Press X true: " + pressX2 + " Press Y true: " + pressY2);
+        System.out.println("Press X: " + pressX + " Press Y: " + pressY);
+        System.out.println("Release X true: " + releaseX2 + " Release Y true: " + releaseY2);
+        System.out.println("Release X: " + releaseX + " Release Y: " + releaseY);
+        
+        ArrayList<EdgeData> edges2 = qt.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+        
+//        ArrayList<EdgeData> edges2 = root.getRoadsImproved(CoordinateBoundaries.xMin+200000,
+//                CoordinateBoundaries.yMin+200000,
+//                CoordinateBoundaries.xMax-200000,
+//                CoordinateBoundaries.yMax-200000);
+        
         
         if(zoomConstant < 0.03){
             RenderingHints rh = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
@@ -66,15 +105,18 @@ public class MapPanel extends JPanel implements Observer {
         int type;
         double fnX, fnY, tnX, tnY;
         
-        for (EdgeData ed : edges) {
+        int i = 0;
+        
+        for (EdgeData ed : edges2) {
+            i++;
             fn = loader.nodes.get(ed.FNODE);
             tn = loader.nodes.get(ed.TNODE);
             type = ed.TYP;
-
-            fnX = (((fn.X_COORD - CoordinateBoundaries.xMin) / k) + xk);
-            fnY = (((CoordinateBoundaries.yMax - fn.Y_COORD) / k) + yk); 
-            tnX = (((tn.X_COORD - CoordinateBoundaries.xMin) / k) + xk);
-            tnY = (((CoordinateBoundaries.yMax - tn.Y_COORD) / k) + yk);
+            
+            fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);
+            fnY = (((fn.getY() - CoordinateBoundaries.yMin) / k) + yk); 
+            tnX = (((tn.getX() - CoordinateBoundaries.xMin) / k) + xk);
+            tnY = (((tn.getY() - CoordinateBoundaries.yMin) / k) + yk);
 
             //if these coordinates lies within the specified rectangle's bounds) 
             if ((release.x > press.x && release.y > press.y)
@@ -85,6 +127,7 @@ public class MapPanel extends JPanel implements Observer {
                 drawSpecified(fnX, fnY, tnX, tnY, type, g2);
             }
         }
+        System.out.println(i);
         if (rect != null) {
             drawRect(rect, g2);
         }

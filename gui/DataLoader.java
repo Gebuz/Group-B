@@ -9,6 +9,7 @@ import krakkit.CoordinateBoundaries;
 import krakkit.EdgeData;
 import krakkit.KrakLoader;
 import krakkit.NodeData;
+import krakkit.MirrorCoordinates;
 
 /**
  *
@@ -54,5 +55,6 @@ public class DataLoader {
         }
 
         CoordinateBoundaries.findBoundaries(nodes);
+        MirrorCoordinates.MirrorY(nodes);
     }
 }

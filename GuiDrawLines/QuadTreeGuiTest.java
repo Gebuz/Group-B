@@ -17,7 +17,7 @@ import krakkit.NodeData;
 public class QuadTreeGuiTest {
 
     public static void main(String[] args) throws IOException {
-        String dir = "";
+        String dir = "/Users/flemmingxu/NetBeansProjects/Group-B/";
 
         // For this example, we'll simply load the raw data into
         // ArrayLists.
@@ -73,8 +73,8 @@ public class QuadTreeGuiTest {
         System.out.println("\nRoot neighbour branch id (01) = " + branch.id);
         System.out.println("");
 
-        final ArrayList<EdgeData> edges2 = root.getRoadsImproved(CoordinateBoundaries.xMin+200000,
-                CoordinateBoundaries.yMin+200000,
+        final ArrayList<EdgeData> edges2 = root.getRoadsImproved(CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax-200000,
                 CoordinateBoundaries.yMax-200000);
 
@@ -102,8 +102,10 @@ public class QuadTreeGuiTest {
                 int k = 550;
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
+                int i = 0;
 
                 for (EdgeData ed : edges2) {
+                    i++;
                     NodeData fn = nodes.get(ed.FNODE);
                     NodeData tn = nodes.get(ed.TNODE);
                     int type = ed.TYP;
@@ -138,6 +140,7 @@ public class QuadTreeGuiTest {
                     }
 
                 }
+                System.out.println(i);
             }
         }
         );
