@@ -20,28 +20,25 @@ public class MapPanel extends JPanel implements Observer {
 
     private QuadTree qt;
     private DataLoader loader;
+    
     private ArrayList<EdgeData> edges; //to be replaced by model through controller depending on how much data is needed.
     private HashMap<Integer, NodeData> nodes;
+    
     private int k = 550;
     private double resizeConstant = 1, zoomConstant = 1;
     private double xk = 0, yk = 0;
     final double ratio;
     final float dash[] = {7.0f};
+    
     private Rectangle rect;
     private Point2D.Double press, release, vectorLastPress, vectorLastRelease;
-    //test
-    BufferedImage map;
-    JComponent view;
-//    JLabel view;
+    
+    private boolean isMap;
+    private Graphics2D mapG;
+    private BufferedImage map;
 
     public MapPanel() {
-        //test
-        map = new BufferedImage(850, 660, BufferedImage.TYPE_INT_RGB);
-        view = new JLabel(new ImageIcon(map));
-//        view = new JLabel(new ImageIcon(map));
-//        Graphics g = map.getGraphics();
-//        g.setColor(Color.WHITE);
-//        g.fillRect(0, 0, 850, 660);
+        isMap = false;
         
         loader = new DataLoader();
         edges = loader.edges;
@@ -59,35 +56,32 @@ public class MapPanel extends JPanel implements Observer {
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
         qt.split();
-        
-//        drawMap();
-//        g.dispose();
     }
     
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        
+              
         Graphics2D g2 = (Graphics2D) g;
         
-        double pressX = (press.x*resizeConstant*zoomConstant*k) + xk + CoordinateBoundaries.xMin;
-        double pressY = (press.y*resizeConstant*zoomConstant*k) + yk + CoordinateBoundaries.yMin;
+//        double pressX = (press.x*resizeConstant*zoomConstant*k) + xk + CoordinateBoundaries.xMin;
+//        double pressY = (press.y*resizeConstant*zoomConstant*k) + yk + CoordinateBoundaries.yMin;
+//        
+//        double releaseX2 = CoordinateBoundaries.xMax; //(press.x*resizeConstant*zoomConstant*k) + xk;
+//        double releaseY2 = CoordinateBoundaries.yMax;//(press.y*resizeConstant*zoomConstant*k) + yk;
+//        
+//        double pressX2 = CoordinateBoundaries.xMin;
+//        double pressY2 = CoordinateBoundaries.yMin;
+//        
+//        double releaseX = (release.x*resizeConstant*zoomConstant*k) + xk + CoordinateBoundaries.xMin;
+//        double releaseY = (release.y*resizeConstant*zoomConstant*k) + yk + CoordinateBoundaries.yMin;
         
-        double releaseX2 = CoordinateBoundaries.xMax; //(press.x*resizeConstant*zoomConstant*k) + xk;
-        double releaseY2 = CoordinateBoundaries.yMax;//(press.y*resizeConstant*zoomConstant*k) + yk;
+//        System.out.println("Press X true: " + pressX2 + " Press Y true: " + pressY2);
+//        System.out.println("Press X: " + pressX + " Press Y: " + pressY);
+//        System.out.println("Release X true: " + releaseX2 + " Release Y true: " + releaseY2);
+//        System.out.println("Release X: " + releaseX + " Release Y: " + releaseY);
         
-        double pressX2 = CoordinateBoundaries.xMin;
-        double pressY2 = CoordinateBoundaries.yMin;
-        
-        double releaseX = (release.x*resizeConstant*zoomConstant*k) + xk + CoordinateBoundaries.xMin;
-        double releaseY = (release.y*resizeConstant*zoomConstant*k) + yk + CoordinateBoundaries.yMin;
-        
-        System.out.println("Press X true: " + pressX2 + " Press Y true: " + pressY2);
-        System.out.println("Press X: " + pressX + " Press Y: " + pressY);
-        System.out.println("Release X true: " + releaseX2 + " Release Y true: " + releaseY2);
-        System.out.println("Release X: " + releaseX + " Release Y: " + releaseY);
-        
-        ArrayList<EdgeData> edges2 = qt.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+//        ArrayList<EdgeData> edges2 = qt.getRoadsImproved(pressX, pressY, releaseX, releaseY);
         
 //        ArrayList<EdgeData> edges2 = root.getRoadsImproved(CoordinateBoundaries.xMin+200000,
 //                CoordinateBoundaries.yMin+200000,
@@ -95,39 +89,44 @@ public class MapPanel extends JPanel implements Observer {
 //                CoordinateBoundaries.yMax-200000);
         
         
-        if(zoomConstant < 0.03){
-            RenderingHints rh = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-            rh.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setRenderingHints(rh);
-        }
-        
         NodeData fn, tn;
         int type;
         double fnX, fnY, tnX, tnY;
         
-        int i = 0;
-        
-        for (EdgeData ed : edges2) {
-            i++;
-            fn = loader.nodes.get(ed.FNODE);
-            tn = loader.nodes.get(ed.TNODE);
-            type = ed.TYP;
+        if(isMap == false) {
+            map = new BufferedImage(850, 660, BufferedImage.TYPE_INT_RGB);
+            mapG = (Graphics2D) map.getGraphics();
+            mapG.setColor(Color.WHITE);
+            mapG.fillRect(0, 0, 850, 660);
             
-            fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);
-            fnY = (((fn.getY() - CoordinateBoundaries.yMin) / k) + yk); 
-            tnX = (((tn.getX() - CoordinateBoundaries.xMin) / k) + xk);
-            tnY = (((tn.getY() - CoordinateBoundaries.yMin) / k) + yk);
+            if(zoomConstant < 0.03){
+                RenderingHints rh = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+                rh.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                mapG.setRenderingHints(rh);
+            }
+            
+            for (EdgeData ed : edges) {
+                fn = loader.nodes.get(ed.FNODE);
+                tn = loader.nodes.get(ed.TNODE);
+                type = ed.TYP;
 
-            //if these coordinates lies within the specified rectangle's bounds) 
-            if ((release.x > press.x && release.y > press.y)
-                    && (fnX < release.x && tnX < release.x)
-                    && (fnX > press.x && tnX > press.x)
-                    && (fnY > press.y && tnY > press.y)
-                    && (fnY < release.y && tnY < release.y)) {
-                drawSpecified(fnX, fnY, tnX, tnY, type, g2);
+                fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);
+                fnY = (((fn.getY() - CoordinateBoundaries.yMin) / k) + yk); 
+                tnX = (((tn.getX() - CoordinateBoundaries.xMin) / k) + xk);
+                tnY = (((tn.getY() - CoordinateBoundaries.yMin) / k) + yk);
+
+                //if these coordinates lies within the specified rectangle's bounds) 
+                if ((release.x > press.x && release.y > press.y)
+                        && (fnX < release.x && tnX < release.x)
+                        && (fnX > press.x && tnX > press.x)
+                        && (fnY > press.y && tnY > press.y)
+                        && (fnY < release.y && tnY < release.y)) {
+                    drawSpecified(fnX, fnY, tnX, tnY, type, mapG);
+                }
             }
         }
-        System.out.println(i);
+        g2.drawImage(map, 0, 0, null);
+        mapG.dispose();
         if (rect != null) {
             drawRect(rect, g2);
         }
@@ -153,6 +152,11 @@ public class MapPanel extends JPanel implements Observer {
     public void assignCoords(Point2D.Double press, Point2D.Double release) {
         this.press = press;
         this.release = release;
+        
+        System.out.println("pressX: " + press.x + " pressY: " + press.y);
+        System.out.println("releaseX: " + release.x + " releaseY: " + release.y);
+        
+        isMap = false;
         
         updateZoom(Math.abs(release.y - press.y) / getHeight());
         repaint();
@@ -198,10 +202,12 @@ public class MapPanel extends JPanel implements Observer {
                 drawLine(g2D, line, Color.BLUE, 1);
                 break;
         }
+        isMap = true;
     }
 
     public void updateResize(double j) {
         resizeConstant = j;
+        isMap = false;
         repaint();
     }
 
@@ -222,6 +228,7 @@ public class MapPanel extends JPanel implements Observer {
         setPreferredSize(new Dimension(850, 660));
         setVectorLastPress(0.0, 0.0);
         setVectorLastRelease(0.0, 0.0);
+        isMap = false;
         repaint();
     }
 
@@ -232,6 +239,7 @@ public class MapPanel extends JPanel implements Observer {
      * zero, the slower the zoom will be.
      */
     public void zoomIn(double factor) {
+        isMap = false;
         double deltaX = (release.x - press.x);
         double deltaY = (release.y - press.y);
         press.setLocation(press.x + deltaX * factor, press.y + deltaY * factor);
@@ -252,6 +260,7 @@ public class MapPanel extends JPanel implements Observer {
      * zero, the slower the zoom will be.
      */
     public void zoomOut(double factor) {
+        isMap = false;
         double deltaX = (release.x - press.x);
         double deltaY = (release.y - press.y);
         press.setLocation(press.x - deltaX * factor, press.y - deltaY * factor);
@@ -296,11 +305,13 @@ public class MapPanel extends JPanel implements Observer {
     }
 
     public void changeX(double j) {
+        isMap = false;
         xk += j;
         repaint();
     }
 
     public void changeY(double j) {
+        isMap = false;
         yk += j;
         repaint();
     }
