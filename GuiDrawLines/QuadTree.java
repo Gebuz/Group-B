@@ -258,6 +258,71 @@ public class QuadTree {
         }
         return getBranch(tempID);
     }
+    
+    public EdgeData getClosestRoad(double x1, double y1) {
+        EdgeData ed;
+        String ID = getID(x1, y1);
+        ArrayList<EdgeData> a = getBranch(ID).getEdges();
+        double distance;
+        
+        ed = a.get(0);
+        NodeData edfn = nodes.get(ed.FNODE);
+        NodeData edtn = nodes.get(ed.TNODE);
+        distance = distanceFromLine(edfn.getX(), edfn.getY(), edtn.getX(), edtn.getY(), x1, y1);
+        
+        for(EdgeData e: a){
+            NodeData fn = nodes.get(e.FNODE);
+            NodeData tn = nodes.get(e.TNODE);
+            double d = distanceFromLine(fn.getX(), fn.getY(), tn.getX(), tn.getY(), x1, y1);
+            if(d < distance) {
+                distance = d;
+                ed = e;
+            }
+        }
+        return ed;
+    }
+    
+    private double distanceFromLine(double ax, double ay, double bx, double by, double cx, double cy)
+    {
+	double distance;
+        double r_numerator = (cx - ax) * (bx - ax) + (cy - ay) * (by - ay);
+        double r_denomenator = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
+        double r = r_numerator / r_denomenator;
+
+        double px = ax + r * (bx - ax);
+        double py = ay + r * (by - ay);
+     
+        double s = ((ay - cy) * (bx - ax) - (ax - cx) * (by - ay)) / r_denomenator;
+
+        double distanceLine = Math.abs(s) * Math.sqrt(r_denomenator);
+
+
+        // (xx,yy) is the point on the lineSegment closest to (cx,cy)
+
+        double xx = px;
+        double yy = py;
+
+        if ((r >= 0) && (r <= 1)) {
+            distance = distanceLine;
+        } else {
+
+            double dist1 = (cx - ax) * (cx - ax) + (cy - ay) * (cy - ay);
+            double dist2 = (cx - bx) * (cx - bx) + (cy - by) * (cy - by);
+            if (dist1 < dist2) {
+                xx = ax;
+                yy = ay;
+                distance = Math.sqrt(dist1);
+            } else {
+                xx = bx;
+                yy = by;
+                distance = Math.sqrt(dist2);
+            }
+
+        }
+
+        return distance;
+    }
+
 
     /**
      * Get the parent of the current QuadTree.
