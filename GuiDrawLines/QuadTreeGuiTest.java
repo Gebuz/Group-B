@@ -91,7 +91,7 @@ public class QuadTreeGuiTest {
         System.out.println("Size of edges in branch 02 = " + root.getBranch("02").getEdges().size());
         System.out.println("\nID for branch 03 = " + root.getBranch("03").id);
         System.out.println("Size of edges in branch 03 = " + root.getBranch("03").getEdges().size());
-
+        
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
         frame.add(new JPanel() {

@@ -131,7 +131,7 @@ public class QuadTree {
             else if ('2' == ID.charAt(0)) qt = qt.sw;
             else if ('3' == ID.charAt(0)) qt = qt.se;
             else throw new RuntimeException("|" + id + "|");
-
+            
             ID = ID.substring(1);
         }
         return qt;
@@ -306,7 +306,7 @@ public class QuadTree {
         String ID = getID(x, y);
         double distance;
         ArrayList<EdgeData> a = getBranch(ID).getEdges();
-        if(a.isEmpty()) a = getBranch(ID).getParent().getEdges();
+        if(a.isEmpty()) a = this.getParent(getBranch(ID)).getEdges();
         
         ed = a.get(0);
         NodeData edfn = nodes.get(ed.FNODE);
@@ -371,9 +371,9 @@ public class QuadTree {
      * Get the parent of the current QuadTree.
      * @return Returns the parent of the current QuadTree.
      */
-    private QuadTree getParent()
+    private QuadTree getParent(QuadTree qt)
     {
-        return getBranch(id.substring(0, id.length()-1));
+        return getBranch(qt.id.substring(0, qt.id.length()-1));
     }
     
     private boolean isParent(QuadTree qtFather, QuadTree qtSon) {

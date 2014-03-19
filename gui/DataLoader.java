@@ -20,7 +20,7 @@ public class DataLoader {
     public final ArrayList<EdgeData> edges;
 
     public DataLoader() {
-        String dir = "/Users/flemmingxu/NetBeansProjects/Group-B/";
+        String dir = "";
 
         // For this example, we'll simply load the raw data into
         // ArrayLists.
