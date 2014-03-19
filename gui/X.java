@@ -19,6 +19,7 @@ public class X
         MapView map = new MapView("Super duper map", panel);
         Controller controller = new Controller(map);
     }
+    
 //        String dir = "/Users/flemmingxu/NetBeansProjects/Group-B/";
 //
 //        // For this example, we'll simply load the raw data into

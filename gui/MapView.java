@@ -15,11 +15,9 @@ import java.awt.geom.*;
 public class MapView extends JFrame {
     private final JPanel mapPanel;
     JPanel northPanel, eastPanel, arrowPanel, upPanel, downPanel;
-    //GlassPane gp;
     private JPanel xyPanel;
     JButton zoomIn, zoomOut, showFull, up, down, left, right;
-    JLabel x;
-    JLabel y;
+    JLabel x, y, road; 
     
     public MapView(String name, final MapPanel mapPanel) {
         super(name);
@@ -37,6 +35,8 @@ public class MapView extends JFrame {
         
         x = new JLabel("0");
         y = new JLabel("0");
+        road = new JLabel("");
+       
         
         showFull = new JButton ("▣");
         zoomIn = new JButton("Zoom In (+)");
@@ -162,6 +162,7 @@ public class MapView extends JFrame {
         arrowPanel.add(left, BorderLayout.WEST);
         arrowPanel.add(right, BorderLayout.EAST);
         arrowPanel.add(showFull, BorderLayout.CENTER);
+        
         eastPanel.add(arrowPanel);
         
         //Spacing
@@ -175,6 +176,11 @@ public class MapView extends JFrame {
         xyPanel.add(x);
         xyPanel.add(new JLabel(" y: "));
         xyPanel.add(y);
+        
+        northPanel.add(Box.createHorizontalGlue());
+        
+        northPanel.add(road);
+        
         
         
         //Spacing, uncomment this if removing xyPanel from northPanel

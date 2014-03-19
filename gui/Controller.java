@@ -4,6 +4,7 @@
  */
 package gui;
 
+import GuiDrawLines.QuadTree;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.*;
@@ -15,6 +16,8 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeListener;
+import krakkit.CoordinateBoundaries;
+import krakkit.EdgeData;
 
 /**
  *
@@ -33,7 +36,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         this.view = view;
         this.map = (MapPanel) view.getMap();
         this.loader = map.getData();
-        
+         
         initHeight = map.getSize().height - 1;
         initWidth = map.getSize().width - 1;
 
@@ -219,36 +222,49 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             }
             
             if (press != null && release != null) { // Avoid nullPointerException
-
-                //Rectangle rect = new Rectangle((int) xPress, (int) yPress, (int) rectWidth, (int) rectHeight);
-
+ 
+                System.out.println("\nRatio between press and release BEFORE:");
+                double w = -(press.x - release.x);
+                double h = -(press.y - release.y);
+                double mouseRatio = w / h;
+                System.out.println("ratio = " + mouseRatio + "\n");
+ 
                 // *** Sjurdur ***
                 double zoomConstant = map.getZoomConstant();
                 Point2D.Double vectorLastPress = map.getVectorLastPress();
                 Point2D.Double vectorLastRelease = map.getVectorLastRelease();
-
+ 
                 // Top left corner
                 double vectorNewPressX = (press.x) * zoomConstant;
                 double vectorNewPressY = (press.y) * zoomConstant;
-
-                press.setLocation(vectorLastPress.x + vectorNewPressX,
-                        vectorLastPress.y + vectorNewPressY);
-
-                map.setVectorLastPress(vectorLastPress.x + vectorNewPressX,
-                        vectorLastPress.y + vectorNewPressY);
-
-                // Bottom right corner.
-                double vectorNewReleaseX = (release.x - initWidth) * zoomConstant;
+     
+                press.setLocation(vectorLastPress.x + vectorNewPressX, vectorLastPress.y + vectorNewPressY);
+                map.setVectorLastPress(vectorLastPress.x + vectorNewPressX, vectorLastPress.y + vectorNewPressY);
+ 
+ 
+                // Bottom right corner.                
                 double vectorNewReleaseY = (release.y - initHeight) * zoomConstant;
-
-                release.setLocation(initWidth + vectorLastRelease.x + vectorNewReleaseX,
-                        initHeight + vectorLastRelease.y + vectorNewReleaseY);
-
-                map.setVectorLastRelease(vectorLastRelease.x + vectorNewReleaseX,
-                        vectorLastRelease.y + vectorNewReleaseY);
-
+                double vectorNewReleaseX = (release.x - initWidth)  * zoomConstant;
+               
+                // New Part
+                double newReleaseY = map.getHeight() + vectorLastRelease.y + vectorNewReleaseY;
+                rectHeight = Math.abs(newReleaseY - press.y);
+                rectWidth = rectHeight * map.ratio;
+                double newReleaseX = rectWidth + press.x;
+                release.setLocation(newReleaseX, newReleaseY);
+ 
+ 
+                map.setVectorLastRelease(map.getVectorLastRelease().x + vectorNewReleaseX,
+                        map.getVectorLastRelease().y + vectorNewReleaseY);
+               
+               
+               
+                System.out.println("\nRatio between press and release AFTER:");
+                double w1 = -(press.x - release.x);
+                double h1 = -(press.y - release.y);
+                System.out.println("ratio = " + (w1 / h1));
+ 
                 // ***************
-
                 map.assignCoords(press, release);
             }
         }
@@ -266,14 +282,25 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     public void mouseMoved(MouseEvent e) {
         view.x.setText("" + e.getX());
         view.y.setText("" + e.getY());
+        
+        double x = (e.getX()*map.oldResize*map.oldZoom*map.k) + (map.oldXK*map.k) + CoordinateBoundaries.xMin;
+        double y = (e.getY()*map.oldResize*map.oldZoom*map.k) + (map.oldYK*map.k) + CoordinateBoundaries.yMin;
+               
+        EdgeData edge = map.qt.getClosestRoad(x, y);
+        
+        view.road.setText(edge.VEJNAVN);
 
         //use Point2D.double for storing x, y coordinate of edges, put the point objects in Hash map.
     }
 
     @Override
     public void componentResized(ComponentEvent e) {
-        double resizeHeight = map.getSize().height - 1;
-
+        double resizeHeight = map.getSize().height;
+ 
+        Point2D.Double release = map.getRelease();
+        map.setVectorLastRelease(release.x - map.getWidth(),
+                release.y - map.getHeight());
+        
         if (resizeHeight < initHeight || resizeHeight > initHeight) {
             double constant = initHeight / resizeHeight;
             map.updateResize(constant);
