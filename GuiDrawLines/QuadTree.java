@@ -17,8 +17,18 @@ public class QuadTree {
     private final HashMap<Integer, NodeData> nodes;
     private ArrayList<EdgeData> edges;
     private double x, y, length, height;
-    public final String id; // Unique ID
 
+    /**
+     * ID unique to the QuadTree.
+     */
+    public final String id;
+
+    /**
+     * Creates a new QuadTree, should always be followed by a addCoords call
+     * @param edges
+     * @param nodes
+     * @param id
+     */
     public QuadTree(ArrayList edges, HashMap nodes, String id) {
         this.edges = edges;
         this.nodes = nodes;
@@ -141,6 +151,22 @@ public class QuadTree {
         if (se.canZoom(x, y)) return se.getID(x, y);
         return id;
     }
+    
+     /**
+     * Gets the ID of all existing QuadTrees. For testing purposes only.
+     * @return a HashSet containing the ID of all existing QuadTrees.
+     */
+    public HashSet<String> getAll() {
+        HashSet<String> hs = new HashSet<>();
+        if(nw != null) {
+            hs.addAll(nw.getAll());
+            hs.addAll(ne.getAll());
+            hs.addAll(sw.getAll());
+            hs.addAll(se.getAll());
+        }
+        hs.add(id);
+        return hs;
+    }
 
     private boolean canZoom(double x1, double y1) {
         return (    x1 >= x
@@ -157,7 +183,7 @@ public class QuadTree {
     }
 
     /**
-     * Return all the edges in the QuadTree found by two points. ??
+     * Outdated, use getRoadsImproved instead.
      * @param x1 The x coordinate of the top left corner of the
      * @param y1 The y coordinate of the top left corner of the 
      * @param x2 The x coordinate of the lower right corner of the 
@@ -172,6 +198,16 @@ public class QuadTree {
         if (se.canZoom(x1, y1, x2, y2)) return se.getRoads(x1, y1, x2, y2);
         return getEdges();
     }
+    
+     /**
+     * Returns a HashSet with the ID of all QuadTrees needed to find the 
+     * roads in the rectangle drawn by (x1,y1) and (x2, y2). 
+     * @param x1 The x coordinate of the top left corner of the
+     * @param y1 The y coordinate of the top left corner of the 
+     * @param x2 The x coordinate of the lower right corner of the 
+     * @param y2 The y coordinate of the lower right corner of the
+     * @return Returns a HashSet with the ID of relevant QuadTrees.
+     */
 
     public HashSet<String> getRoadsImproved(double x1, double y1, double x2, double y2) {
         HashSet<String> trees = new HashSet<>();
@@ -259,21 +295,28 @@ public class QuadTree {
         return getBranch(tempID);
     }
     
-    public EdgeData getClosestRoad(double x1, double y1) {
+   /**
+     * Find the road closest to a given point (x1, y1).
+     * @param x The x coordinate of the point.
+     * @param y The y coordinate of the point.
+     * @return Returns the EdgeData with the road closest to a given point.
+     */
+    public EdgeData getClosestRoad(double x, double y) {
         EdgeData ed;
-        String ID = getID(x1, y1);
-        ArrayList<EdgeData> a = getBranch(ID).getEdges();
+        String ID = getID(x, y);
         double distance;
+        ArrayList<EdgeData> a = getBranch(ID).getEdges();
+        if(a.isEmpty()) a = getBranch(ID).getParent().getEdges();
         
         ed = a.get(0);
         NodeData edfn = nodes.get(ed.FNODE);
         NodeData edtn = nodes.get(ed.TNODE);
-        distance = distanceFromLine(edfn.getX(), edfn.getY(), edtn.getX(), edtn.getY(), x1, y1);
+        distance = distanceFromLine(edfn.getX(), edfn.getY(), edtn.getX(), edtn.getY(), x, y);
         
         for(EdgeData e: a){
             NodeData fn = nodes.get(e.FNODE);
             NodeData tn = nodes.get(e.TNODE);
-            double d = distanceFromLine(fn.getX(), fn.getY(), tn.getX(), tn.getY(), x1, y1);
+            double d = distanceFromLine(fn.getX(), fn.getY(), tn.getX(), tn.getY(), x, y);
             if(d < distance) {
                 distance = d;
                 ed = e;
@@ -385,19 +428,35 @@ public class QuadTree {
         return "2, E";
     }
 
+    /**
+     * Gets the middle x-coordinate of the QuadTree.
+     * @return returns the middle x-coordinate of the QuadTree.
+     */
     public double getMidX() {
         return (x+length)/2;
     }
 
+    /**
+     * Gets the middle y-coordinate of the QuadTree.
+     * @return returns the middle y-coordinate of the QuadTree.
+     */
     public double getMidY() {
         return (y+height)/2;
     }
 
+    /**
+     * Gets the HashMap containing all nodes.
+     * @return returns the HashMap containing all nodes.
+     */
     public HashMap<Integer, NodeData> getNodes()
     {
         return nodes;
     }
 
+    /**
+     * Gets all the Edges in the QuadTree.
+     * @return Returns all Edges in the QuadTree.
+     */
     public ArrayList<EdgeData> getEdges()
     {
         if(nw == null) return edges; //if leaf
