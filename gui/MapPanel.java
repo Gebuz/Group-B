@@ -71,22 +71,17 @@ public class MapPanel extends JPanel implements Observer {
               
         Graphics2D g2 = (Graphics2D) g;
         
-        double pressX = ((press.x*oldResize*k)/oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
-        double pressY = ((press.y*oldResize*k)/oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
+        double pressX = (press.x*k) + CoordinateBoundaries.xMin; //oldResize*k)*oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
+        double pressY = (press.y*k) + CoordinateBoundaries.yMin; //oldResize*k)*oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
         
-//        double releaseX2 = CoordinateBoundaries.xMax; //(press.x*resizeConstant*zoomConstant*k) + xk;
-//        double releaseY2 = CoordinateBoundaries.yMax;//(press.y*resizeConstant*zoomConstant*k) + yk;
-//        
-//        double pressX2 = CoordinateBoundaries.xMin;
-//        double pressY2 = CoordinateBoundaries.yMin;
+        double releaseX = (release.x*k) + CoordinateBoundaries.xMin; //oldResize*k)*oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
+        double releaseY = (release.y*k) + CoordinateBoundaries.yMin; //oldResize*k)*oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
         
-        double releaseX = ((release.x*oldResize*k)/oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
-        double releaseY = ((release.y*oldResize*k)/oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
+        double releaseX2 = CoordinateBoundaries.xMax; 
+        double releaseY2 = CoordinateBoundaries.yMax;
         
-//        System.out.println("Press X true: " + pressX2 + " Press Y true: " + pressY2);
-//        System.out.println("Press X: " + pressX + " Press Y: " + pressY);
-//        System.out.println("Release X true: " + releaseX2 + " Release Y true: " + releaseY2);
-//        System.out.println("Release X: " + releaseX + " Release Y: " + releaseY);
+        double pressX2 = CoordinateBoundaries.xMin;
+        double pressY2 = CoordinateBoundaries.yMin;
         
         NodeData fn, tn;
         int type;
@@ -98,14 +93,20 @@ public class MapPanel extends JPanel implements Observer {
             mapG.setColor(Color.WHITE);
             mapG.fillRect(0, 0, 850, 660);
             
+            System.out.println("Press X true: " + pressX2 + " Press Y true: " + pressY2);
+            System.out.println("Press X: " + pressX + " Press Y: " + pressY);
+            System.out.println("Release X true: " + releaseX2 + " Release Y true: " + releaseY2);
+            System.out.println("Release X: " + releaseX + " Release Y: " + releaseY);
+            
             HashSet<String> trees = qt.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+            System.out.println("HEY!");
             ArrayList<EdgeData> edges2 = new ArrayList<EdgeData>();
             for(String s : trees) {
                 edges2.addAll(qt.getBranch(s).getEdges());
             }
             
             if(zoomConstant < 0.03){
-                RenderingHints rh = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+                RenderingHints rh = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 rh.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 mapG.setRenderingHints(rh);
             }
@@ -124,8 +125,7 @@ public class MapPanel extends JPanel implements Observer {
                 tnY = (((tn.getY() - CoordinateBoundaries.yMin) / k) + yk);
 
                 //if these coordinates lies within the specified rectangle's bounds) 
-                if ((       release.x > press.x
-                    &&  release.y > press.y)
+                if ((release.x > press.x &&  release.y > press.y)
                     && (fnX < release.x + widthDiff && tnX < release.x + widthDiff)
                     && (fnX > press.x && tnX > press.x)
                     && (fnY > press.y && tnY > press.y)
@@ -152,11 +152,6 @@ public class MapPanel extends JPanel implements Observer {
         g.setStroke(new BasicStroke(width));
         g.draw(line);
     }
-
-    public void assignRect(Rectangle r) {
-        rect = new Rectangle(r.x, r.y, r.width, r.height);
-        repaint();
-    }
     
     public void drawRect(Rectangle r, Graphics2D g2) {
         g2.setColor(Color.BLACK);
@@ -168,8 +163,8 @@ public class MapPanel extends JPanel implements Observer {
         this.press = press;
         this.release = release;
         
-        System.out.println("pressX: " + press.x + " pressY: " + press.y);
-        System.out.println("releaseX: " + release.x + " releaseY: " + release.y);
+        //System.out.println("pressX: " + press.x + " pressY: " + press.y);
+        //System.out.println("releaseX: " + release.x + " releaseY: " + release.y);
         
         isMap = false;
       
@@ -219,22 +214,7 @@ public class MapPanel extends JPanel implements Observer {
         }
         isMap = true;
     }
-
-    public void updateResize(double j) {
-        oldResize = resizeConstant;
-        resizeConstant = j;
-        isMap = false;
-        repaint();
-    }
-
-    public void updateZoom(double j) {
-        oldZoom = zoomConstant;
-        System.out.println("Old zoom: " + oldZoom);
-        zoomConstant = j;
-        System.out.println("Zoom constant: " + zoomConstant);
-        repaint();
-    }
-
+    
     public void defaultMap() {
         press = new Point2D.Double(0, 0);
         release = new Point2D.Double(850, 660);
@@ -247,6 +227,19 @@ public class MapPanel extends JPanel implements Observer {
         setVectorLastPress(0.0, 0.0);
         setVectorLastRelease(0.0, 0.0);
         isMap = false;
+        repaint();
+    }
+
+    public void updateResize(double j) {
+        oldResize = resizeConstant;
+        resizeConstant = j;
+        isMap = false;
+        repaint();
+    }
+
+    public void updateZoom(double j) {
+        oldZoom = zoomConstant;
+        zoomConstant = j;
         repaint();
     }
 
@@ -342,6 +335,11 @@ public class MapPanel extends JPanel implements Observer {
 
     public double getZoom() {
         return zoomConstant;
+    }
+    
+    public void assignRect(Rectangle r) {
+        rect = new Rectangle(r.x, r.y, r.width, r.height);
+        repaint();
     }
     
     public void removeRect() {
