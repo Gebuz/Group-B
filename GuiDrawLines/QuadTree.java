@@ -250,7 +250,7 @@ public class QuadTree {
             while(true){
                 trees.add(tempRight);
                 QuadTree qtRight = getBranch(tempRight);
-                System.out.println(qtRight.getEdges().size());
+                //System.out.println(qtRight.getEdges().size());
                 if(farRight.equals(tempRight) || isParent(tempRight, farRight)) break;
                 tempRight = findNeighbor(qtRight, Direction.E).id;
                 
