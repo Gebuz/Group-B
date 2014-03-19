@@ -275,8 +275,9 @@ public class QuadTree {
     public EdgeData getClosestRoad(double x1, double y1) {
         EdgeData ed;
         String ID = getID(x1, y1);
-        ArrayList<EdgeData> a = getBranch(ID).getEdges();
         double distance;
+        ArrayList<EdgeData> a = getBranch(ID).getEdges();
+        if(a.isEmpty()) a = getBranch(ID).getParent().getEdges();
         
         ed = a.get(0);
         NodeData edfn = nodes.get(ed.FNODE);
