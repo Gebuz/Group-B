@@ -17,8 +17,18 @@ public class QuadTree {
     private final HashMap<Integer, NodeData> nodes;
     private ArrayList<EdgeData> edges;
     private double x, y, length, height;
-    public final String id; // Unique ID
 
+    /**
+     * ID unique to the QuadTree.
+     */
+    public final String id;
+
+    /**
+     * Creates a new QuadTree, should always be followed by a addCoords call
+     * @param edges
+     * @param nodes
+     * @param id
+     */
     public QuadTree(ArrayList edges, HashMap nodes, String id) {
         this.edges = edges;
         this.nodes = nodes;
@@ -418,19 +428,35 @@ public class QuadTree {
         return "2, E";
     }
 
+    /**
+     * Gets the middle x-coordinate of the QuadTree.
+     * @return returns the middle x-coordinate of the QuadTree.
+     */
     public double getMidX() {
         return (x+length)/2;
     }
 
+    /**
+     * Gets the middle y-coordinate of the QuadTree.
+     * @return returns the middle y-coordinate of the QuadTree.
+     */
     public double getMidY() {
         return (y+height)/2;
     }
 
+    /**
+     * Gets the HashMap containing all nodes.
+     * @return returns the HashMap containing all nodes.
+     */
     public HashMap<Integer, NodeData> getNodes()
     {
         return nodes;
     }
 
+    /**
+     * Gets all the Edges in the QuadTree.
+     * @return Returns all Edges in the QuadTree.
+     */
     public ArrayList<EdgeData> getEdges()
     {
         if(nw == null) return edges; //if leaf
