@@ -1,0 +1,40 @@
+static double distanceFromLine(double ax, double ay, double bx, double by, double cx, double cy)
+{
+	double distance;
+        double r_numerator = (cx - ax) * (bx - ax) + (cy - ay) * (by - ay);
+        double r_denomenator = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
+        double r = r_numerator / r_denomenator;
+//
+        double px = ax + r * (bx - ax);
+        double py = ay + r * (by - ay);
+//     
+        double s = ((ay - cy) * (bx - ax) - (ax - cx) * (by - ay)) / r_denomenator;
+
+        double distanceLine = Math.abs(s) * Math.sqrt(r_denomenator);
+
+//
+// (xx,yy) is the point on the lineSegment closest to (cx,cy)
+//
+        double xx = px;
+        double yy = py;
+
+        if ((r >= 0) && (r <= 1)) {
+            distance = distanceLine;
+        } else {
+
+            double dist1 = (cx - ax) * (cx - ax) + (cy - ay) * (cy - ay);
+            double dist2 = (cx - bx) * (cx - bx) + (cy - by) * (cy - by);
+            if (dist1 < dist2) {
+                xx = ax;
+                yy = ay;
+                distance = Math.sqrt(dist1);
+            } else {
+                xx = bx;
+                yy = by;
+                distance = Math.sqrt(dist2);
+            }
+
+        }
+
+        return distance;
+    }
