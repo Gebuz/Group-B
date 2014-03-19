@@ -141,6 +141,19 @@ public class QuadTree {
         if (se.canZoom(x, y)) return se.getID(x, y);
         return id;
     }
+    
+    //kun brugt som test til at tegne quadtrees
+    public HashSet<String> getAll() {
+        HashSet<String> hs = new HashSet<>();
+        if(nw != null) {
+            hs.addAll(nw.getAll());
+            hs.addAll(ne.getAll());
+            hs.addAll(sw.getAll());
+            hs.addAll(se.getAll());
+        }
+        hs.add(id);
+        return hs;
+    }
 
     private boolean canZoom(double x1, double y1) {
         return (    x1 >= x

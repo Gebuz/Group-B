@@ -105,7 +105,6 @@ public class QuadTreeGuiTest {
                 int k = 550;
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
-
                 ArrayList<EdgeData> zoomEdges = new ArrayList<>();
                 for (String s : trees) {
                     zoomEdges.addAll(root.getBranch(s).getEdges());
