@@ -100,7 +100,7 @@ public class MapPanel extends JPanel implements Observer {
             
             HashSet<String> trees = qt.getRoadsImproved(pressX, pressY, releaseX, releaseY);
             System.out.println("HEY!");
-            ArrayList<EdgeData> edges2 = new ArrayList<EdgeData>();
+            ArrayList<EdgeData> edges2 = new ArrayList<>();
             for(String s : trees) {
                 edges2.addAll(qt.getBranch(s).getEdges());
             }
@@ -345,8 +345,16 @@ public class MapPanel extends JPanel implements Observer {
     public void removeRect() {
         rect = null;
     }
+    
+    //only works in default map.
+    public String getRoadName(double x, double y) {
+        x = x*k + CoordinateBoundaries.xMin;
+        y = y*k + CoordinateBoundaries.yMin;
+        EdgeData edge = qt.getClosestRoad(x, y);
+        return edge.VEJNAVN;
+    }
 
     @Override
     public void update(Observable o, Object arg) {
-    }
+    } 
 }

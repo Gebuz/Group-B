@@ -265,13 +265,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     public void mouseMoved(MouseEvent e) {
         view.x.setText("" + e.getX());
         view.y.setText("" + e.getY());
-        
-        double x = (e.getX()*map.k) + CoordinateBoundaries.xMin;
-        double y = (e.getY()*map.k) + CoordinateBoundaries.yMin;
-               
-        EdgeData edge = map.qt.getClosestRoad(x, y);
-       
-        view.road.setText(edge.VEJNAVN);
+        view.road.setText(map.getRoadName(e.getX(), e.getY()));
 
         //use Point2D.double for storing x, y coordinate of edges, put the point objects in Hash map.
     }
