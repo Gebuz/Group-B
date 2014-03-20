@@ -28,7 +28,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
     public Controller(MapView view) {
         this.view = view;
-        this.map = (MapPanel) view.getMap();
+        this.map = (MapPanel) view.mapPanel;
          
         initHeight = map.getSize().height - 1;
         initWidth = map.getSize().width - 1;
