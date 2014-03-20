@@ -4,10 +4,8 @@
  */
 package gui;
 
-import GuiDrawLines.QuadTree;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,9 +13,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
-import java.beans.PropertyChangeListener;
-import krakkit.CoordinateBoundaries;
-import krakkit.EdgeData;
 
 /**
  *
@@ -25,10 +20,10 @@ import krakkit.EdgeData;
  */
 public class Controller implements MouseListener, MouseMotionListener, ComponentListener, ActionListener {
 
-    private MapView view;
-    private MapPanel map;
-    private double initHeight;
-    private double initWidth;
+    private final MapView view;
+    private final MapPanel map;
+    private final double initHeight;
+    private final double initWidth;
     private double xPress, yPress;
 
     public Controller(MapView view) {

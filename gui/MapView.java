@@ -4,8 +4,6 @@ package gui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.geom.*;
 
 /**
  *
@@ -13,11 +11,11 @@ import java.awt.geom.*;
  */
 
 public class MapView extends JFrame {
-    private final JPanel mapPanel;
-    JPanel northPanel, eastPanel, arrowPanel, upPanel, downPanel;
-    private JPanel xyPanel;
-    JButton zoomIn, zoomOut, showFull, up, down, left, right;
-    JLabel x, y, road; 
+    public final JPanel mapPanel;
+    public final JPanel northPanel, eastPanel, arrowPanel, upPanel, downPanel;
+    public final JPanel xyPanel;
+    public final JButton zoomIn, zoomOut, showFull, up, down, left, right;
+    public final JLabel x, y, road; 
     
     public MapView(String name, final MapPanel mapPanel) {
         super(name);
@@ -198,9 +196,5 @@ public class MapView extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         pack();
         setVisible(true);
-    }
-    
-    public JPanel getMap() {
-        return mapPanel;
     }
 }
