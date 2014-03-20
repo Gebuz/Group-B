@@ -18,17 +18,17 @@ import GuiDrawLines.QuadTree;
 //Our model should return lists of edges to be drawn.
 public class MapPanel extends JPanel implements Observer {
 
-    QuadTree qt;
-    private DataLoader loader;
+    public final QuadTree qt;
+    public final DataLoader loader;
     
-    private ArrayList<EdgeData> edges; //to be replaced by model through controller depending on how much data is needed.
-    private HashMap<Integer, NodeData> nodes;
+    public final ArrayList<EdgeData> edges; //to be replaced by model through controller depending on how much data is needed.
+    public final HashMap<Integer, NodeData> nodes;
     
-    int k = 550;
-    double resizeConstant = 1, zoomConstant = 1, oldResize = 1, oldZoom = 1;
-    double xk = 0, yk = 0, oldXK = 0, oldYK = 0;
-    final double ratio;
-    final float dash[] = {7.0f};
+    public final int k = 550;
+    private double resizeConstant = 1, zoomConstant = 1; //oldResize = 1, oldZoom = 1;
+    private double xk = 0, yk = 0; //oldXK = 0, oldYK = 0
+    public final double ratio;
+    public final float dash[] = {7.0f};
     
     private Rectangle rect;
     private Point2D.Double press, release, vectorLastPress, vectorLastRelease;
@@ -37,7 +37,7 @@ public class MapPanel extends JPanel implements Observer {
     private Graphics2D mapG;
     private BufferedImage map;
     
-    private Area area;
+    private final Area area;
     
     private final int INIT_WIDTH = 850;
     private final int INIT_HEIGHT = 660;
@@ -222,7 +222,7 @@ public class MapPanel extends JPanel implements Observer {
         resizeConstant = 1;
         yk = 0;
         xk = 0;
-        k = 550;
+        //k = 550; //k er altid 550?
         setPreferredSize(new Dimension(850, 660));
         setVectorLastPress(0.0, 0.0);
         setVectorLastRelease(0.0, 0.0);
@@ -231,14 +231,14 @@ public class MapPanel extends JPanel implements Observer {
     }
 
     public void updateResize(double j) {
-        oldResize = resizeConstant;
+        //oldResize = resizeConstant;
         resizeConstant = j;
         isMap = false;
         repaint();
     }
 
     public void updateZoom(double j) {
-        oldZoom = zoomConstant;
+        //oldZoom = zoomConstant;
         zoomConstant = j;
         repaint();
     }
@@ -317,14 +317,14 @@ public class MapPanel extends JPanel implements Observer {
 
     public void changeX(double j) {
         isMap = false;
-        oldXK = xk;
+        //oldXK = xk;
         xk += j;
         repaint();
     }
 
     public void changeY(double j) {
         isMap = false;
-        oldYK = yk;
+        //oldYK = yk;
         yk += j;
         repaint();
     }

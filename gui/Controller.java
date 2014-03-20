@@ -13,6 +13,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
+import krakkit.CoordinateBoundaries;
+import krakkit.EdgeData;
 
 /**
  *
@@ -264,12 +266,12 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         view.x.setText("" + e.getX());
         view.y.setText("" + e.getY());
         
-//        double x = ((e.getX()*map.resizeConstant*map.k)/map.zoomConstant) + (map.xk*map.k) + CoordinateBoundaries.xMin;
-//        double y = ((e.getY()*map.resizeConstant*map.k)/map.zoomConstant) + (map.yk*map.k) + CoordinateBoundaries.yMin;
-//               
-//        EdgeData edge = map.qt.getClosestRoad(x, y);
-//        
-//        view.road.setText(edge.VEJNAVN);
+        double x = (e.getX()*map.k) + CoordinateBoundaries.xMin;
+        double y = (e.getY()*map.k) + CoordinateBoundaries.yMin;
+               
+        EdgeData edge = map.qt.getClosestRoad(x, y);
+       
+        view.road.setText(edge.VEJNAVN);
 
         //use Point2D.double for storing x, y coordinate of edges, put the point objects in Hash map.
     }
