@@ -258,7 +258,8 @@ public class QuadTree {
             if(botLeft.equals(tempLeft) || isParent(tempLeft, botLeft)) break;
             tempLeft = findNeighbor(getBranch(tempLeft), Direction.S).id;
             farRight = findNeighbor(getBranch(farRight), Direction.S).id;
-
+            if(tempLeft.length() < farRight.length()) farRight = farRight.substring(0,tempLeft.length());
+            if(tempLeft.length() > farRight.length()) tempLeft = tempLeft.substring(0,farRight.length());
         }
 
         return trees;
