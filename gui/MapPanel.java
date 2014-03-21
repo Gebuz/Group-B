@@ -41,6 +41,8 @@ public class MapPanel extends JPanel implements Observer {
     
     private final int INIT_WIDTH = 850;
     private final int INIT_HEIGHT = 660;
+    
+    double pressX, pressY, releaseX, releaseY;
 
     public MapPanel() {
         isMap = false;
@@ -87,11 +89,11 @@ public class MapPanel extends JPanel implements Observer {
             mapG.setColor(Color.WHITE);
             mapG.fillRect(0, 0, getWidth(), getHeight());
             
-            double pressX = (press.x*k) - (xk*k) + CoordinateBoundaries.xMin; //oldResize*k)*oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
-            double pressY = (press.y*k) - (yk*k) + CoordinateBoundaries.yMin; //oldResize*k)*oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
+            pressX = (press.x*k) - (xk*k) + CoordinateBoundaries.xMin; //oldResize*k)*oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
+            pressY = (press.y*k) - (yk*k) + CoordinateBoundaries.yMin; //oldResize*k)*oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
         
-            double releaseX = (release.x*k) - (xk*k) + CoordinateBoundaries.xMin; //oldResize*k)*oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
-            double releaseY = (release.y*k) - (yk*k) + CoordinateBoundaries.yMin; //oldResize*k)*oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
+            releaseX = (release.x*k) - (xk*k) + CoordinateBoundaries.xMin; //oldResize*k)*oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
+            releaseY = (release.y*k) - (yk*k) + CoordinateBoundaries.yMin; //oldResize*k)*oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
             
 //            System.out.println("Press X true: " + pressX2 + " Press Y true: " + pressY2);
 //            System.out.println("Press X: " + pressX + " Press Y: " + pressY);
@@ -346,9 +348,9 @@ public class MapPanel extends JPanel implements Observer {
     }
     
     //only works in default map.
-    public String getRoadName(double x, double y) {
-        x = x*k + CoordinateBoundaries.xMin;
-        y = y*k + CoordinateBoundaries.yMin;
+    public String getRoadName(double x, double y) {        
+        x = pressX + (releaseX - pressX)*x/INIT_WIDTH;
+        y = pressY + (releaseY - pressY)*y/INIT_HEIGHT;
         EdgeData edge = qt.getClosestRoad(x, y);
         return edge.VEJNAVN;
     }

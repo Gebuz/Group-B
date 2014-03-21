@@ -318,7 +318,7 @@ public class QuadTree {
             NodeData fn = nodes.get(e.FNODE);
             NodeData tn = nodes.get(e.TNODE);
             double d = distanceFromLine(fn.getX(), fn.getY(), tn.getX(), tn.getY(), x, y);
-            if(d < distance) {
+            if(d < distance && !(e.VEJNAVN.equals(""))) {
                 distance = d;
                 ed = e;
             }
