@@ -14,8 +14,6 @@ import GuiDrawLines.QuadTree;
  *
  * @author flemmingxu
  */
-//Our view
-//Our model should return lists of edges to be drawn.
 public class MapPanel extends JPanel implements Observer {
 
     public final QuadTree qt;
@@ -73,12 +71,6 @@ public class MapPanel extends JPanel implements Observer {
               
         Graphics2D g2 = (Graphics2D) g;
         
-        double releaseX2 = CoordinateBoundaries.xMax; 
-        double releaseY2 = CoordinateBoundaries.yMax;
-        
-        double pressX2 = CoordinateBoundaries.xMin;
-        double pressY2 = CoordinateBoundaries.yMin;
-        
         NodeData fn, tn;
         int type;
         double fnX, fnY, tnX, tnY;
@@ -89,32 +81,22 @@ public class MapPanel extends JPanel implements Observer {
             mapG.setColor(Color.WHITE);
             mapG.fillRect(0, 0, getWidth(), getHeight());
             
-            pressX = (press.x*k) - (xk*k) + CoordinateBoundaries.xMin; //oldResize*k)*oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
-            pressY = (press.y*k) - (yk*k) + CoordinateBoundaries.yMin; //oldResize*k)*oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
-        
-            releaseX = (release.x*k) - (xk*k) + CoordinateBoundaries.xMin; //oldResize*k)*oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
-            releaseY = (release.y*k) - (yk*k) + CoordinateBoundaries.yMin; //oldResize*k)*oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
+            pressX = (press.x*k) - (xk*k) + CoordinateBoundaries.xMin; 
+            pressY = (press.y*k) - (yk*k) + CoordinateBoundaries.yMin; 
             
-//            System.out.println("Press X true: " + pressX2 + " Press Y true: " + pressY2);
-//            System.out.println("Press X: " + pressX + " Press Y: " + pressY);
-//            System.out.println("Release X true: " + releaseX2 + " Release Y true: " + releaseY2);
-//            System.out.println("Release X: " + releaseX + " Release Y: " + releaseY);
+            releaseX = (release.x*k) - (xk*k) + CoordinateBoundaries.xMin; 
+            releaseY = (release.y*k) - (yk*k) + CoordinateBoundaries.yMin; 
     
-            System.out.println("Beginning of getRoads!");
             HashSet<String> trees = qt.getRoadsImproved(pressX, pressY, releaseX, releaseY);
-            System.out.println("End of getRoads!");
             ArrayList<EdgeData> edges2 = new ArrayList<>();
             for(String s : trees) {
                 edges2.addAll(qt.getBranch(s).getEdges());
             }
-            if(zoomConstant < 0.03){
+            if(zoomConstant < 0.10){
                 RenderingHints rh = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 rh.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 mapG.setRenderingHints(rh);
             }
-            
-//            double widthDiff = (getWidth() - INIT_WIDTH)*zoomConstant*resizeConstant;
-//            double heightDiff = (getHeight() - INIT_HEIGHT)*zoomConstant*resizeConstant;
             
             for (EdgeData ed : edges2) {
                 fn = loader.nodes.get(ed.FNODE);
@@ -132,7 +114,7 @@ public class MapPanel extends JPanel implements Observer {
 //                    && (fnX > press.x && tnX > press.x)
 //                    && (fnY > press.y && tnY > press.y)
 //                    && (fnY < release.y + heightDiff && tnY < release.y + heightDiff)) {
-                    drawSpecified(fnX, fnY, tnX, tnY, type, mapG);
+                drawSpecified(fnX, fnY, tnX, tnY, type, mapG);
 //                }
             }
             System.out.println(edges2.size());
@@ -164,9 +146,6 @@ public class MapPanel extends JPanel implements Observer {
     public void assignCoords(Point2D.Double press, Point2D.Double release) {
         this.press = press;
         this.release = release;
-        
-        //System.out.println("pressX: " + press.x + " pressY: " + press.y);
-        //System.out.println("releaseX: " + release.x + " releaseY: " + release.y);
         
         isMap = false;
       
@@ -232,14 +211,12 @@ public class MapPanel extends JPanel implements Observer {
     }
 
     public void updateResize(double j) {
-        //oldResize = resizeConstant;
         resizeConstant = j;
         isMap = false;
         repaint();
     }
 
     public void updateZoom(double j) {
-        //oldZoom = zoomConstant;
         zoomConstant = j;
         repaint();
     }
@@ -318,14 +295,12 @@ public class MapPanel extends JPanel implements Observer {
 
     public void changeX(double j) {
         isMap = false;
-        //oldXK = xk;
         xk += j;
         repaint();
     }
 
     public void changeY(double j) {
         isMap = false;
-        //oldYK = yk;
         yk += j;
         repaint();
     }
@@ -347,7 +322,6 @@ public class MapPanel extends JPanel implements Observer {
         rect = null;
     }
     
-    //only works in default map.
     public String getRoadName(double x, double y) {        
         x = pressX + (releaseX - pressX)*x/INIT_WIDTH;
         y = pressY + (releaseY - pressY)*y/INIT_HEIGHT;

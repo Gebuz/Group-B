@@ -44,14 +44,12 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         view.left.addMouseListener(this);
         view.right.addMouseListener(this);
 
-        //map.addComponentListener(this);
         map.addMouseListener(this);
         map.addMouseMotionListener(this);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        //This could assign a new list of edges to MapPanel
         if (e.getComponent() == view.zoomIn) {
             map.zoomIn(0.10);
         }
@@ -266,8 +264,6 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         view.x.setText("" + e.getX());
         view.y.setText("" + e.getY());
         view.road.setText(map.getRoadName(e.getX(), e.getY()));
-
-        //use Point2D.double for storing x, y coordinate of edges, put the point objects in Hash map.
     }
     
     @Override
