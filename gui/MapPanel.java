@@ -71,12 +71,6 @@ public class MapPanel extends JPanel implements Observer {
               
         Graphics2D g2 = (Graphics2D) g;
         
-        double pressX = (press.x*k) + CoordinateBoundaries.xMin; //oldResize*k)*oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
-        double pressY = (press.y*k) + CoordinateBoundaries.yMin; //oldResize*k)*oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
-        
-        double releaseX = (release.x*k) + CoordinateBoundaries.xMin; //oldResize*k)*oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
-        double releaseY = (release.y*k) + CoordinateBoundaries.yMin; //oldResize*k)*oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
-        
         double releaseX2 = CoordinateBoundaries.xMax; 
         double releaseY2 = CoordinateBoundaries.yMax;
         
@@ -88,31 +82,37 @@ public class MapPanel extends JPanel implements Observer {
         double fnX, fnY, tnX, tnY;
         
         if(isMap == false) {
-            map = new BufferedImage(850, 660, BufferedImage.TYPE_INT_RGB);
+            map = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
             mapG = (Graphics2D) map.getGraphics();
             mapG.setColor(Color.WHITE);
-            mapG.fillRect(0, 0, 850, 660);
+            mapG.fillRect(0, 0, getWidth(), getHeight());
             
-            System.out.println("Press X true: " + pressX2 + " Press Y true: " + pressY2);
-            System.out.println("Press X: " + pressX + " Press Y: " + pressY);
-            System.out.println("Release X true: " + releaseX2 + " Release Y true: " + releaseY2);
-            System.out.println("Release X: " + releaseX + " Release Y: " + releaseY);
+            double pressX = (press.x*k) - (xk*k) + CoordinateBoundaries.xMin; //oldResize*k)*oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
+            double pressY = (press.y*k) - (yk*k) + CoordinateBoundaries.yMin; //oldResize*k)*oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
+        
+            double releaseX = (release.x*k) - (xk*k) + CoordinateBoundaries.xMin; //oldResize*k)*oldZoom) + (oldXK*k) + CoordinateBoundaries.xMin;
+            double releaseY = (release.y*k) - (yk*k) + CoordinateBoundaries.yMin; //oldResize*k)*oldZoom) + (oldYK*k) + CoordinateBoundaries.yMin;
             
+//            System.out.println("Press X true: " + pressX2 + " Press Y true: " + pressY2);
+//            System.out.println("Press X: " + pressX + " Press Y: " + pressY);
+//            System.out.println("Release X true: " + releaseX2 + " Release Y true: " + releaseY2);
+//            System.out.println("Release X: " + releaseX + " Release Y: " + releaseY);
+    
+            System.out.println("Beginning of getRoads!");
             HashSet<String> trees = qt.getRoadsImproved(pressX, pressY, releaseX, releaseY);
-            System.out.println("HEY!");
+            System.out.println("End of getRoads!");
             ArrayList<EdgeData> edges2 = new ArrayList<>();
             for(String s : trees) {
                 edges2.addAll(qt.getBranch(s).getEdges());
             }
-            
             if(zoomConstant < 0.03){
                 RenderingHints rh = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 rh.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 mapG.setRenderingHints(rh);
             }
             
-            double widthDiff = (getWidth() - INIT_WIDTH)*zoomConstant*resizeConstant;
-            double heightDiff = (getHeight() - INIT_HEIGHT)*zoomConstant*resizeConstant;
+//            double widthDiff = (getWidth() - INIT_WIDTH)*zoomConstant*resizeConstant;
+//            double heightDiff = (getHeight() - INIT_HEIGHT)*zoomConstant*resizeConstant;
             
             for (EdgeData ed : edges2) {
                 fn = loader.nodes.get(ed.FNODE);
@@ -125,13 +125,13 @@ public class MapPanel extends JPanel implements Observer {
                 tnY = (((tn.getY() - CoordinateBoundaries.yMin) / k) + yk);
 
                 //if these coordinates lies within the specified rectangle's bounds) 
-                if ((release.x > press.x &&  release.y > press.y)
-                    && (fnX < release.x + widthDiff && tnX < release.x + widthDiff)
-                    && (fnX > press.x && tnX > press.x)
-                    && (fnY > press.y && tnY > press.y)
-                    && (fnY < release.y + heightDiff && tnY < release.y + heightDiff)) {
+//                if ((release.x > press.x &&  release.y > press.y)
+//                    && (fnX < release.x + widthDiff && tnX < release.x + widthDiff)
+//                    && (fnX > press.x && tnX > press.x)
+//                    && (fnY > press.y && tnY > press.y)
+//                    && (fnY < release.y + heightDiff && tnY < release.y + heightDiff)) {
                     drawSpecified(fnX, fnY, tnX, tnY, type, mapG);
-                }
+//                }
             }
             System.out.println(edges2.size());
         }
@@ -222,7 +222,6 @@ public class MapPanel extends JPanel implements Observer {
         resizeConstant = 1;
         yk = 0;
         xk = 0;
-        //k = 550; //k er altid 550?
         setPreferredSize(new Dimension(850, 660));
         setVectorLastPress(0.0, 0.0);
         setVectorLastRelease(0.0, 0.0);
