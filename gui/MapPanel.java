@@ -271,10 +271,6 @@ public class MapPanel extends JPanel implements Observer {
         return release;
     }
 
-    public double getZoomConstant() {
-        return zoomConstant;
-    }
-
     public Point2D.Double getVectorLastPress() {
         return vectorLastPress;
     }

@@ -12,9 +12,9 @@ import java.awt.event.ActionEvent;
 
 public class MapView extends JFrame {
     public final JPanel mapPanel;
-    public final JPanel northPanel, eastPanel, arrowPanel, upPanel, downPanel;
+    public final JPanel northPanel, eastPanel, arrowPanel, upPanel, downPanel, zoomScrollPanel;
     public final JPanel xyPanel;
-    public final JButton zoomIn, zoomOut, showFull, up, down, left, right;
+    public final JButton zoomIn, zoomOut, showFull, up, down, left, right, zoom, scroll;
     public final JLabel x, y, road; 
     
     public MapView(String name, final MapPanel mapPanel) {
@@ -30,6 +30,7 @@ public class MapView extends JFrame {
         arrowPanel = new JPanel();
         upPanel = new JPanel();
         downPanel = new JPanel();
+        zoomScrollPanel = new JPanel();
         
         x = new JLabel("0");
         y = new JLabel("0");
@@ -44,6 +45,10 @@ public class MapView extends JFrame {
         down = new JButton("↓");
         left = new JButton("←");
         right = new JButton("→");
+        
+        zoom = new JButton("Zoom mode");
+        scroll = new JButton("Scroll mode");
+        zoom.setEnabled(false);
         
         //Mapping key inputs to button
         KeyStroke keyUp = KeyStroke.getKeyStroke("UP"); 
@@ -138,12 +143,16 @@ public class MapView extends JFrame {
         northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.LINE_AXIS));
         northPanel.setBorder(BorderFactory.createEtchedBorder(Color.PINK, Color.MAGENTA));
         
-        eastPanel.setLayout(new FlowLayout());
+        eastPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
         eastPanel.setBorder(BorderFactory.createEtchedBorder(Color.PINK, Color.MAGENTA));
         
         arrowPanel.setLayout(new BorderLayout());
         upPanel.setLayout(new BoxLayout(upPanel, BoxLayout.LINE_AXIS));
         downPanel.setLayout(new BoxLayout(downPanel, BoxLayout.LINE_AXIS));
+        
+        zoomScrollPanel.setLayout(new FlowLayout());
 
         
         //Adding components to panels
@@ -161,7 +170,11 @@ public class MapView extends JFrame {
         arrowPanel.add(right, BorderLayout.EAST);
         arrowPanel.add(showFull, BorderLayout.CENTER);
         
-        eastPanel.add(arrowPanel);
+        zoomScrollPanel.add(zoom);
+        zoomScrollPanel.add(scroll);
+        
+        eastPanel.add(arrowPanel, gbc);
+        eastPanel.add(zoomScrollPanel, gbc);
         
         //Spacing
         northPanel.add(Box.createHorizontalGlue());

@@ -26,11 +26,13 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     private final MapPanel map;
     private final double initHeight;
     private final double initWidth;
-    private double xPress, yPress;
-
+    private double xPress, yPress, xPressLocal, yPressLocal;
+    private boolean zoomEnabled;
+    
     public Controller(MapView view) {
         this.view = view;
         this.map = (MapPanel) view.mapPanel;
+        zoomEnabled = true;
          
         initHeight = map.getSize().height - 1;
         initWidth = map.getSize().width - 1;
@@ -43,6 +45,8 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         view.down.addMouseListener(this);
         view.left.addMouseListener(this);
         view.right.addMouseListener(this);
+        view.zoom.addMouseListener(this);
+        view.scroll.addMouseListener(this);
 
         map.addMouseListener(this);
         map.addMouseMotionListener(this);
@@ -59,6 +63,16 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         if (e.getComponent() == view.showFull) {
             map.defaultMap();
             view.pack();
+        }
+        if (e.getComponent() == view.scroll) {
+            zoomEnabled = false;
+            view.scroll.setEnabled(false);
+            view.zoom.setEnabled(true);
+        }
+        if (e.getComponent() == view.zoom) {
+            zoomEnabled = true;
+            view.zoom.setEnabled(false);
+            view.scroll.setEnabled(true);
         }
         if (e.getComponent() == view.up) {
             if (map.getZoom() != 1 && map.getZoom() >= 0.4) {
@@ -147,6 +161,10 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         if (e.getComponent() == map) {
             xPress = e.getX();
             yPress = e.getY();
+            if(map.getZoom() != 1) {
+                xPressLocal = map.getPress().x + (map.getRelease().x - map.getPress().x)*xPress/850;
+                yPressLocal = map.getPress().y + (map.getRelease().y - map.getPress().y)*yPress/660;
+            }
         }
     }
     
@@ -154,31 +172,46 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     public void mouseDragged(MouseEvent e) {
         double xDrag = e.getX();
         double yDrag = e.getY();
+      
         double rectHeight = Math.abs(yDrag - yPress);
         double rectWidth = rectHeight * map.ratio;
         
-        Rectangle rectangle = new Rectangle((int) xPress,(int) yPress, 0, 0);
-        
-        if (xDrag > xPress && yDrag > yPress) {
-                rectangle = new Rectangle((int) xPress,(int) yPress,(int) rectWidth, (int) rectHeight);
-            }
-        if (xDrag > xPress && yDrag < yPress) {
-                rectangle = new Rectangle((int) xPress,(int) yDrag,(int) rectWidth, (int) rectHeight);
-            }
-        if (xDrag < xPress && yDrag > yPress) {
-                double xReleaseLeft = xPress - rectWidth;
-                rectangle = new Rectangle((int) xReleaseLeft,(int) yPress,(int) rectWidth, (int) rectHeight);
-            }
-        if (xDrag < xPress && yDrag < yPress) {
-                double xReleaseLeft = xPress - rectWidth;
-                rectangle = new Rectangle((int) xReleaseLeft,(int) yDrag,(int) rectWidth, (int) rectHeight);
+        if(!zoomEnabled && map.getZoom() != 1) {
+            double xDragLocal = map.getPress().x + (map.getRelease().x - map.getPress().x)*e.getX()/850; 
+            double yDragLocal = map.getPress().y + (map.getRelease().y - map.getPress().y)*e.getY()/660;
+            double xDiff = xDragLocal - xPressLocal;
+            double yDiff = yDragLocal - yPressLocal;
+            
+            xPressLocal += xDiff;
+            yPressLocal += yDiff;
+            map.changeX(xDiff);
+            map.changeY(yDiff);
         }
-        map.assignRect(rectangle);
+        
+        if(zoomEnabled) {
+            Rectangle rectangle = new Rectangle((int) xPress,(int) yPress, 0, 0);
+
+            if (xDrag > xPress && yDrag > yPress) {
+                    rectangle = new Rectangle((int) xPress,(int) yPress,(int) rectWidth, (int) rectHeight);
+                }
+            if (xDrag > xPress && yDrag < yPress) {
+                    rectangle = new Rectangle((int) xPress,(int) yDrag,(int) rectWidth, (int) rectHeight);
+                }
+            if (xDrag < xPress && yDrag > yPress) {
+                    double xReleaseLeft = xPress - rectWidth;
+                    rectangle = new Rectangle((int) xReleaseLeft,(int) yPress,(int) rectWidth, (int) rectHeight);
+                }
+            if (xDrag < xPress && yDrag < yPress) {
+                    double xReleaseLeft = xPress - rectWidth;
+                    rectangle = new Rectangle((int) xReleaseLeft,(int) yDrag,(int) rectWidth, (int) rectHeight);
+            }
+            map.assignRect(rectangle);
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (e.getComponent() == map) {
+        if (e.getComponent() == map && zoomEnabled) {
             map.removeRect();
             double yRelease = e.getY();
             double xRelease = e.getX();
@@ -188,7 +221,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
             Point2D.Double press = null;
             Point2D.Double release = null;
-
+            
             if (xRelease > xPress && yRelease > yPress) {
                 double xReleaseRight = rectWidth + xPress;
                 press = new Point2D.Double(xPress, yPress);
@@ -219,7 +252,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 //System.out.println("ratio = " + mouseRatio + "\n");
  
                 // *** Sjurdur ***
-                double zoomConstant = map.getZoomConstant();
+                double zoomConstant = map.getZoom();
                 Point2D.Double vectorLastPress = map.getVectorLastPress();
                 Point2D.Double vectorLastRelease = map.getVectorLastRelease();
  
