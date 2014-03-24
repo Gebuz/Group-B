@@ -19,7 +19,7 @@ public class DataLoader {
 
     public final HashMap<Integer, NodeData> nodes;
     public final ArrayList<EdgeData> edgesBlue;
-    public final ArrayList<EdgeData> edgesRed;
+    public final ArrayList<EdgeData> edgesPink;
     public final ArrayList<EdgeData> edgesGreen;
 
     public DataLoader() {
@@ -29,7 +29,7 @@ public class DataLoader {
         // ArrayLists.
         nodes = new HashMap<>();
         edgesBlue = new ArrayList<>();
-        edgesRed = new ArrayList<>();
+        edgesPink = new ArrayList<>();
         edgesGreen = new ArrayList<>();
 
         // For that, we need to inherit from KrakLoader and override
@@ -47,24 +47,24 @@ public class DataLoader {
                 switch (ed.TYP) {
                     case 5:
                     case 6:
-                        edgesRed.add(ed);
+                        edgesPink.add(ed);
                         break;
                     case 1:
                     case 31:
                     case 41:
-                        edgesRed.add(ed);
+                        edgesPink.add(ed);
                         edgesBlue.add(ed);
                         break;
                     case 2:
                     case 32:
-                        edgesRed.add(ed);
+                        edgesPink.add(ed);
                         edgesBlue.add(ed);
                         break;
                     case 8:
                     case 48:
                         break;
                     default:
-                        edgesRed.add(ed);
+                        edgesPink.add(ed);
                         edgesBlue.add(ed);
                         break;
                 }

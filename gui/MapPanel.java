@@ -16,11 +16,11 @@ import GuiDrawLines.QuadTree;
  */
 public class MapPanel extends JPanel implements Observer {
 
-    public final QuadTree qt;
+    public final QuadTree qtBlue;
+    public final QuadTree qtPink;
+    public final QuadTree qtGreen;
+    private Colour colour;
     public final DataLoader loader;
-    
-    public final ArrayList<EdgeData> edges; //to be replaced by model through controller depending on how much data is needed.
-    public final HashMap<Integer, NodeData> nodes;
     
     public final int k = 550;
     private double resizeConstant = 1, zoomConstant = 1; //oldResize = 1, oldZoom = 1;
@@ -48,8 +48,6 @@ public class MapPanel extends JPanel implements Observer {
         area = new Area();
         
         loader = new DataLoader();
-        edges = loader.edges;
-        nodes = loader.nodes;
         vectorLastPress = new Point2D.Double(0.0, 0.0);
         vectorLastRelease = new Point2D.Double(0.0, 0.0);
         press = new Point2D.Double(0, 0);  
@@ -57,12 +55,28 @@ public class MapPanel extends JPanel implements Observer {
         setPreferredSize(new Dimension(INIT_WIDTH, INIT_HEIGHT));
         ratio = release.x / release.y;
         
-        qt = new QuadTree(edges, nodes, "0");
-        qt.addCoords(CoordinateBoundaries.xMin,
+        qtBlue = new QuadTree(loader.edgesBlue, loader.nodes, "0");
+        qtBlue.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
-        qt.split();
+        qtBlue.split();
+        
+        qtPink = new QuadTree(loader.edgesPink, loader.nodes, "0");
+        qtPink.addCoords(CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMin,
+                CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
+        qtPink.split();
+        
+        qtGreen = new QuadTree(loader.edgesGreen, loader.nodes, "0");
+        qtGreen.addCoords(CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMin,
+                CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
+        qtGreen.split();
+        
+        colour = Colour.BLUE;
     }
     
     @Override
@@ -86,12 +100,30 @@ public class MapPanel extends JPanel implements Observer {
             
             releaseX = (release.x*k) - (xk*k) + CoordinateBoundaries.xMin; 
             releaseY = (release.y*k) - (yk*k) + CoordinateBoundaries.yMin; 
-    
-            HashSet<String> trees = qt.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+
+            HashSet<String> trees;
             ArrayList<EdgeData> edges2 = new ArrayList<>();
-            for(String s : trees) {
-                edges2.addAll(qt.getBranch(s).getEdges());
-            }
+                    switch(colour) {
+            case BLUE:
+                trees = qtBlue.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+                for(String s : trees) {
+                    edges2.addAll(qtBlue.getBranch(s).getEdges());
+                }
+                break;
+            case PINK:
+                trees = qtPink.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+                for(String s : trees) {
+                    edges2.addAll(qtPink.getBranch(s).getEdges());
+                }
+                break;
+            default:
+                trees = qtGreen.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+                for(String s : trees) {
+                    edges2.addAll(qtGreen.getBranch(s).getEdges());
+                }
+                break;
+        }   
+
             if(zoomConstant < 0.10){
                 RenderingHints rh = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 rh.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -117,7 +149,7 @@ public class MapPanel extends JPanel implements Observer {
                 drawSpecified(fnX, fnY, tnX, tnY, type, mapG);
 //                }
             }
-            System.out.println(edges2.size());
+            //System.out.println(edges2.size());
         }
         g2.drawImage(map, 0, 0, null);
         mapG.dispose();
@@ -200,6 +232,7 @@ public class MapPanel extends JPanel implements Observer {
         press = new Point2D.Double(0, 0);
         release = new Point2D.Double(850, 660);
         zoomConstant = 1;
+        colour = colour.BLUE;
         resizeConstant = 1;
         yk = 0;
         xk = 0;
@@ -218,6 +251,7 @@ public class MapPanel extends JPanel implements Observer {
 
     public void updateZoom(double j) {
         zoomConstant = j;
+        colour = colour.getColour(zoomConstant);
         repaint();
     }
 
@@ -281,12 +315,12 @@ public class MapPanel extends JPanel implements Observer {
 
     public void setVectorLastPress(double x, double y) {
         this.vectorLastPress.setLocation(x, y);
-        System.out.println("LPrV = " + vectorLastPress);
+        //System.out.println("LPrV = " + vectorLastPress);
     }
 
     public void setVectorLastRelease(double x, double y) {
         this.vectorLastRelease.setLocation(x, y);
-        System.out.println("LReV = " + vectorLastRelease);
+        //System.out.println("LReV = " + vectorLastRelease);
     }
 
     public void changeX(double j) {
@@ -321,7 +355,18 @@ public class MapPanel extends JPanel implements Observer {
     public String getRoadName(double x, double y) {        
         x = pressX + (releaseX - pressX)*x/INIT_WIDTH;
         y = pressY + (releaseY - pressY)*y/INIT_HEIGHT;
-        EdgeData edge = qt.getClosestRoad(x, y);
+        EdgeData edge;
+        switch(colour) {
+            case BLUE:
+                edge = qtBlue.getClosestRoad(x, y);
+                break;
+            case PINK:
+                edge = qtPink.getClosestRoad(x, y);
+                break;
+            default:
+                edge = qtGreen.getClosestRoad(x, y);
+                break;
+        }
         return edge.VEJNAVN;
     }
 
