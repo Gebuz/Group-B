@@ -54,8 +54,8 @@ public class QuadTree {
      * Split the QuadTree into SubQuadTrees. This method is called recursively
      * until the smallest QuadTree has less than 500 edges.
      */
-    public void split() {
-        if (edges.size() > 500) {
+    public void split(int size) {
+        if (edges.size() > size) {
             double midx = x + length / 2;
             double midy = y + height / 2;
 
@@ -95,19 +95,19 @@ public class QuadTree {
             
             nw = new QuadTree(enw, nodes, id + "0");
             nw.addCoords(x, y, length / 2, height / 2);
-            nw.split();
+            nw.split(size);
             
             ne = new QuadTree(ene, nodes, id + "1");
             ne.addCoords(midx, y, length / 2, height / 2);
-            ne.split();
+            ne.split(size);
             
             sw = new QuadTree(esw, nodes, id + "2");
             sw.addCoords(x, midy, length / 2, height / 2);
-            sw.split();
+            sw.split(size);
             
             se = new QuadTree(ese, nodes, id + "3");
             se.addCoords(midx, midy, length / 2, height / 2);
-            se.split();
+            se.split(size);
             
             edges = null;
 

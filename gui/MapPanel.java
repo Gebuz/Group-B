@@ -64,21 +64,21 @@ public class MapPanel extends JPanel implements Observer {
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
-        qtBlue.split();
+        qtBlue.split(250);
         
         qtPink = new QuadTree(loader.edgesPink, loader.nodes, "0");
         qtPink.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
-        qtPink.split();
+        qtPink.split(500);
         
         qtGreen = new QuadTree(loader.edgesGreen, loader.nodes, "0");
         qtGreen.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
-        qtGreen.split();
+        qtGreen.split(500);
         
         colour = Colour.BLUE;
     }

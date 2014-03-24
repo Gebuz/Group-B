@@ -70,7 +70,7 @@ public class QuadTreeGuiTest {
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
-        root.split();
+        root.split(500);
 
         final QuadTree branch = root.findNeighbor(root.getBranch("00"), Direction.E);
         System.out.println("\nRoot neighbour branch id (01) = " + branch.id);
