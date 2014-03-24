@@ -150,8 +150,8 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     @Override
     public void mousePressed(MouseEvent e) {
         if (e.getComponent() == map) {
-            xPress = e.getX();
-            yPress = e.getY();
+            xPress = e.getX()* map.getResizeConstant();
+            yPress = e.getY()* map.getResizeConstant();
             if(map.getZoom() != 1) {
                 xPressLocal = map.getPress().x + (map.getRelease().x - map.getPress().x)*xPress/850;
                 yPressLocal = map.getPress().y + (map.getRelease().y - map.getPress().y)*yPress/660;
@@ -164,11 +164,12 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         double xDrag = e.getX();
         double yDrag = e.getY();
       
-        double rectHeight = Math.abs(yDrag - yPress);
+        double rectHeight = Math.abs(yDrag - (yPress / map.getResizeConstant()));
         double rectWidth = rectHeight * map.ratio;
+        
         if(map.getZoom() != 1 && SwingUtilities.isRightMouseButton(e)) {
-            double xDragLocal = map.getPress().x + (map.getRelease().x - map.getPress().x)*e.getX()/850; 
-            double yDragLocal = map.getPress().y + (map.getRelease().y - map.getPress().y)*e.getY()/660;
+            double xDragLocal = map.getPress().x + (map.getRelease().x - map.getPress().x)*e.getX()* map.getResizeConstant()/850; 
+            double yDragLocal = map.getPress().y + (map.getRelease().y - map.getPress().y)*e.getY()* map.getResizeConstant()/660;
             double xDiff = xDragLocal - xPressLocal;
             double yDiff = yDragLocal - yPressLocal;
             
@@ -177,22 +178,25 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             map.changeX(xDiff);
             map.changeY(yDiff);
         }
-        
-        else if(SwingUtilities.isLeftMouseButton(e)) {
-            Rectangle rectangle = new Rectangle((int) xPress,(int) yPress, 0, 0);
 
-            if (xDrag > xPress && yDrag > yPress) {
-                    rectangle = new Rectangle((int) xPress,(int) yPress,(int) rectWidth, (int) rectHeight);
+        else if(SwingUtilities.isLeftMouseButton(e)) {
+            double xPressTemp = xPress / map.getResizeConstant();
+            double yPressTemp = yPress / map.getResizeConstant();
+            
+            Rectangle rectangle = new Rectangle((int) xPressTemp,(int) yPressTemp, 0, 0);
+
+            if (xDrag > xPressTemp && yDrag > yPressTemp) {
+                    rectangle = new Rectangle((int) xPressTemp,(int) yPressTemp,(int) rectWidth, (int) rectHeight);
                 }
-            if (xDrag > xPress && yDrag < yPress) {
-                    rectangle = new Rectangle((int) xPress,(int) yDrag,(int) rectWidth, (int) rectHeight);
+            else if (xDrag > xPressTemp && yDrag < yPressTemp) {
+                    rectangle = new Rectangle((int) xPressTemp,(int) yDrag,(int) rectWidth, (int) rectHeight);
                 }
-            if (xDrag < xPress && yDrag > yPress) {
-                    double xReleaseLeft = xPress - rectWidth;
-                    rectangle = new Rectangle((int) xReleaseLeft,(int) yPress,(int) rectWidth, (int) rectHeight);
+            else if (xDrag < xPressTemp && yDrag > yPressTemp) {
+                    double xReleaseLeft = xPressTemp - rectWidth;
+                    rectangle = new Rectangle((int) xReleaseLeft,(int) yPressTemp,(int) rectWidth, (int) rectHeight);
                 }
-            if (xDrag < xPress && yDrag < yPress) {
-                    double xReleaseLeft = xPress - rectWidth;
+            else if (xDrag < xPressTemp && yDrag < yPressTemp) {
+                    double xReleaseLeft = xPressTemp - rectWidth;
                     rectangle = new Rectangle((int) xReleaseLeft,(int) yDrag,(int) rectWidth, (int) rectHeight);
             }
             map.assignRect(rectangle);
@@ -203,8 +207,9 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     public void mouseReleased(MouseEvent e) {
         if (e.getComponent() == map && SwingUtilities.isLeftMouseButton(e)) {
             map.removeRect();
-            double yRelease = e.getY();
-            double xRelease = e.getX();
+            
+            double yRelease = e.getY()* map.getResizeConstant();
+            double xRelease = e.getX()* map.getResizeConstant();
 
             double rectHeight = Math.abs(yRelease - yPress);
             double rectWidth = rectHeight * map.ratio;
