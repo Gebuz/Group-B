@@ -212,13 +212,11 @@ public class MapPanel extends JPanel implements Observer {
             case 5:
             case 6:
                 drawLine(g2, line, Color.PINK, 1);
-                drawRoadNames(fnX, tnX, fnY, tnY, 0.0025, 12, edge, g2);
                 break;
             case 1:
             case 31:
             case 41:
                 drawLine(g2, line, Color.RED, 1);
-                drawRoadNames(fnX, tnX, fnY, tnY, 0.05, 16, edge, g2);
                 break;
             case 2:
             case 32:
@@ -231,6 +229,17 @@ public class MapPanel extends JPanel implements Observer {
             default:
                 drawLine(g2, line, Color.BLUE, 1);
                 break;
+        }
+        switch (type) {
+            case 5:
+            case 6:
+                drawRoadNames(fnX, tnX, fnY, tnY, 0.0025, 12, edge, g2);
+                break;
+            case 1:
+                drawRoadNames(fnX, tnX, fnY, tnY, 0.05, 16, edge, g2);
+                break;
+            case 4:
+                drawRoadNames(fnX, tnX, fnY, tnY, 0.03, 14, edge, g2);
         }
         isMap = true;
     }
