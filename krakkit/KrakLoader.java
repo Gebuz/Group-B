@@ -1,8 +1,10 @@
 package krakkit;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.util.ArrayList;
@@ -50,7 +52,7 @@ public abstract class KrakLoader
 
         /* Edges. */
 
-        br = new BufferedReader(new FileReader(edgeFile));
+        br = new BufferedReader(new InputStreamReader(new FileInputStream(edgeFile), "LATIN1"));
         br.readLine(); // Again, first line is column names, not data.
 
         while ((line = br.readLine()) != null) {

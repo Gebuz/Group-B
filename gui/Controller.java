@@ -4,35 +4,34 @@
  */
 package gui;
 
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
-import krakkit.CoordinateBoundaries;
-import krakkit.EdgeData;
+import javax.swing.SwingUtilities;
 
 /**
  *
  * @author flemmingxu
  */
-public class Controller implements MouseListener, MouseMotionListener, ComponentListener, ActionListener {
+public class Controller implements MouseListener, MouseMotionListener, ComponentListener, ActionListener, MouseWheelListener {
 
     private final MapView view;
     private final MapPanel map;
     private final double initHeight;
     private final double initWidth;
     private double xPress, yPress, xPressLocal, yPressLocal;
-    private boolean zoomEnabled;
     
     public Controller(MapView view) {
         this.view = view;
         this.map = (MapPanel) view.mapPanel;
-        zoomEnabled = true;
          
         initHeight = map.getSize().height - 1;
         initWidth = map.getSize().width - 1;
@@ -50,6 +49,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
         map.addMouseListener(this);
         map.addMouseMotionListener(this);
+        map.addMouseWheelListener(this);
     }
 
     @Override
@@ -63,16 +63,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         if (e.getComponent() == view.showFull) {
             map.defaultMap();
             view.pack();
-        }
-        if (e.getComponent() == view.scroll) {
-            zoomEnabled = false;
-            view.scroll.setEnabled(false);
-            view.zoom.setEnabled(true);
-        }
-        if (e.getComponent() == view.zoom) {
-            zoomEnabled = true;
-            view.zoom.setEnabled(false);
-            view.scroll.setEnabled(true);
+        
         }
         if (e.getComponent() == view.up) {
             if (map.getZoom() != 1 && map.getZoom() >= 0.4) {
@@ -175,8 +166,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
       
         double rectHeight = Math.abs(yDrag - yPress);
         double rectWidth = rectHeight * map.ratio;
-        
-        if(!zoomEnabled && map.getZoom() != 1) {
+        if(map.getZoom() != 1 && SwingUtilities.isRightMouseButton(e)) {
             double xDragLocal = map.getPress().x + (map.getRelease().x - map.getPress().x)*e.getX()/850; 
             double yDragLocal = map.getPress().y + (map.getRelease().y - map.getPress().y)*e.getY()/660;
             double xDiff = xDragLocal - xPressLocal;
@@ -188,7 +178,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             map.changeY(yDiff);
         }
         
-        if(zoomEnabled) {
+        else if(SwingUtilities.isLeftMouseButton(e)) {
             Rectangle rectangle = new Rectangle((int) xPress,(int) yPress, 0, 0);
 
             if (xDrag > xPress && yDrag > yPress) {
@@ -211,7 +201,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (e.getComponent() == map && zoomEnabled) {
+        if (e.getComponent() == map && SwingUtilities.isLeftMouseButton(e)) {
             map.removeRect();
             double yRelease = e.getY();
             double xRelease = e.getX();
@@ -312,7 +302,14 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             map.updateResize(constant);
         }
     }
-
+    
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+       int notches = e.getWheelRotation();
+       if (notches > 0) map.zoomOut(0.05);
+       else             map.zoomIn (0.05);
+    }
+    
     @Override
     public void mouseEntered(MouseEvent e) {
     }
