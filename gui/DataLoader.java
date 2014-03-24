@@ -16,16 +16,21 @@ import krakkit.MirrorCoordinates;
  * @author flemmingxu
  */
 public class DataLoader {
+
     public final HashMap<Integer, NodeData> nodes;
-    public final ArrayList<EdgeData> edges;
+    public final ArrayList<EdgeData> edgesBlue;
+    public final ArrayList<EdgeData> edgesRed;
+    public final ArrayList<EdgeData> edgesGreen;
 
     public DataLoader() {
         String dir = "";
 
         // For this example, we'll simply load the raw data into
         // ArrayLists.
-        nodes = new HashMap<Integer, NodeData>();
-        edges = new ArrayList<EdgeData>();
+        nodes = new HashMap<>();
+        edgesBlue = new ArrayList<>();
+        edgesRed = new ArrayList<>();
+        edgesGreen = new ArrayList<>();
 
         // For that, we need to inherit from KrakLoader and override
         // processNode and processEdge. We do that with an 
@@ -38,7 +43,31 @@ public class DataLoader {
 
             @Override
             public void processEdge(EdgeData ed) {
-                edges.add(ed);
+                edgesGreen.add(ed);
+                switch (ed.TYP) {
+                    case 5:
+                    case 6:
+                        edgesRed.add(ed);
+                        break;
+                    case 1:
+                    case 31:
+                    case 41:
+                        edgesRed.add(ed);
+                        edgesBlue.add(ed);
+                        break;
+                    case 2:
+                    case 32:
+                        edgesRed.add(ed);
+                        edgesBlue.add(ed);
+                        break;
+                    case 8:
+                    case 48:
+                        break;
+                    default:
+                        edgesRed.add(ed);
+                        edgesBlue.add(ed);
+                        break;
+                }
             }
         };
         try {
