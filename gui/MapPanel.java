@@ -22,6 +22,10 @@ public class MapPanel extends JPanel implements Observer {
     private Colour colour;
     public final DataLoader loader;
     
+    private ArrayList<String> roadList = new ArrayList<String>();
+    private boolean found = false;
+    private String roadName;
+    
     public final int k = 550;
     private double resizeConstant = 1, zoomConstant = 1; //oldResize = 1, oldZoom = 1;
     private double xk = 0, yk = 0; //oldXK = 0, oldYK = 0
@@ -103,26 +107,26 @@ public class MapPanel extends JPanel implements Observer {
 
             HashSet<String> trees;
             ArrayList<EdgeData> edges2 = new ArrayList<>();
-                    switch(colour) {
-            case BLUE:
-                trees = qtBlue.getRoadsImproved(pressX, pressY, releaseX, releaseY);
-                for(String s : trees) {
-                    edges2.addAll(qtBlue.getBranch(s).getEdges());
-                }
-                break;
-            case PINK:
-                trees = qtPink.getRoadsImproved(pressX, pressY, releaseX, releaseY);
-                for(String s : trees) {
-                    edges2.addAll(qtPink.getBranch(s).getEdges());
-                }
-                break;
-            default:
-                trees = qtGreen.getRoadsImproved(pressX, pressY, releaseX, releaseY);
-                for(String s : trees) {
-                    edges2.addAll(qtGreen.getBranch(s).getEdges());
-                }
-                break;
-        }   
+            switch(colour) {
+                case BLUE:
+                    trees = qtBlue.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+                    for(String s : trees) {
+                        edges2.addAll(qtBlue.getBranch(s).getEdges());
+                    }
+                    break;
+                case PINK:
+                    trees = qtPink.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+                    for(String s : trees) {
+                        edges2.addAll(qtPink.getBranch(s).getEdges());
+                    }
+                    break;
+                default:
+                    trees = qtGreen.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+                    for(String s : trees) {
+                        edges2.addAll(qtGreen.getBranch(s).getEdges());
+                    }
+                    break;
+            }   
 
             if(zoomConstant < 0.10){
                 RenderingHints rh = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -146,9 +150,10 @@ public class MapPanel extends JPanel implements Observer {
 //                    && (fnX > press.x && tnX > press.x)
 //                    && (fnY > press.y && tnY > press.y)
 //                    && (fnY < release.y + heightDiff && tnY < release.y + heightDiff)) {
-                drawSpecified(fnX, fnY, tnX, tnY, type, mapG);
+                drawSpecified(fnX, fnY, tnX, tnY, type, ed, mapG);
 //                }
             }
+            roadList.removeAll(roadList);
             //System.out.println(edges2.size());
         }
         g2.drawImage(map, 0, 0, null);
@@ -185,7 +190,7 @@ public class MapPanel extends JPanel implements Observer {
         repaint();
     }
 
-    private void drawSpecified(double fnX, double fnY, double tnX, double tnY, int type, Graphics2D g2D) {
+    private void drawSpecified(double fnX, double fnY, double tnX, double tnY, int type, EdgeData edge, Graphics2D g2) {
         //at this point, only the relevant coordinates (those within the rectangle) are accessed.
         fnX = fnX - press.x;
         fnY = fnY - press.y;
@@ -206,26 +211,49 @@ public class MapPanel extends JPanel implements Observer {
         switch (type) {
             case 5:
             case 6:
-                drawLine(g2D, line, Color.PINK, 1);
+                drawLine(g2, line, Color.PINK, 1);
+                drawRoadNames(fnX, tnX, fnY, tnY, 0.0025, 12, edge, g2);
                 break;
             case 1:
             case 31:
             case 41:
-                drawLine(g2D, line, Color.RED, 1);
+                drawLine(g2, line, Color.RED, 1);
+                drawRoadNames(fnX, tnX, fnY, tnY, 0.05, 16, edge, g2);
                 break;
             case 2:
             case 32:
-                drawLine(g2D, line, Color.GRAY, 1);
+                drawLine(g2, line, Color.GRAY, 1);
                 break;
             case 8:
             case 48:
-                drawLine(g2D, line, Color.GREEN, 1);
+                drawLine(g2, line, Color.GREEN, 1);
                 break;
             default:
-                drawLine(g2D, line, Color.BLUE, 1);
+                drawLine(g2, line, Color.BLUE, 1);
                 break;
         }
         isMap = true;
+    }
+    
+    public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int font, EdgeData edge, Graphics2D g2) {
+        if(zoomConstant < zoomLimit) { 
+            roadName = edge.VEJNAVN;
+            for(int i = 0; i < roadList.size(); i++) {
+                if(roadName.equals(roadList.get(i))) {
+                    found = true;
+                    break;
+                }
+            }
+            if(found == false) {
+                roadList.add(roadName);
+                double xMid = (fnX + tnX)/2.0;
+                double yMid = (fnY + tnY)/2.0;
+                g2.setColor(Color.BLACK);
+                g2.setFont(new Font("TimesRoman", Font.PLAIN, font));
+                g2.drawString(roadName,(float) xMid,(float) yMid);
+            }
+        }
+        found = false;
     }
     
     public void defaultMap() {
