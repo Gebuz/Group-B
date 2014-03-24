@@ -243,6 +243,50 @@ public class MapPanel extends JPanel implements Observer {
         }
         isMap = true;
     }
+    /**
+     * http://stackoverflow.com/questions/10388118/how-to-make-rotated-text-look-good-with-java2d
+     */
+    public BufferedImage createStringImage(Graphics g, String s) {
+        int w = g.getFontMetrics().stringWidth(s) + 5;
+        int h = g.getFontMetrics().getHeight();
+
+        BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D imageGraphics = image.createGraphics();
+        imageGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        imageGraphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        imageGraphics.setColor(Color.BLACK);
+        imageGraphics.setFont(g.getFont());
+        imageGraphics.drawString(s, 0, h - g.getFontMetrics().getDescent());
+        imageGraphics.dispose();
+
+        return image;
+    }
+    /**
+     * http://stackoverflow.com/questions/10388118/how-to-make-rotated-text-look-good-with-java2d
+     */
+    private void drawString(Graphics2D g, String s, int tx, int ty, double theta, double rotx, double roty) {
+        AffineTransform aff = AffineTransform.getRotateInstance(theta, rotx, roty);
+        aff.translate(tx, ty);
+
+        Graphics2D g2D = ((Graphics2D) g);
+        g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g2D.drawImage(createStringImage(g, s), aff, this);
+    }
+    
+    /** 
+     * Determines the angle of a straight line drawn between point one and two. 
+     * The number returned, which is a double in degrees, tells us how much we have to 
+     * rotate a horizontal line clockwise for it to match the line between the two points. 
+     * If you prefer to deal with angles using radians instead of degrees, 
+     * just change the last line to: "return Math.atan2(yDiff, xDiff);" 
+     * 
+     * http://wikicode.wikidot.com/get-angle-of-line-between-two-points
+     */ 
+    private static double GetAngleOfLineBetweenTwoPoints(double x1, double y1, double x2, double y2) { 
+        double xDiff = x2 - x1; 
+        double yDiff = y2 - y1; 
+        return Math.toDegrees(Math.atan2(yDiff, xDiff)); 
+    }
     
     public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int font, EdgeData edge, Graphics2D g2) {
         if(zoomConstant < zoomLimit) { 
@@ -259,7 +303,20 @@ public class MapPanel extends JPanel implements Observer {
                 double yMid = (fnY + tnY)/2.0;
                 g2.setColor(Color.BLACK);
                 g2.setFont(new Font("TimesRoman", Font.PLAIN, font));
-                g2.drawString(roadName,(float) xMid,(float) yMid);
+                
+                double degrees = GetAngleOfLineBetweenTwoPoints(fnX, fnY, tnX, tnY);
+                
+                if (degrees < -90) {
+                    degrees += 180;
+                } else if (degrees > 90) {
+                    degrees -= 180;
+                }
+                
+                double radians = Math.toRadians(degrees);
+
+
+                drawString(g2, roadName, (int) xMid, (int) yMid, radians, xMid, yMid);
+                //g2.drawString(roadName,(float) xMid,(float) yMid);
             }
         }
         found = false;
