@@ -146,7 +146,7 @@ public class MapPanel extends JPanel implements Observer {
                 rh.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 mapG.setRenderingHints(rh);
             }
-            System.out.println("Size: " + edges2.size());
+
             for (EdgeData ed : edges2) {
                 fn = loader.nodes.get(ed.FNODE);
                 tn = loader.nodes.get(ed.TNODE);
@@ -243,8 +243,10 @@ public class MapPanel extends JPanel implements Observer {
     
     public void drawLine(Graphics2D g2, Line2D line, Color color, float width) {
         g2.setColor(color);
-        if(color == Color.ORANGE) g2.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10.0f, dash, 0.0f));
-        else g2.setStroke(new BasicStroke(width));
+        if(color == Color.ORANGE) 
+            g2.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10.0f, dash, 0.0f));
+        else 
+            g2.setStroke(new BasicStroke(width));
         g2.draw(line);
     }
     
@@ -325,7 +327,10 @@ public class MapPanel extends JPanel implements Observer {
                     break;
                 }
             }
-            if(found == false && edge.LENGTH == roadMap.get(edge.VEJNR).LENGTH) {
+            double epsilon = 1E-5;
+            if(found == false && edge.LENGTH + epsilon > roadMap.get(edge.VEJNR).LENGTH 
+                              && edge.LENGTH - epsilon < roadMap.get(edge.VEJNR).LENGTH) 
+            {
                 roadList.add(roadName);
                 double xMid = (fnX + tnX)/2.0;
                 double yMid = (fnY + tnY)/2.0;
