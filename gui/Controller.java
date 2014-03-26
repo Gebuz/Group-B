@@ -70,7 +70,6 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             yPress = e.getY()* map.getResizeConstant();
             xPressLocal = map.getPress().x + (map.getRelease().x - map.getPress().x)*xPress/850;
             yPressLocal = map.getPress().y + (map.getRelease().y - map.getPress().y)*yPress/660;
-            //}
         }
     }
     
@@ -192,9 +191,9 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     public void mouseMoved(MouseEvent e) {
         view.x.setText("" + e.getX());
         view.y.setText("" + e.getY());
-        view.road.setText(map.getRoadName(e.getX()*map.getResizeConstant(), e.getY()*map.getResizeConstant()));
         mousePosX = e.getX()*map.getResizeConstant();
         mousePosY = e.getY()*map.getResizeConstant();
+        view.road.setText(map.getRoadName(mousePosX, mousePosY));
     }
     
     @Override
@@ -247,49 +246,49 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == view.zoomIn) {
+        if      (e.getSource() == view.zoomIn) {
             map.zoomIn(0.10);
         }
-        if (e.getSource() == view.zoomOut) {
+        else if (e.getSource() == view.zoomOut) {
             map.zoomOut(0.10);
         }
-        if (e.getSource() == view.showFull) {
+        else if (e.getSource() == view.showFull) {
             map.defaultMap();
             view.pack();
         }
-        if(e.getSource() == view.roadOn) {
+        else if (e.getSource() == view.roadOn) {
             view.roadOn.setEnabled(false);
             view.roadOff.setEnabled(true);
             map.roadSwitch();
         }
-        if(e.getSource() == view.roadOff) {
+        else if (e.getSource() == view.roadOff) {
             view.roadOff.setEnabled(false);
             view.roadOn.setEnabled(true);
             map.roadSwitch();
         }
         
-        if (e.getSource() == view.up) {
+        else if (e.getSource() == view.up) {
             if      (map.getZoom() >= 0.4)  map.changeY(20);
             else if (map.getZoom() >= 0.15) map.changeY(10);
             else if (map.getZoom() >= 0.09) map.changeY(5);
             else if (map.getZoom() >= 0.03) map.changeY(1);
             else if (map.getZoom() <  0.03) map.changeY(0.08);
         }
-        if (e.getSource() == view.down) {
+        else if (e.getSource() == view.down) {
             if     (map.getZoom() >= 0.4)   map.changeY(-20);
             else if(map.getZoom() >= 0.15)  map.changeY(-10);
             else if(map.getZoom() >= 0.09)  map.changeY(-5);
             else if(map.getZoom() >= 0.03)  map.changeY(-1);
             else if(map.getZoom() <  0.03)  map.changeY(-0.08);
         }
-        if (e.getSource() == view.left) {
+        else if (e.getSource() == view.left) {
             if     (map.getZoom() >= 0.4)   map.changeX(20);
             else if(map.getZoom() >= 0.15)  map.changeX(10);
             else if(map.getZoom() >= 0.09)  map.changeX(5);
             else if(map.getZoom() >= 0.03)  map.changeX(1);
             else if(map.getZoom() <  0.03)  map.changeX(0.08);
         }
-        if (e.getSource() == view.right) {
+        else if (e.getSource() == view.right) {
             if     (map.getZoom() >= 0.4)   map.changeX(-20);
             else if(map.getZoom() >= 0.15)  map.changeX(-10);
             else if(map.getZoom() >= 0.09)  map.changeX(-5);

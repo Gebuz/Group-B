@@ -26,7 +26,6 @@ public class MapPanel extends JPanel implements Observer {
     private ArrayList<String> roadList = new ArrayList<>();
     private boolean found = false;
     private boolean roadOn = true;
-    private boolean makeRoadMap = true;
     private String roadName;
     
     public final int k = 550;
@@ -267,7 +266,8 @@ public class MapPanel extends JPanel implements Observer {
 
 
     /**
-     * http://stackoverflow.com/questions/10388118/how-to-make-rotated-text-look-good-with-java2d
+     * Source: Stack Overflow forum
+     * @see http://stackoverflow.com/a/14376141
      */
     public BufferedImage createStringImage(Graphics g, String s) {
         int w = g.getFontMetrics().stringWidth(s) + 5;
@@ -284,8 +284,10 @@ public class MapPanel extends JPanel implements Observer {
 
         return image;
     }
+    
     /**
-     * http://stackoverflow.com/questions/10388118/how-to-make-rotated-text-look-good-with-java2d
+     * Source: Stack Overflow forum
+     * @see http://stackoverflow.com/a/14376141
      */
     private void drawString(Graphics2D g, String s, double tx, double ty, double theta) { //double rotx, double roty) {
         AffineTransform aff = AffineTransform.getRotateInstance(theta, tx, ty);
@@ -299,13 +301,14 @@ public class MapPanel extends JPanel implements Observer {
     }
     
     /** 
+     * Source: Wiki Code
+     * @see http://wikicode.wikidot.com/get-angle-of-line-between-two-points
+     * 
      * Determines the angle of a straight line drawn between point one and two. 
      * The number returned, which is a double in degrees, tells us how much we have to 
      * rotate a horizontal line clockwise for it to match the line between the two points. 
      * If you prefer to deal with angles using radians instead of degrees, 
      * just change the last line to: "return Math.atan2(yDiff, xDiff);" 
-     * 
-     * http://wikicode.wikidot.com/get-angle-of-line-between-two-points
      */ 
     private static double GetAngleOfLineBetweenTwoPoints(double x1, double y1, double x2, double y2) { 
         double xDiff = x2 - x1; 
@@ -330,18 +333,13 @@ public class MapPanel extends JPanel implements Observer {
                 g2.setFont(new Font("Helvetica", Font.PLAIN, fontSize));
                 
                 double degrees = GetAngleOfLineBetweenTwoPoints(fnX, fnY, tnX, tnY);
-                
-                if (degrees < -90) {
-                    degrees += 180;
-                } else if (degrees > 90) {
-                    degrees -= 180;
-                }
+                // flip the angle if the string would be written upside down
+                if      (degrees < -90) degrees += 180;
+                else if (degrees >  90) degrees -= 180;
                 
                 double radians = Math.toRadians(degrees);
 
-
-                drawString(g2, roadName, xMid, yMid, radians); //xMid, yMid);
-                //g2.drawString(roadName,(float) xMid,(float) yMid);
+                drawString(g2, roadName, xMid, yMid, radians);
             }
         }
         found = false;
