@@ -10,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
@@ -21,7 +23,7 @@ import javax.swing.SwingUtilities;
  *
  * @author flemmingxu
  */
-public class Controller implements MouseListener, MouseMotionListener, ComponentListener, ActionListener, MouseWheelListener {
+public class Controller implements MouseListener, MouseMotionListener, ComponentListener, ActionListener, MouseWheelListener, ItemListener {
 
     private final MapView view;
     private final MapPanel map;
@@ -50,7 +52,8 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         view.right.addActionListener(this);
         view.roadOn.addActionListener(this);
         view.roadOff.addActionListener(this);
-
+        view.relativeZoomCheckBox.addItemListener(this);
+        
         map.addMouseListener(this);
         map.addMouseMotionListener(this);
         map.addMouseWheelListener(this);
@@ -270,52 +273,64 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         }
         
         if (e.getSource() == view.up) {
-            if (map.getZoom() != 1 && map.getZoom() >= 0.4)
+            if (map.getZoom() >= 0.4)
                 map.changeY(20);
-            else if (map.getZoom() != 1 && map.getZoom() >= 0.15) 
+            else if (map.getZoom() >= 0.15) 
                 map.changeY(10);
-            else if (map.getZoom() != 1 && map.getZoom() >= 0.09) 
+            else if (map.getZoom() >= 0.09) 
                 map.changeY(5);
-            else if (map.getZoom() != 1 && map.getZoom() >= 0.03) 
+            else if (map.getZoom() >= 0.03) 
                 map.changeY(1);
-            else if (map.getZoom() != 1 && map.getZoom() < 0.03) 
+            else if (map.getZoom() < 0.03) 
                 map.changeY(0.08);
         }
         if (e.getSource() == view.down) {
-            if(map.getZoom() != 1 && map.getZoom() >= 0.4) 
+            if(map.getZoom() >= 0.4) 
                 map.changeY(-20);
-            else if(map.getZoom() != 1 && map.getZoom() >= 0.15) 
+            else if(map.getZoom() >= 0.15) 
                 map.changeY(-10);
-            else if(map.getZoom() != 1 && map.getZoom() >= 0.09) 
+            else if(map.getZoom() >= 0.09) 
                 map.changeY(-5);
-            else if(map.getZoom() != 1 && map.getZoom() >= 0.03) 
+            else if(map.getZoom() >= 0.03) 
                 map.changeY(-1);
-            else if(map.getZoom() != 1 && map.getZoom() < 0.03)
+            else if(map.getZoom() < 0.03)
                 map.changeY(-0.08);
         }
         if (e.getSource() == view.left) {
-            if(map.getZoom() != 1 && map.getZoom() >= 0.4) 
+            if(map.getZoom() >= 0.4) 
                 map.changeX(20);
-            else if(map.getZoom() != 1 && map.getZoom() >= 0.15) 
+            else if(map.getZoom() >= 0.15) 
                 map.changeX(10);
-            else if(map.getZoom() != 1 && map.getZoom() >= 0.09) 
+            else if(map.getZoom() >= 0.09) 
                 map.changeX(5);
-            else if(map.getZoom() != 1 && map.getZoom() >= 0.03) 
+            else if(map.getZoom() >= 0.03) 
                 map.changeX(1);
-            else if(map.getZoom() != 1 && map.getZoom() < 0.03)
+            else if(map.getZoom() < 0.03)
                 map.changeX(0.08);
         }
         if (e.getSource() == view.right) {
-            if(map.getZoom() != 1 && map.getZoom() >= 0.4) 
+            if(map.getZoom() >= 0.4) 
                 map.changeX(-20);
-            else if(map.getZoom() != 1 && map.getZoom() >= 0.15) 
+            else if(map.getZoom() >= 0.15) 
                 map.changeX(-10);
-            else if(map.getZoom() != 1 && map.getZoom() >= 0.09) 
+            else if(map.getZoom() >= 0.09) 
                 map.changeX(-5);
-            else if(map.getZoom() != 1 && map.getZoom() >= 0.03) 
+            else if(map.getZoom() >= 0.03) 
                 map.changeX(-1);
-            else if(map.getZoom() != 1 && map.getZoom() < 0.03)
+            else if(map.getZoom() < 0.03)
                 map.changeX(-0.08);
+        }
+    }
+
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        Object source = e.getItemSelectable();
+        if (source == view.relativeZoomCheckBox) {
+            if (centerZoom) {
+                centerZoom = false;
+            } else {
+                centerZoom = true;
+            }
         }
     }
 }

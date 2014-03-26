@@ -555,7 +555,4 @@ public class MapPanel extends JPanel implements Observer {
         return resizeConstant;
     }
     
-    public void repaintTheMap(){
-        repaint();
-    }
 }

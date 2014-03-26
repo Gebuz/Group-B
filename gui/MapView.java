@@ -16,6 +16,7 @@ public class MapView extends JFrame {
     public final JPanel xyPanel;
     public final JButton zoomIn, zoomOut, showFull, up, down, left, right, roadOn, roadOff;
     public final JLabel x, y, road, roadOnOff; 
+    public final JCheckBox relativeZoomCheckBox;
     
     public MapView(String name, final MapPanel mapPanel) {
         super(name);
@@ -50,6 +51,10 @@ public class MapView extends JFrame {
         roadOn = new JButton("On");
         roadOff = new JButton("Off");
         roadOn.setEnabled(false);
+        
+        relativeZoomCheckBox = new JCheckBox("Relative Mouse Zoom:");
+        relativeZoomCheckBox.setEnabled(true);
+        relativeZoomCheckBox.setSelected(true);
         
         //Mapping key inputs to button
         KeyStroke keyUp = KeyStroke.getKeyStroke("UP"); 
@@ -162,9 +167,11 @@ public class MapView extends JFrame {
         roadPanel.add(roadOn);
         roadPanel.add(roadOff);
         
+        
         eastPanel.add(arrowPanel, gbc);
         eastPanel.add(roadOnOff, gbc);
         eastPanel.add(roadPanel, gbc);
+        eastPanel.add(relativeZoomCheckBox, gbc);
         
         //Spacing
         northPanel.add(Box.createHorizontalGlue());
