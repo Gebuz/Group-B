@@ -108,8 +108,8 @@ public class MapPanel extends JPanel implements Observer {
             pressX = (press.x*k) - (xk*k) + CoordinateBoundaries.xMin; 
             pressY = (press.y*k) - (yk*k) + CoordinateBoundaries.yMin; 
             
-            releaseX = (release.x*k) - (xk*k) + widthDiff/2*k + CoordinateBoundaries.xMin; 
-            releaseY = (release.y*k) - (yk*k) + heightDiff/2*k + CoordinateBoundaries.yMin;  
+            releaseX = (release.x*k) - (xk*k) + widthDiff*k + CoordinateBoundaries.xMin; 
+            releaseY = (release.y*k) - (yk*k) + heightDiff*k + CoordinateBoundaries.yMin;  
 
             // If press or release is outside the boundaries for the quadtrees
             // set press or release to the boundaries so not all quadtrees are
@@ -530,8 +530,8 @@ public class MapPanel extends JPanel implements Observer {
         double widthDiff  = (getWidth() * resizeConstant - INIT_WIDTH)  * zoomConstant;
         double heightDiff = (getHeight()* resizeConstant - INIT_HEIGHT) * zoomConstant;
         
-        x = pressX + ((releaseX-widthDiff/2*k) - pressX)*x/INIT_WIDTH;
-        y = pressY +  ((releaseY-heightDiff/2*k) - pressY)*y/INIT_HEIGHT;
+        x = pressX +  ((releaseX-widthDiff*k) - pressX)*x/INIT_WIDTH;
+        y = pressY +  ((releaseY-heightDiff*k) - pressY)*y/INIT_HEIGHT;
         EdgeData edge;
         switch(colour) {
             case BLUE:

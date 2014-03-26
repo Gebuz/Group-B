@@ -4,6 +4,7 @@ package gui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 /**
  *
@@ -52,7 +53,8 @@ public class MapView extends JFrame {
         roadOff = new JButton("Off");
         roadOn.setEnabled(false);
         
-        relativeZoomCheckBox = new JCheckBox("Relative Mouse Zoom:");
+        relativeZoomCheckBox = new JCheckBox("Relative Mouse Zoom");
+        relativeZoomCheckBox.setMnemonic(KeyEvent.VK_R);
         relativeZoomCheckBox.setEnabled(true);
         relativeZoomCheckBox.setSelected(true);
         

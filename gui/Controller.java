@@ -195,7 +195,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     public void mouseMoved(MouseEvent e) {
         view.x.setText("" + e.getX());
         view.y.setText("" + e.getY());
-        view.road.setText(map.getRoadName(e.getX(), e.getY()));
+        view.road.setText(map.getRoadName(e.getX()*map.getResizeConstant(), e.getY()*map.getResizeConstant()));
         mousePosX = e.getX()*map.getResizeConstant();
         mousePosY = e.getY()*map.getResizeConstant();
     }
