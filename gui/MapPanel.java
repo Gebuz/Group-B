@@ -74,14 +74,14 @@ public class MapPanel extends JPanel implements Observer {
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
-        qtPink.split(500);
+        qtPink.split(100);
         
         qtGreen = new QuadTree(loader.edgesGreen, loader.nodes, "0");
         qtGreen.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
-        qtGreen.split(500);
+        qtGreen.split(100);
         
         colour = Colour.BLUE;
     }
@@ -102,8 +102,8 @@ public class MapPanel extends JPanel implements Observer {
             mapG.setColor(Color.WHITE);
             mapG.fillRect(0, 0, getWidth(), getHeight());
             
-            double widthDiff  = (getWidth() * resizeConstant - INIT_WIDTH)  * zoomConstant;
-            double heightDiff = (getHeight()* resizeConstant - INIT_HEIGHT) * zoomConstant;
+            double widthDiff  = (getWidth() - INIT_WIDTH)   * zoomConstant * resizeConstant;
+            double heightDiff = (getHeight() - INIT_HEIGHT) * zoomConstant * resizeConstant;
             
             pressX = (press.x*k) - (xk*k) + CoordinateBoundaries.xMin; 
             pressY = (press.y*k) - (yk*k) + CoordinateBoundaries.yMin; 
@@ -147,7 +147,7 @@ public class MapPanel extends JPanel implements Observer {
                 rh.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 mapG.setRenderingHints(rh);
             }
-            
+            System.out.println("Size: " + edges2.size());
             for (EdgeData ed : edges2) {
                 fn = loader.nodes.get(ed.FNODE);
                 tn = loader.nodes.get(ed.TNODE);
@@ -527,8 +527,8 @@ public class MapPanel extends JPanel implements Observer {
     }
     
     public String getRoadName(double x, double y) {
-        double widthDiff  = (getWidth() * resizeConstant - INIT_WIDTH)  * zoomConstant;
-        double heightDiff = (getHeight()* resizeConstant - INIT_HEIGHT) * zoomConstant;
+        double widthDiff  = (getWidth()  - INIT_WIDTH)  * zoomConstant * resizeConstant;
+        double heightDiff = (getHeight() - INIT_HEIGHT) * zoomConstant * resizeConstant;
         
         x = pressX +  ((releaseX-widthDiff*k) - pressX)*x/INIT_WIDTH;
         y = pressY +  ((releaseY-heightDiff*k) - pressY)*y/INIT_HEIGHT;

@@ -135,22 +135,22 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             Point2D.Double press = null;
             Point2D.Double release = null;
             
-            if (xRelease > xPress && yRelease > yPress) {
+            if      (xRelease > xPress && yRelease > yPress) {
                 double xReleaseRight = rectWidth + xPress;
                 press = new Point2D.Double(xPress, yPress);
                 release = new Point2D.Double(xReleaseRight, yRelease);
             }
-            if (xRelease > xPress && yRelease < yPress) {
+            else if (xRelease > xPress && yRelease < yPress) {
                 double xReleaseRight = rectWidth + xPress;
                 press = new Point2D.Double(xPress, yRelease);
                 release = new Point2D.Double(xReleaseRight, yPress);
             }
-            if (xRelease < xPress && yRelease > yPress) {
+            else if (xRelease < xPress && yRelease > yPress) {
                 double xReleaseLeft = xPress - rectWidth;
                 press = new Point2D.Double(xReleaseLeft, yPress);
                 release = new Point2D.Double(xPress, yRelease);
             }
-            if (xRelease < xPress && yRelease < yPress) {
+            else if (xRelease < xPress && yRelease < yPress) {
                 double xReleaseLeft = xPress - rectWidth;
                 press = new Point2D.Double(xReleaseLeft, yRelease);
                 release = new Point2D.Double(xPress, yPress);
@@ -158,7 +158,6 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             
             if (press != null && release != null) { // Avoid nullPointerException
  
-
                 double zoomConstant = map.getZoom();
                 Point2D.Double vectorLastPress = map.getVectorLastPress();
                 Point2D.Double vectorLastRelease = map.getVectorLastRelease();
@@ -181,11 +180,9 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 double newReleaseX = rectWidth + press.x;
                 release.setLocation(newReleaseX, newReleaseY);
  
-
                 map.setVectorLastRelease(map.getVectorLastRelease().x + vectorNewReleaseX,
                 map.getVectorLastRelease().y + vectorNewReleaseY);
                
-
                 map.assignCoords(press, release);
             }
         }
@@ -214,7 +211,6 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             double constant = (initHeight+1) / resizeHeight;
             map.updateResize(constant);
         }
-        //map.setX((resizeWidth*map.getResizeConstant())/2);
     }
     
     @Override
@@ -249,7 +245,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     public void componentHidden(ComponentEvent e) {
     }
 
-@Override
+    @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == view.zoomIn) {
             map.zoomIn(0.10);
@@ -273,52 +269,32 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         }
         
         if (e.getSource() == view.up) {
-            if (map.getZoom() >= 0.4)
-                map.changeY(20);
-            else if (map.getZoom() >= 0.15) 
-                map.changeY(10);
-            else if (map.getZoom() >= 0.09) 
-                map.changeY(5);
-            else if (map.getZoom() >= 0.03) 
-                map.changeY(1);
-            else if (map.getZoom() < 0.03) 
-                map.changeY(0.08);
+            if      (map.getZoom() >= 0.4)  map.changeY(20);
+            else if (map.getZoom() >= 0.15) map.changeY(10);
+            else if (map.getZoom() >= 0.09) map.changeY(5);
+            else if (map.getZoom() >= 0.03) map.changeY(1);
+            else if (map.getZoom() <  0.03) map.changeY(0.08);
         }
         if (e.getSource() == view.down) {
-            if(map.getZoom() >= 0.4) 
-                map.changeY(-20);
-            else if(map.getZoom() >= 0.15) 
-                map.changeY(-10);
-            else if(map.getZoom() >= 0.09) 
-                map.changeY(-5);
-            else if(map.getZoom() >= 0.03) 
-                map.changeY(-1);
-            else if(map.getZoom() < 0.03)
-                map.changeY(-0.08);
+            if     (map.getZoom() >= 0.4)   map.changeY(-20);
+            else if(map.getZoom() >= 0.15)  map.changeY(-10);
+            else if(map.getZoom() >= 0.09)  map.changeY(-5);
+            else if(map.getZoom() >= 0.03)  map.changeY(-1);
+            else if(map.getZoom() <  0.03)  map.changeY(-0.08);
         }
         if (e.getSource() == view.left) {
-            if(map.getZoom() >= 0.4) 
-                map.changeX(20);
-            else if(map.getZoom() >= 0.15) 
-                map.changeX(10);
-            else if(map.getZoom() >= 0.09) 
-                map.changeX(5);
-            else if(map.getZoom() >= 0.03) 
-                map.changeX(1);
-            else if(map.getZoom() < 0.03)
-                map.changeX(0.08);
+            if     (map.getZoom() >= 0.4)   map.changeX(20);
+            else if(map.getZoom() >= 0.15)  map.changeX(10);
+            else if(map.getZoom() >= 0.09)  map.changeX(5);
+            else if(map.getZoom() >= 0.03)  map.changeX(1);
+            else if(map.getZoom() <  0.03)  map.changeX(0.08);
         }
         if (e.getSource() == view.right) {
-            if(map.getZoom() >= 0.4) 
-                map.changeX(-20);
-            else if(map.getZoom() >= 0.15) 
-                map.changeX(-10);
-            else if(map.getZoom() >= 0.09) 
-                map.changeX(-5);
-            else if(map.getZoom() >= 0.03) 
-                map.changeX(-1);
-            else if(map.getZoom() < 0.03)
-                map.changeX(-0.08);
+            if     (map.getZoom() >= 0.4)   map.changeX(-20);
+            else if(map.getZoom() >= 0.15)  map.changeX(-10);
+            else if(map.getZoom() >= 0.09)  map.changeX(-5);
+            else if(map.getZoom() >= 0.03)  map.changeX(-1);
+            else if(map.getZoom() <  0.03)  map.changeX(-0.08);
         }
     }
 
