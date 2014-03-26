@@ -14,7 +14,7 @@ public enum Colour {
     BLUE, PINK, GREEN;
     
     public Colour getColour(double zC){
-        if(zC > 0.035) return BLUE;
+        if(zC > 0.1) return BLUE;
         else if(zC > 0.01) return PINK;
         else return GREEN;
     }

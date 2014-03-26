@@ -30,26 +30,26 @@ public class MapPanel extends JPanel implements Observer {
     private String roadName;
     
     public final int k = 550;
-    private double resizeConstant = 1, zoomConstant = 1; //oldResize = 1, oldZoom = 1;
-    private double xk = 0, yk = 0; //oldXK = 0, oldYK = 0
+    private double resizeConstant = 1, zoomConstant = 1;
+    private double xk = 0, yk = 0;
     public final double ratio;
     public final float dash[] = {7.0f};
     
     private Rectangle rect;
     private Point2D.Double press, release, vectorLastPress, vectorLastRelease;
-    
+        
     private boolean isMap = false;
     private Graphics2D mapG;
     private BufferedImage map;
     
     private final Area area;
     
-    private final int INIT_WIDTH = 850;
-    private final int INIT_HEIGHT = 660;
+    public final int INIT_WIDTH = 850;
+    public final int INIT_HEIGHT = 660;
     
     double pressX, pressY, releaseX, releaseY;
 
-    public MapPanel() {        
+    public MapPanel() {  
         area = new Area();
         
         loader = new DataLoader();
@@ -68,7 +68,7 @@ public class MapPanel extends JPanel implements Observer {
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
         qtBlue.split(250);
-        
+
         qtPink = new QuadTree(loader.edgesPink, loader.nodes, "0");
         qtPink.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
@@ -102,12 +102,23 @@ public class MapPanel extends JPanel implements Observer {
             mapG.setColor(Color.WHITE);
             mapG.fillRect(0, 0, getWidth(), getHeight());
             
+            double widthDiff  = (getWidth() * resizeConstant - INIT_WIDTH)  * zoomConstant;
+            double heightDiff = (getHeight()* resizeConstant - INIT_HEIGHT) * zoomConstant;
+            
             pressX = (press.x*k) - (xk*k) + CoordinateBoundaries.xMin; 
             pressY = (press.y*k) - (yk*k) + CoordinateBoundaries.yMin; 
             
-            releaseX = (release.x*k) - (xk*k) + CoordinateBoundaries.xMin; 
-            releaseY = (release.y*k) - (yk*k) + CoordinateBoundaries.yMin; 
+            releaseX = (release.x*k) - (xk*k) + widthDiff/2*k + CoordinateBoundaries.xMin; 
+            releaseY = (release.y*k) - (yk*k) + heightDiff/2*k + CoordinateBoundaries.yMin;  
 
+            // If press or release is outside the boundaries for the quadtrees
+            // set press or release to the boundaries so not all quadtrees are
+            // returned.
+            if (pressX < CoordinateBoundaries.xMin)   pressX   = CoordinateBoundaries.xMin;
+            if (pressY < CoordinateBoundaries.yMin)   pressY   = CoordinateBoundaries.yMin;
+            if (releaseX > CoordinateBoundaries.xMax) releaseX = CoordinateBoundaries.xMax;
+            if (releaseY > CoordinateBoundaries.yMax) releaseY = CoordinateBoundaries.yMax;
+            
             HashSet<String> trees;
             ArrayList<EdgeData> edges2 = new ArrayList<>();
             switch(colour) {
@@ -137,7 +148,7 @@ public class MapPanel extends JPanel implements Observer {
                 mapG.setRenderingHints(rh);
             }
             
-            for (EdgeData ed : edges2) {        
+            for (EdgeData ed : edges2) {
                 fn = loader.nodes.get(ed.FNODE);
                 tn = loader.nodes.get(ed.TNODE);
                 type = ed.TYP;
@@ -147,18 +158,10 @@ public class MapPanel extends JPanel implements Observer {
                 tnX = (((tn.getX() - CoordinateBoundaries.xMin) / k) + xk);
                 tnY = (((tn.getY() - CoordinateBoundaries.yMin) / k) + yk);
 
-                //if these coordinates lies within the specified rectangle's bounds) 
-//                if ((release.x > press.x &&  release.y > press.y)
-//                    && (fnX < release.x + widthDiff && tnX < release.x + widthDiff)
-//                    && (fnX > press.x && tnX > press.x)
-//                    && (fnY > press.y && tnY > press.y)
-//                    && (fnY < release.y + heightDiff && tnY < release.y + heightDiff)) {
                 drawSpecified(fnX, fnY, tnX, tnY, type, ed, mapG);
-//                }
             }
-            makeRoadMap = false;
             roadList.removeAll(roadList);
-            //System.out.println(edges2.size());
+
         }
         g2.drawImage(map, 0, 0, null);
         mapG.dispose();
@@ -171,7 +174,7 @@ public class MapPanel extends JPanel implements Observer {
             drawRect(rect, g2);
         }
     }
-
+    
     private void drawSpecified(double fnX, double fnY, double tnX, double tnY, int type, EdgeData edge, Graphics2D g2) {
         //at this point, only the relevant coordinates (those within the rectangle) are accessed.
         fnX = fnX - press.x;
@@ -258,10 +261,11 @@ public class MapPanel extends JPanel implements Observer {
         
         isMap = false;
       
-        updateZoom(Math.abs(release.y - press.y) / getHeight());
+        updateZoom(Math.abs(release.y - press.y) / INIT_HEIGHT);
         repaint();
     }
-    
+
+
     /**
      * http://stackoverflow.com/questions/10388118/how-to-make-rotated-text-look-good-with-java2d
      */
@@ -280,7 +284,6 @@ public class MapPanel extends JPanel implements Observer {
 
         return image;
     }
-    
     /**
      * http://stackoverflow.com/questions/10388118/how-to-make-rotated-text-look-good-with-java2d
      */
@@ -290,7 +293,9 @@ public class MapPanel extends JPanel implements Observer {
 
         Graphics2D g2D = ((Graphics2D) g);
         g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        g2D.drawImage(createStringImage(g, s), aff, this);
+        BufferedImage stringImage = createStringImage(g, s);
+        aff.translate(-stringImage.getWidth()/2, 0); // Move image so it is centered around tx, ty
+        g2D.drawImage(stringImage, aff, this);
     }
     
     /** 
@@ -377,17 +382,17 @@ public class MapPanel extends JPanel implements Observer {
      */
     public void zoomIn(double factor) {
         isMap = false;
-        double deltaX = (release.x - press.x);
-        double deltaY = (release.y - press.y);
-        press.setLocation(press.x + deltaX * factor, press.y + deltaY * factor);
-        release.setLocation(release.x - deltaX * factor, release.y - deltaY * factor);
+        double deltaX = (release.x - press.x) * factor;
+        double deltaY = (release.y - press.y) * factor;
+        press.setLocation(press.x + deltaX, press.y + deltaY);
+        release.setLocation(release.x - deltaX, release.y - deltaY);
  
         assignCoords(press, release);
  
-        setVectorLastPress(vectorLastPress.x + deltaX * factor,
-                vectorLastPress.y + deltaY * factor);
-        setVectorLastRelease(vectorLastRelease.x - deltaX * factor,
-                vectorLastRelease.y - deltaY * factor);
+        setVectorLastPress(vectorLastPress.x + deltaX,
+                vectorLastPress.y + deltaY);
+        setVectorLastRelease(vectorLastRelease.x - deltaX,
+                vectorLastRelease.y - deltaY);
     }
 
     /**
@@ -398,19 +403,69 @@ public class MapPanel extends JPanel implements Observer {
      */
     public void zoomOut(double factor) {
         isMap = false;
-        double deltaX = (release.x - press.x);
-        double deltaY = (release.y - press.y);
-        press.setLocation(press.x - deltaX * factor, press.y - deltaY * factor);
-        release.setLocation(release.x + deltaX * factor, release.y + deltaY * factor);
+        double deltaX = (release.x - press.x) * factor;
+        double deltaY = (release.y - press.y) * factor;
+        press.setLocation(press.x - deltaX, press.y - deltaY);
+        release.setLocation(release.x + deltaX, release.y + deltaY);
  
         assignCoords(press, release);
  
-        setVectorLastPress(vectorLastPress.x - deltaX * factor,
-                vectorLastPress.y - deltaY * factor);
-        setVectorLastRelease(vectorLastRelease.x + deltaX * factor,
-                vectorLastRelease.y + deltaY * factor);
+        setVectorLastPress(vectorLastPress.x - deltaX,
+                vectorLastPress.y - deltaY);
+        setVectorLastRelease(vectorLastRelease.x + deltaX,
+                vectorLastRelease.y + deltaY);
     }
+    
+    public void zoomInRelativeToMouse(double factor, double mousePosX, double mousePosY) { 
+        
+        double relativeFactor = factor * zoomConstant;
+        
+        double pressPositionX = (press.x - 0) * relativeFactor;
+        double pressPositionY = (press.y - 0) * relativeFactor;
+        double releasePositionX = (release.x - INIT_WIDTH)  * relativeFactor;
+        double releasePositionY = (release.y - INIT_HEIGHT) * relativeFactor;
+        
+        // vector from press to mousePosition
+        double pcX = (mousePosX - press.x)* relativeFactor;
+        double pcY = (mousePosY - press.y)* relativeFactor;
+        
+        
+        // vector from release to mousePosition
+        double rcX = (mousePosX - release.x)* relativeFactor;
+        double rcY = (mousePosY - release.y)* relativeFactor;
 
+        double moveVectorX = pcX + rcX + (pressPositionX + releasePositionX);
+        double moveVectorY = pcY + rcY + (pressPositionY + releasePositionY);
+                
+        zoomIn(factor);
+        changeX(-moveVectorX);
+        changeY(-moveVectorY);
+    }
+   
+    public void zoomOutRelativeToMouse(double factor, double mousePosX, double mousePosY) {
+        
+        double relativeFactor = factor * zoomConstant;
+        
+        double pressPositionX = (press.x - 0) * relativeFactor;
+        double pressPositionY = (press.y - 0) * relativeFactor;
+        double releasePositionX = (release.x - INIT_WIDTH)  * relativeFactor;
+        double releasePositionY = (release.y - INIT_HEIGHT) * relativeFactor;
+        // vector from press to mousePosition
+        double pcX = (mousePosX - press.x)* relativeFactor;
+        double pcY = (mousePosY - press.y)* relativeFactor;
+        
+        // vector from release to mousePosition
+        double rcX = (mousePosX - release.x)* relativeFactor;
+        double rcY = (mousePosY - release.y)* relativeFactor;
+
+        double moveVectorX = pcX + rcX + (pressPositionX + releasePositionX);
+        double moveVectorY = pcY + rcY + (pressPositionY + releasePositionY);
+        
+        zoomOut(factor);
+        changeX(moveVectorX);
+        changeY(moveVectorY);
+    }
+        
     public Point2D.Double getPress() {
         return press;
     }
@@ -429,12 +484,10 @@ public class MapPanel extends JPanel implements Observer {
 
     public void setVectorLastPress(double x, double y) {
         this.vectorLastPress.setLocation(x, y);
-        //System.out.println("LPrV = " + vectorLastPress);
     }
 
     public void setVectorLastRelease(double x, double y) {
         this.vectorLastRelease.setLocation(x, y);
-        //System.out.println("LReV = " + vectorLastRelease);
     }
 
     public void changeX(double j) {
@@ -473,9 +526,12 @@ public class MapPanel extends JPanel implements Observer {
         repaint();
     }
     
-    public String getRoadName(double x, double y) {        
-        x = pressX + (releaseX - pressX)*x/INIT_WIDTH;
-        y = pressY + (releaseY - pressY)*y/INIT_HEIGHT;
+    public String getRoadName(double x, double y) {
+        double widthDiff  = (getWidth() * resizeConstant - INIT_WIDTH)  * zoomConstant;
+        double heightDiff = (getHeight()* resizeConstant - INIT_HEIGHT) * zoomConstant;
+        
+        x = pressX + ((releaseX-widthDiff/2*k) - pressX)*x/INIT_WIDTH;
+        y = pressY +  ((releaseY-heightDiff/2*k) - pressY)*y/INIT_HEIGHT;
         EdgeData edge;
         switch(colour) {
             case BLUE:
@@ -497,5 +553,9 @@ public class MapPanel extends JPanel implements Observer {
 
     public double getResizeConstant() {
         return resizeConstant;
+    }
+    
+    public void repaintTheMap(){
+        repaint();
     }
 }
