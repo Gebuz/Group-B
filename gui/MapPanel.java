@@ -94,7 +94,7 @@ public class MapPanel extends JPanel implements Observer {
         NodeData fn, tn;
         int type;
         double fnX, fnY, tnX, tnY;
-        
+
         if(isMap == false) {
             map = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
             mapG = (Graphics2D) map.getGraphics();
@@ -113,8 +113,8 @@ public class MapPanel extends JPanel implements Observer {
             // If press or release is outside the boundaries for the quadtrees
             // set press or release to the boundaries so not all quadtrees are
             // returned.
-            if (pressX < CoordinateBoundaries.xMin)   pressX   = CoordinateBoundaries.xMin;
-            if (pressY < CoordinateBoundaries.yMin)   pressY   = CoordinateBoundaries.yMin;
+            if (pressX   < CoordinateBoundaries.xMin)   pressX = CoordinateBoundaries.xMin;
+            if (pressY   < CoordinateBoundaries.yMin)   pressY = CoordinateBoundaries.yMin;
             if (releaseX > CoordinateBoundaries.xMax) releaseX = CoordinateBoundaries.xMax;
             if (releaseY > CoordinateBoundaries.yMax) releaseY = CoordinateBoundaries.yMax;
             
@@ -321,30 +321,33 @@ public class MapPanel extends JPanel implements Observer {
     public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int fontSize, EdgeData edge, Graphics2D g2) {
         if(zoomConstant < zoomLimit) { 
             roadName = edge.VEJNAVN;
-            for(int i = 0; i < roadList.size(); i++) {
-                if(roadName.equals(roadList.get(i))) {
-                    found = true;
-                    break;
+            // Ignore roadnames that are the empty string.
+            if (!roadName.equals("")){
+                for(int i = 0; i < roadList.size(); i++) {
+                    if(roadName.equals(roadList.get(i))) {
+                        found = true;
+                        break;
+                    }
                 }
-            }
-            double epsilon = 1E-5;
-            if(found == false && edge.LENGTH + epsilon > roadMap.get(edge.VEJNR).LENGTH 
-                              && edge.LENGTH - epsilon < roadMap.get(edge.VEJNR).LENGTH) 
-            {
-                roadList.add(roadName);
-                double xMid = (fnX + tnX)/2.0;
-                double yMid = (fnY + tnY)/2.0;
-                g2.setColor(Color.BLACK);
-                g2.setFont(new Font("Helvetica", Font.PLAIN, fontSize));
-                
-                double degrees = GetAngleOfLineBetweenTwoPoints(fnX, fnY, tnX, tnY);
-                // flip the angle if the string would be written upside down
-                if      (degrees < -90) degrees += 180;
-                else if (degrees >  90) degrees -= 180;
-                
-                double radians = Math.toRadians(degrees);
+                double epsilon = 1E-5;
+                if(found == false && edge.LENGTH + epsilon > roadMap.get(edge.VEJNR).LENGTH 
+                                  && edge.LENGTH - epsilon < roadMap.get(edge.VEJNR).LENGTH) 
+                {
+                    roadList.add(roadName);
+                    double xMid = (fnX + tnX)/2.0;
+                    double yMid = (fnY + tnY)/2.0;
+                    g2.setColor(Color.BLACK);
+                    g2.setFont(new Font("Helvetica", Font.PLAIN, fontSize));
 
-                drawString(g2, roadName, xMid, yMid, radians);
+                    double degrees = GetAngleOfLineBetweenTwoPoints(fnX, fnY, tnX, tnY);
+                    // flip the angle if the string would be written upside down
+                    if      (degrees < -90) degrees += 180;
+                    else if (degrees >  90) degrees -= 180;
+
+                    double radians = Math.toRadians(degrees);
+
+                    drawString(g2, roadName, xMid, yMid, radians);
+                }
             }
         }
         found = false;
