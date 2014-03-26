@@ -37,15 +37,15 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         initWidth = map.getSize().width - 1;
 
         view.addComponentListener(this);
-        view.zoomIn.addMouseListener(this);
-        view.zoomOut.addMouseListener(this);
-        view.showFull.addMouseListener(this);
-        view.up.addMouseListener(this);
-        view.down.addMouseListener(this);
-        view.left.addMouseListener(this);
-        view.right.addMouseListener(this);
-        view.zoom.addMouseListener(this);
-        view.scroll.addMouseListener(this);
+        view.zoomIn.addActionListener(this);
+        view.zoomOut.addActionListener(this);
+        view.showFull.addActionListener(this);
+        view.up.addActionListener(this);
+        view.down.addActionListener(this);
+        view.left.addActionListener(this);
+        view.right.addActionListener(this);
+        view.roadOn.addActionListener(this);
+        view.roadOff.addActionListener(this);
 
         map.addMouseListener(this);
         map.addMouseMotionListener(this);
@@ -54,97 +54,6 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (e.getComponent() == view.zoomIn) {
-            map.zoomIn(0.10);
-        }
-        if (e.getComponent() == view.zoomOut) {
-            map.zoomOut(0.10);
-        }
-        if (e.getComponent() == view.showFull) {
-            map.defaultMap();
-            view.pack();
-        
-        }
-        if (e.getComponent() == view.up) {
-            if (map.getZoom() != 1 && map.getZoom() >= 0.4) {
-                map.changeY(20);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.4
-                    && map.getZoom() >= 0.15) {
-                map.changeY(10);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.15
-                    && map.getZoom() >= 0.09) {
-                map.changeY(5);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.09
-                    && map.getZoom() >= 0.03) {
-                map.changeY(1);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.03) {
-                map.changeY(0.2);
-            }
-        }
-        if (e.getComponent() == view.down) {
-            if (map.getZoom() != 1 && map.getZoom() >= 0.4) {
-                map.changeY(-20);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.4
-                    && map.getZoom() >= 0.15) {
-                map.changeY(-10);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.15
-                    && map.getZoom() >= 0.09) {
-                map.changeY(-5);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.09
-                    && map.getZoom() >= 0.03) {
-                map.changeY(-1);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.03) {
-                map.changeY(-0.2);
-            }
-        }
-        if (e.getComponent() == view.left) {
-            if (map.getZoom() != 1 && map.getZoom() >= 0.4) {
-                map.changeX(20);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.4
-                    && map.getZoom() >= 0.15) {
-                map.changeX(10);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.15
-                    && map.getZoom() >= 0.09) {
-                map.changeX(5);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.09
-                    && map.getZoom() >= 0.03) {
-                map.changeX(1);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.03) {
-                map.changeX(0.2);
-            }
-        }
-        if (e.getComponent() == view.right) {
-            if (map.getZoom() != 1 && map.getZoom() >= 0.4) {
-                map.changeX(-20);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.4
-                    && map.getZoom() >= 0.15) {
-                map.changeX(-10);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.15
-                    && map.getZoom() >= 0.09) {
-                map.changeX(-5);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.09
-                    && map.getZoom() >= 0.03) {
-                map.changeX(-1);
-            }
-            if (map.getZoom() != 1 && map.getZoom() < 0.03) {
-                map.changeX(-0.2);
-            }
-        }
     }
 
     @Override
@@ -262,12 +171,17 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 // Bottom right corner.                
                 double vectorNewReleaseY = (release.y - initHeight) * zoomConstant;
                 double vectorNewReleaseX = (release.x - initWidth)  * zoomConstant;
+                
+//                System.out.println("y: " + vectorNewReleaseY);
+//                System.out.println("x: " + vectorNewReleaseX);
                
                 // New Part
                 double newReleaseY = map.getHeight() + vectorLastRelease.y + vectorNewReleaseY;
                 rectHeight = Math.abs(newReleaseY - press.y);
                 rectWidth = rectHeight * map.ratio;
+                System.out.println("rectHeight :" + rectHeight + " rectWidth: " + rectWidth);
                 double newReleaseX = rectWidth + press.x;
+                System.out.println("newReleaseY: " + newReleaseY + " newReleaseX: " + newReleaseX);
                 release.setLocation(newReleaseX, newReleaseY);
  
  
@@ -315,6 +229,79 @@ public class Controller implements MouseListener, MouseMotionListener, Component
        else             map.zoomIn (0.05);
     }
     
+        @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == view.zoomIn) {
+            map.zoomIn(0.10);
+        }
+        if (e.getSource() == view.zoomOut) {
+            map.zoomOut(0.10);
+        }
+        if (e.getSource() == view.showFull) {
+            map.defaultMap();
+            view.pack();
+        }
+        if(e.getSource() == view.roadOn) {
+            view.roadOn.setEnabled(false);
+            view.roadOff.setEnabled(true);
+            map.roadSwitch();
+        }
+        if(e.getSource() == view.roadOff) {
+            view.roadOff.setEnabled(false);
+            view.roadOn.setEnabled(true);
+            map.roadSwitch();
+        }
+        
+        if (e.getSource() == view.up) {
+            if (map.getZoom() != 1 && map.getZoom() >= 0.4)
+                map.changeY(20);
+            else if (map.getZoom() != 1 && map.getZoom() >= 0.15) 
+                map.changeY(10);
+            else if (map.getZoom() != 1 && map.getZoom() >= 0.09) 
+                map.changeY(5);
+            else if (map.getZoom() != 1 && map.getZoom() >= 0.03) 
+                map.changeY(1);
+            else if (map.getZoom() != 1 && map.getZoom() < 0.03) 
+                map.changeY(0.08);
+        }
+        if (e.getSource() == view.down) {
+            if(map.getZoom() != 1 && map.getZoom() >= 0.4) 
+                map.changeY(-20);
+            else if(map.getZoom() != 1 && map.getZoom() >= 0.15) 
+                map.changeY(-10);
+            else if(map.getZoom() != 1 && map.getZoom() >= 0.09) 
+                map.changeY(-5);
+            else if(map.getZoom() != 1 && map.getZoom() >= 0.03) 
+                map.changeY(-1);
+            else if(map.getZoom() != 1 && map.getZoom() < 0.03)
+                map.changeY(-0.08);
+        }
+        if (e.getSource() == view.left) {
+            if(map.getZoom() != 1 && map.getZoom() >= 0.4) 
+                map.changeX(20);
+            else if(map.getZoom() != 1 && map.getZoom() >= 0.15) 
+                map.changeX(10);
+            else if(map.getZoom() != 1 && map.getZoom() >= 0.09) 
+                map.changeX(5);
+            else if(map.getZoom() != 1 && map.getZoom() >= 0.03) 
+                map.changeX(1);
+            else if(map.getZoom() != 1 && map.getZoom() < 0.03)
+                map.changeX(0.08);
+        }
+        if (e.getSource() == view.right) {
+            if(map.getZoom() != 1 && map.getZoom() >= 0.4) 
+                map.changeX(-20);
+            else if(map.getZoom() != 1 && map.getZoom() >= 0.15) 
+                map.changeX(-10);
+            else if(map.getZoom() != 1 && map.getZoom() >= 0.09) 
+                map.changeX(-5);
+            else if(map.getZoom() != 1 && map.getZoom() >= 0.03) 
+                map.changeX(-1);
+            else if(map.getZoom() != 1 && map.getZoom() < 0.03)
+                map.changeX(-0.08);
+        }
+    }
+    
     @Override
     public void mouseEntered(MouseEvent e) {
     }
@@ -333,9 +320,5 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
     @Override
     public void componentHidden(ComponentEvent e) {
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
     }
 }

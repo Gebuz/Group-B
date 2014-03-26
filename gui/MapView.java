@@ -12,10 +12,10 @@ import java.awt.event.ActionEvent;
 
 public class MapView extends JFrame {
     public final JPanel mapPanel;
-    public final JPanel northPanel, eastPanel, arrowPanel, upPanel, downPanel, zoomScrollPanel;
+    public final JPanel northPanel, eastPanel, arrowPanel, upPanel, downPanel, roadPanel;
     public final JPanel xyPanel;
-    public final JButton zoomIn, zoomOut, showFull, up, down, left, right, zoom, scroll;
-    public final JLabel x, y, road; 
+    public final JButton zoomIn, zoomOut, showFull, up, down, left, right, roadOn, roadOff;
+    public final JLabel x, y, road, roadOnOff; 
     
     public MapView(String name, final MapPanel mapPanel) {
         super(name);
@@ -30,11 +30,12 @@ public class MapView extends JFrame {
         arrowPanel = new JPanel();
         upPanel = new JPanel();
         downPanel = new JPanel();
-        zoomScrollPanel = new JPanel();
+        roadPanel = new JPanel();
         
         x = new JLabel("0");
         y = new JLabel("0");
         road = new JLabel("");
+        roadOnOff = new JLabel("Show road names:");
        
         
         showFull = new JButton ("▣");
@@ -46,9 +47,9 @@ public class MapView extends JFrame {
         left = new JButton("←");
         right = new JButton("→");
         
-        zoom = new JButton("Zoom mode");
-        scroll = new JButton("Scroll mode");
-        zoom.setEnabled(false);
+        roadOn = new JButton("On");
+        roadOff = new JButton("Off");
+        roadOn.setEnabled(false);
         
         //Mapping key inputs to button
         KeyStroke keyUp = KeyStroke.getKeyStroke("UP"); 
@@ -61,19 +62,16 @@ public class MapView extends JFrame {
         {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.4) 
+                if (mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.4)
                     mapPanel.changeY(20);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.4 
-                        && mapPanel.getZoom() >= 0.15) 
+                else if (mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.15) 
                     mapPanel.changeY(10);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.15
-                        && mapPanel.getZoom() >= 0.09) 
+                else if (mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.09) 
                     mapPanel.changeY(5);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.09
-                        && mapPanel.getZoom() >= 0.03) 
+                else if (mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.03) 
                     mapPanel.changeY(1);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.03)
-                    mapPanel.changeY(0.2);
+                else if (mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.03) 
+                    mapPanel.changeY(0.08);
             }
         });
         down.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(keyDown, "down");
@@ -83,17 +81,14 @@ public class MapView extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.4) 
                     mapPanel.changeY(-20);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.4 
-                        && mapPanel.getZoom() >= 0.15) 
+                else if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.15) 
                     mapPanel.changeY(-10);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.15
-                        && mapPanel.getZoom() >= 0.09) 
+                else if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.09) 
                     mapPanel.changeY(-5);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.09
-                        && mapPanel.getZoom() >= 0.03) 
+                else if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.03) 
                     mapPanel.changeY(-1);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.03)
-                    mapPanel.changeY(-0.2);
+                else if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.03)
+                    mapPanel.changeY(-0.08);
             }
         });
         left.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(keyLeft, "left");
@@ -103,17 +98,14 @@ public class MapView extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.4) 
                     mapPanel.changeX(20);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.4 
-                        && mapPanel.getZoom() >= 0.15) 
+                else if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.15) 
                     mapPanel.changeX(10);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.15
-                        && mapPanel.getZoom() >= 0.09) 
+                else if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.09) 
                     mapPanel.changeX(5);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.09
-                        && mapPanel.getZoom() >= 0.03) 
+                else if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.03) 
                     mapPanel.changeX(1);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.03)
-                    mapPanel.changeX(0.2);
+                else if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.03)
+                    mapPanel.changeX(0.08);
             }
         });
         right.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(keyRight, "right");
@@ -123,17 +115,14 @@ public class MapView extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.4) 
                     mapPanel.changeX(-20);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.4 
-                        && mapPanel.getZoom() >= 0.15) 
+                else if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.15) 
                     mapPanel.changeX(-10);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.15
-                        && mapPanel.getZoom() >= 0.09) 
+                else if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.09) 
                     mapPanel.changeX(-5);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.09
-                        && mapPanel.getZoom() >= 0.03) 
+                else if(mapPanel.getZoom() != 1 && mapPanel.getZoom() >= 0.03) 
                     mapPanel.changeX(-1);
-                if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.03)
-                    mapPanel.changeX(-0.2);
+                else if(mapPanel.getZoom() != 1 && mapPanel.getZoom() < 0.03)
+                    mapPanel.changeX(-0.08);
             }
         });
         
@@ -152,7 +141,7 @@ public class MapView extends JFrame {
         upPanel.setLayout(new BoxLayout(upPanel, BoxLayout.LINE_AXIS));
         downPanel.setLayout(new BoxLayout(downPanel, BoxLayout.LINE_AXIS));
         
-        zoomScrollPanel.setLayout(new FlowLayout());
+        roadPanel.setLayout(new FlowLayout());
 
         
         //Adding components to panels
@@ -170,11 +159,12 @@ public class MapView extends JFrame {
         arrowPanel.add(right, BorderLayout.EAST);
         arrowPanel.add(showFull, BorderLayout.CENTER);
         
-        zoomScrollPanel.add(zoom);
-        zoomScrollPanel.add(scroll);
+        roadPanel.add(roadOn);
+        roadPanel.add(roadOff);
         
         eastPanel.add(arrowPanel, gbc);
-        eastPanel.add(zoomScrollPanel, gbc);
+        eastPanel.add(roadOnOff, gbc);
+        eastPanel.add(roadPanel, gbc);
         
         //Spacing
         northPanel.add(Box.createHorizontalGlue());

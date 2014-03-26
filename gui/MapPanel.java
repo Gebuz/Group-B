@@ -22,8 +22,11 @@ public class MapPanel extends JPanel implements Observer {
     private Colour colour;
     public final DataLoader loader;
     
-    private ArrayList<String> roadList = new ArrayList<String>();
+    private HashMap<Integer, EdgeData> roadMap;
+    private ArrayList<String> roadList = new ArrayList<>();
     private boolean found = false;
+    private boolean roadOn = true;
+    private boolean makeRoadMap = true;
     private String roadName;
     
     public final int k = 550;
@@ -35,7 +38,7 @@ public class MapPanel extends JPanel implements Observer {
     private Rectangle rect;
     private Point2D.Double press, release, vectorLastPress, vectorLastRelease;
     
-    private boolean isMap;
+    private boolean isMap = false;
     private Graphics2D mapG;
     private BufferedImage map;
     
@@ -46,9 +49,7 @@ public class MapPanel extends JPanel implements Observer {
     
     double pressX, pressY, releaseX, releaseY;
 
-    public MapPanel() {
-        isMap = false;
-        
+    public MapPanel() {        
         area = new Area();
         
         loader = new DataLoader();
@@ -58,6 +59,8 @@ public class MapPanel extends JPanel implements Observer {
         release = new Point2D.Double(INIT_WIDTH, INIT_HEIGHT);
         setPreferredSize(new Dimension(INIT_WIDTH, INIT_HEIGHT));
         ratio = release.x / release.y;
+        
+        roadMap = loader.roadMap;
         
         qtBlue = new QuadTree(loader.edgesBlue, loader.nodes, "0");
         qtBlue.addCoords(CoordinateBoundaries.xMin,
@@ -134,7 +137,7 @@ public class MapPanel extends JPanel implements Observer {
                 mapG.setRenderingHints(rh);
             }
             
-            for (EdgeData ed : edges2) {
+            for (EdgeData ed : edges2) {        
                 fn = loader.nodes.get(ed.FNODE);
                 tn = loader.nodes.get(ed.TNODE);
                 type = ed.TYP;
@@ -153,6 +156,7 @@ public class MapPanel extends JPanel implements Observer {
                 drawSpecified(fnX, fnY, tnX, tnY, type, ed, mapG);
 //                }
             }
+            makeRoadMap = false;
             roadList.removeAll(roadList);
             //System.out.println(edges2.size());
         }
@@ -168,28 +172,6 @@ public class MapPanel extends JPanel implements Observer {
         }
     }
 
-    public void drawLine(Graphics2D g, Line2D line, Color color, float width) {
-        g.setColor(color);
-        g.setStroke(new BasicStroke(width));
-        g.draw(line);
-    }
-    
-    public void drawRect(Rectangle r, Graphics2D g2) {
-        g2.setColor(Color.BLACK);
-        g2.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10.0f, dash, 0.0f));
-        g2.drawRect(rect.x, rect.y, rect.width, rect.height);
-    }
-    
-    public void assignCoords(Point2D.Double press, Point2D.Double release) {
-        this.press = press;
-        this.release = release;
-        
-        isMap = false;
-      
-        updateZoom(Math.abs(release.y - press.y) / getHeight());
-        repaint();
-    }
-
     private void drawSpecified(double fnX, double fnY, double tnX, double tnY, int type, EdgeData edge, Graphics2D g2) {
         //at this point, only the relevant coordinates (those within the rectangle) are accessed.
         fnX = fnX - press.x;
@@ -201,7 +183,7 @@ public class MapPanel extends JPanel implements Observer {
         fnY /= zoomConstant;
         tnX /= zoomConstant;
         tnY /= zoomConstant;
-
+        
         fnX /= resizeConstant;
         fnY /= resizeConstant;
         tnX /= resizeConstant;
@@ -220,29 +202,66 @@ public class MapPanel extends JPanel implements Observer {
                 break;
             case 2:
             case 32:
-                drawLine(g2, line, Color.GRAY, 1);
+            case 42:
+                drawLine(g2, line, Color.MAGENTA, 1);
                 break;
             case 8:
             case 48:
                 drawLine(g2, line, Color.GREEN, 1);
                 break;
-            default:
+            case 11:
+                drawLine(g2, line, Color.GRAY, 1);
+                break;
+            case 3:
+            case 4:
                 drawLine(g2, line, Color.BLUE, 1);
                 break;
+            case 80:
+                drawLine(g2, line, Color.ORANGE, 1);
+                break;
+            default:
+                drawLine(g2, line, Color.BLACK, 1);
+                break;
         }
-        switch (type) {
-            case 5:
-            case 6:
-                drawRoadNames(fnX, tnX, fnY, tnY, 0.0025, 12, edge, g2);
-                break;
-            case 1:
-                drawRoadNames(fnX, tnX, fnY, tnY, 0.05, 16, edge, g2);
-                break;
-            case 4:
-                drawRoadNames(fnX, tnX, fnY, tnY, 0.03, 14, edge, g2);
+        if(roadOn) {
+            switch (type) {
+                case 5:
+                case 6:
+                    drawRoadNames(fnX, tnX, fnY, tnY, 0.0025, 11, edge, g2);
+                    break;
+                case 1:
+                    drawRoadNames(fnX, tnX, fnY, tnY, 0.05, 14, edge, g2);
+                    break;
+                case 4:
+                    drawRoadNames(fnX, tnX, fnY, tnY, 0.03, 12, edge, g2);
+            }
         }
         isMap = true;
     }
+    
+    public void drawLine(Graphics2D g2, Line2D line, Color color, float width) {
+        g2.setColor(color);
+        if(color == Color.ORANGE) g2.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10.0f, dash, 0.0f));
+        else g2.setStroke(new BasicStroke(width));
+        g2.draw(line);
+    }
+    
+    public void drawRect(Rectangle r, Graphics2D g2) {
+        g2.setColor(Color.BLACK);
+        g2.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10.0f, dash, 0.0f));
+        g2.drawRect(rect.x, rect.y, rect.width, rect.height);
+    }
+    
+    public void assignCoords(Point2D.Double press, Point2D.Double release) {
+        this.press = press;
+        this.release = release;
+        
+        isMap = false;
+      
+        updateZoom(Math.abs(release.y - press.y) / getHeight());
+        repaint();
+    }
+    
     /**
      * http://stackoverflow.com/questions/10388118/how-to-make-rotated-text-look-good-with-java2d
      */
@@ -261,11 +280,12 @@ public class MapPanel extends JPanel implements Observer {
 
         return image;
     }
+    
     /**
      * http://stackoverflow.com/questions/10388118/how-to-make-rotated-text-look-good-with-java2d
      */
-    private void drawString(Graphics2D g, String s, int tx, int ty, double theta, double rotx, double roty) {
-        AffineTransform aff = AffineTransform.getRotateInstance(theta, rotx, roty);
+    private void drawString(Graphics2D g, String s, double tx, double ty, double theta) { //double rotx, double roty) {
+        AffineTransform aff = AffineTransform.getRotateInstance(theta, tx, ty);
         aff.translate(tx, ty);
 
         Graphics2D g2D = ((Graphics2D) g);
@@ -288,7 +308,7 @@ public class MapPanel extends JPanel implements Observer {
         return Math.toDegrees(Math.atan2(yDiff, xDiff)); 
     }
     
-    public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int font, EdgeData edge, Graphics2D g2) {
+    public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int fontSize, EdgeData edge, Graphics2D g2) {
         if(zoomConstant < zoomLimit) { 
             roadName = edge.VEJNAVN;
             for(int i = 0; i < roadList.size(); i++) {
@@ -297,12 +317,12 @@ public class MapPanel extends JPanel implements Observer {
                     break;
                 }
             }
-            if(found == false) {
+            if(found == false && edge.LENGTH == roadMap.get(edge.VEJNR).LENGTH) {
                 roadList.add(roadName);
                 double xMid = (fnX + tnX)/2.0;
                 double yMid = (fnY + tnY)/2.0;
                 g2.setColor(Color.BLACK);
-                g2.setFont(new Font("TimesRoman", Font.PLAIN, font));
+                g2.setFont(new Font("Helvetica", Font.PLAIN, fontSize));
                 
                 double degrees = GetAngleOfLineBetweenTwoPoints(fnX, fnY, tnX, tnY);
                 
@@ -315,7 +335,7 @@ public class MapPanel extends JPanel implements Observer {
                 double radians = Math.toRadians(degrees);
 
 
-                drawString(g2, roadName, (int) xMid, (int) yMid, radians, xMid, yMid);
+                drawString(g2, roadName, xMid, yMid, radians); //xMid, yMid);
                 //g2.drawString(roadName,(float) xMid,(float) yMid);
             }
         }
@@ -444,6 +464,13 @@ public class MapPanel extends JPanel implements Observer {
     
     public void removeRect() {
         rect = null;
+    }
+    
+    public void roadSwitch() {
+        if(roadOn) roadOn = false;
+        else roadOn = true;
+        isMap = false;
+        repaint();
     }
     
     public String getRoadName(double x, double y) {        
