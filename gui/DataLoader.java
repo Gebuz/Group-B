@@ -26,8 +26,6 @@ public class DataLoader {
     public DataLoader() {
         String dir = "";
 
-        // For this example, we'll simply load the raw data into
-        // ArrayLists.
         roadMap = new HashMap<>();
         nodes = new HashMap<>();
         edgesBlue = new ArrayList<>();
@@ -43,21 +41,7 @@ public class DataLoader {
             public void processNode(NodeData nd) {
                 nodes.put(nd.KDV, nd);
             }
-            
-//            for (EdgeData ed : edges2) {
-//                if(makeRoadMap) {
-//                    if(roadMap.containsKey(ed.VEJNR) && roadMap.get(ed.VEJNR).LENGTH < ed.LENGTH) {
-//                        roadMap.put(ed.VEJNR, ed);
-//                    }
-//                    else if(!roadMap.containsKey(ed.VEJNR)) {
-//                        roadMap.put(ed.VEJNR, ed);
-//                    }
-//                    else if(roadMap.containsKey(ed.VEJNR) && roadMap.get(ed.VEJNR).LENGTH > ed.LENGTH) {
-//                        //do nothing...
-//                    }
-//                }
-            
-            
+
             @Override
             public void processEdge(EdgeData ed) {
                 edgesGreen.add(ed);
@@ -71,17 +55,6 @@ public class DataLoader {
                     case 5:
                     case 6:
                         edgesPink.add(ed);
-                        break;
-                    case 1:
-                    case 31:
-                    case 41:
-                        edgesPink.add(ed);
-                        edgesBlue.add(ed);
-                        break;
-                    case 2:
-                    case 32:
-                        edgesPink.add(ed);
-                        edgesBlue.add(ed);
                         break;
                     case 8:
                     case 48:
