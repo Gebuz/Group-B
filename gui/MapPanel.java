@@ -23,10 +23,8 @@ public class MapPanel extends JPanel implements Observer {
     public final DataLoader loader;
     
     private HashMap<Integer, EdgeData> roadMap;
-    private ArrayList<Integer> roadList = new ArrayList<>();
-    private boolean found = false;
+    private HashSet<Integer> roadListHashSet = new HashSet<>();
     private boolean roadOn = true;
-    private int roadNum;
     
     public final int k = 550;
     private double resizeConstant = 1, zoomConstant = 1;
@@ -159,7 +157,7 @@ public class MapPanel extends JPanel implements Observer {
 
                 drawSpecified(fnX, fnY, tnX, tnY, type, ed, mapG);
             }
-            roadList.removeAll(roadList);
+            roadListHashSet.clear();
 
         }
         g2.drawImage(map, 0, 0, null);
@@ -319,17 +317,17 @@ public class MapPanel extends JPanel implements Observer {
     }
     
     public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int fontSize, EdgeData edge, Graphics2D g2) {
-        if(zoomConstant < zoomLimit) { 
-            roadNum = edge.VEJNR;
+        if(zoomConstant < zoomLimit) {
+            boolean found;
+            int roadNum = edge.VEJNR;
+            String roadName = edge.VEJNAVN;
+            double roadLength = edge.LENGTH;
+            
             // Ignore roadnames that are the empty string.
             if (!edge.VEJNAVN.equals("")){
-                for(int i = 0; i < roadList.size(); i++) {
-                    int roadNumber = roadList.get(i);
-                    if(roadNum == roadNumber) {
-                        found = true;
-                        break;
-                    }
-                }
+                
+                found = roadListHashSet.contains(roadNum);
+
                 double xMid = (fnX + tnX)/2.0;
                 double yMid = (fnY + tnY)/2.0;
                 g2.setColor(Color.BLACK);
@@ -337,27 +335,30 @@ public class MapPanel extends JPanel implements Observer {
 
                 double degrees = GetAngleOfLineBetweenTwoPoints(fnX, fnY, tnX, tnY);
 
+                // Flip the angle 180 degrees if the string would be written 
+                // upside down.
                 if      (degrees < -90) degrees += 180;
                 else if (degrees >  90)	degrees -= 180;
 
                 double radians = Math.toRadians(degrees);
 
                 if(xMid < getWidth() && xMid > 0 && yMid < getHeight() && yMid > 0) {
+                    // Use epsilon precision instead of == when checking equality
+                    // of two doubles.
                     double epsilon = 1E-5;
-                    if(!found && edge.LENGTH + epsilon > roadMap.get(edge.VEJNR).LENGTH 
-                              && edge.LENGTH - epsilon < roadMap.get(edge.VEJNR).LENGTH) 
+                    if(!found && roadLength + epsilon > roadMap.get(roadNum).LENGTH 
+                              && roadLength - epsilon < roadMap.get(roadNum).LENGTH) 
                     {
-                        roadList.add(roadNum);
-                        drawString(g2, edge.VEJNAVN, xMid, yMid, radians);
+                        roadListHashSet.add(roadNum);
+                        drawString(g2, roadName, xMid, yMid, radians);
                     }
-                    else if(!found && edge.LENGTH < roadMap.get(edge.VEJNR).LENGTH) {
-                        roadList.add(roadNum);
-                        drawString(g2, edge.VEJNAVN, xMid, yMid, radians);
+                    else if(!found && roadLength < roadMap.get(roadNum).LENGTH) {
+                        roadListHashSet.add(roadNum);
+                        drawString(g2, roadName, xMid, yMid, radians);
                     }
                 }
             }
         }
-        found = false;
     }
     
     public void defaultMap() {
