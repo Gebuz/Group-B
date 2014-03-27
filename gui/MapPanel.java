@@ -23,10 +23,10 @@ public class MapPanel extends JPanel implements Observer {
     public final DataLoader loader;
     
     private HashMap<Integer, EdgeData> roadMap;
-    private ArrayList<String> roadList = new ArrayList<>();
+    private ArrayList<Integer> roadList = new ArrayList<>();
     private boolean found = false;
     private boolean roadOn = true;
-    private String roadName;
+    private int roadNum;
     
     public final int k = 550;
     private double resizeConstant = 1, zoomConstant = 1;
@@ -73,14 +73,14 @@ public class MapPanel extends JPanel implements Observer {
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
-        qtPink.split(100);
+        qtPink.split(500);
         
         qtGreen = new QuadTree(loader.edgesGreen, loader.nodes, "0");
         qtGreen.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
-        qtGreen.split(100);
+        qtGreen.split(500);
         
         colour = Colour.BLUE;
     }
@@ -101,8 +101,8 @@ public class MapPanel extends JPanel implements Observer {
             mapG.setColor(Color.WHITE);
             mapG.fillRect(0, 0, getWidth(), getHeight());
             
-            double widthDiff  = (getWidth() - INIT_WIDTH)   * zoomConstant * resizeConstant;
-            double heightDiff = (getHeight() - INIT_HEIGHT) * zoomConstant * resizeConstant;
+            double widthDiff  = (getWidth() * resizeConstant - INIT_WIDTH)  * zoomConstant;
+            double heightDiff = (getHeight()* resizeConstant - INIT_HEIGHT) * zoomConstant;
             
             pressX = (press.x*k) - (xk*k) + CoordinateBoundaries.xMin; 
             pressY = (press.y*k) - (yk*k) + CoordinateBoundaries.yMin; 
@@ -320,33 +320,40 @@ public class MapPanel extends JPanel implements Observer {
     
     public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int fontSize, EdgeData edge, Graphics2D g2) {
         if(zoomConstant < zoomLimit) { 
-            roadName = edge.VEJNAVN;
+            roadNum = edge.VEJNR;
             // Ignore roadnames that are the empty string.
-            if (!roadName.equals("")){
+            if (!edge.VEJNAVN.equals("")){
                 for(int i = 0; i < roadList.size(); i++) {
-                    if(roadName.equals(roadList.get(i))) {
+                    int roadNumber = roadList.get(i);
+                    if(roadNum == roadNumber) {
                         found = true;
                         break;
                     }
                 }
-                double epsilon = 1E-5;
-                if(found == false && edge.LENGTH + epsilon > roadMap.get(edge.VEJNR).LENGTH 
-                                  && edge.LENGTH - epsilon < roadMap.get(edge.VEJNR).LENGTH) 
-                {
-                    roadList.add(roadName);
-                    double xMid = (fnX + tnX)/2.0;
-                    double yMid = (fnY + tnY)/2.0;
-                    g2.setColor(Color.BLACK);
-                    g2.setFont(new Font("Helvetica", Font.PLAIN, fontSize));
+                double xMid = (fnX + tnX)/2.0;
+                double yMid = (fnY + tnY)/2.0;
+                g2.setColor(Color.BLACK);
+                g2.setFont(new Font("Helvetica", Font.PLAIN, fontSize));
 
-                    double degrees = GetAngleOfLineBetweenTwoPoints(fnX, fnY, tnX, tnY);
-                    // flip the angle if the string would be written upside down
-                    if      (degrees < -90) degrees += 180;
-                    else if (degrees >  90) degrees -= 180;
+                double degrees = GetAngleOfLineBetweenTwoPoints(fnX, fnY, tnX, tnY);
 
-                    double radians = Math.toRadians(degrees);
+                if      (degrees < -90) degrees += 180;
+                else if (degrees >  90)	degrees -= 180;
 
-                    drawString(g2, roadName, xMid, yMid, radians);
+                double radians = Math.toRadians(degrees);
+
+                if(xMid < getWidth() && xMid > 0 && yMid < getHeight() && yMid > 0) {
+                    double epsilon = 1E-5;
+                    if(!found && edge.LENGTH + epsilon > roadMap.get(edge.VEJNR).LENGTH 
+                              && edge.LENGTH - epsilon < roadMap.get(edge.VEJNR).LENGTH) 
+                    {
+                        roadList.add(roadNum);
+                        drawString(g2, edge.VEJNAVN, xMid, yMid, radians);
+                    }
+                    else if(!found && edge.LENGTH < roadMap.get(edge.VEJNR).LENGTH) {
+                        roadList.add(roadNum);
+                        drawString(g2, edge.VEJNAVN, xMid, yMid, radians);
+                    }
                 }
             }
         }
@@ -533,8 +540,8 @@ public class MapPanel extends JPanel implements Observer {
     }
     
     public String getRoadName(double x, double y) {
-        double widthDiff  = (getWidth()  - INIT_WIDTH)  * zoomConstant * resizeConstant;
-        double heightDiff = (getHeight() - INIT_HEIGHT) * zoomConstant * resizeConstant;
+        double widthDiff  = (getWidth()  * resizeConstant - INIT_WIDTH)  * zoomConstant;
+        double heightDiff = (getHeight() * resizeConstant - INIT_HEIGHT) * zoomConstant;
         
         x = pressX +  ((releaseX-widthDiff*k) - pressX)*x/INIT_WIDTH;
         y = pressY +  ((releaseY-heightDiff*k) - pressY)*y/INIT_HEIGHT;

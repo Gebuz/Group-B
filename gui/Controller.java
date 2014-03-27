@@ -259,11 +259,13 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         else if (e.getSource() == view.roadOn) {
             view.roadOn.setEnabled(false);
             view.roadOff.setEnabled(true);
+            view.roadOnOff.setText("Show Road Names: ON");
             map.roadSwitch();
         }
         else if (e.getSource() == view.roadOff) {
             view.roadOff.setEnabled(false);
             view.roadOn.setEnabled(true);
+            view.roadOnOff.setText("Show Road Names: OFF");
             map.roadSwitch();
         }
         
