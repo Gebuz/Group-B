@@ -319,7 +319,6 @@ public class MapPanel extends JPanel implements Observer {
             boolean found;
             int roadNum = edge.VEJNR;
             String roadName = edge.VEJNAVN;
-            double roadLength = edge.LENGTH;
  
             found = roadListHashSet.contains(roadNum);
 
