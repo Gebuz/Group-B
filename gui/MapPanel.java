@@ -22,7 +22,6 @@ public class MapPanel extends JPanel implements Observer {
     private Colour colour;
     public final DataLoader loader;
     
-    private HashMap<Integer, EdgeData> roadMap;
     private HashSet<Integer> roadListHashSet = new HashSet<>();
     private boolean roadOn = true;
     
@@ -56,9 +55,7 @@ public class MapPanel extends JPanel implements Observer {
         release = new Point2D.Double(INIT_WIDTH, INIT_HEIGHT);
         setPreferredSize(new Dimension(INIT_WIDTH, INIT_HEIGHT));
         ratio = release.x / release.y;
-        
-        roadMap = loader.roadMap;
-        
+            
         qtBlue = new QuadTree(loader.edgesBlue, loader.nodes, "0");
         qtBlue.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
@@ -317,7 +314,7 @@ public class MapPanel extends JPanel implements Observer {
     }
     
     public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int fontSize, EdgeData edge, Graphics2D g2) {
-                                    // Ignore roadnames that are the empty string.    
+                                 /* Ignore roadnames that are the empty string. */ 
         if(zoomConstant < zoomLimit && !edge.VEJNAVN.equals("")) {
             boolean found;
             int roadNum = edge.VEJNR;
@@ -341,22 +338,14 @@ public class MapPanel extends JPanel implements Observer {
             double radians = Math.toRadians(degrees);
 
             if(xMid < getWidth() && xMid > 0 && yMid < getHeight() && yMid > 0) {
-                // Using epsilon precision instead of == when checking equality
-                // of two doubles.
-                double epsilon = 1E-5;
-                if(!found && roadLength + epsilon > roadMap.get(roadNum).LENGTH 
-                          && roadLength - epsilon < roadMap.get(roadNum).LENGTH) 
-                {
-                    roadListHashSet.add(roadNum);
-                    drawString(g2, roadName, xMid, yMid, radians);
-                }
-                else if(!found && roadLength < roadMap.get(roadNum).LENGTH) {
+                if(!found) {
                     roadListHashSet.add(roadNum);
                     drawString(g2, roadName, xMid, yMid, radians);
                 }
             }
         }
     }
+
     
     public void defaultMap() {
         press = new Point2D.Double(0, 0);

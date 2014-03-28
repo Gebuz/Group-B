@@ -17,7 +17,6 @@ import krakkit.MirrorCoordinates;
  */
 public class DataLoader {
 
-    public final HashMap<Integer, EdgeData> roadMap;
     public final HashMap<Integer, NodeData> nodes;
     public final ArrayList<EdgeData> edgesBlue;
     public final ArrayList<EdgeData> edgesPink;
@@ -26,7 +25,6 @@ public class DataLoader {
     public DataLoader() {
         String dir = "";
 
-        roadMap = new HashMap<>();
         nodes = new HashMap<>();
         edgesBlue = new ArrayList<>();
         edgesPink = new ArrayList<>();
@@ -45,12 +43,6 @@ public class DataLoader {
             @Override
             public void processEdge(EdgeData ed) {
                 edgesGreen.add(ed);
-                if(roadMap.containsKey(ed.VEJNR) && roadMap.get(ed.VEJNR).LENGTH < ed.LENGTH) {
-                        roadMap.put(ed.VEJNR, ed);
-                    }
-                    else if(!roadMap.containsKey(ed.VEJNR)) {
-                        roadMap.put(ed.VEJNR, ed);
-                    }
                 switch (ed.TYP) {
                     case 5:
                     case 6:
