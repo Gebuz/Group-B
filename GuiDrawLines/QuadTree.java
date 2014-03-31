@@ -3,6 +3,7 @@ package GuiDrawLines;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import krakkit.CoordinateBoundaries;
 import krakkit.EdgeData;
 import krakkit.NodeData;
 
@@ -210,6 +211,10 @@ public class QuadTree {
      */
 
     public HashSet<String> getRoadsImproved(double x1, double y1, double x2, double y2) {
+        x1 = outOfBoundsX(x1);
+        y1 = outOfBoundsY(y1);
+        x2 = outOfBoundsX(x2);
+        y2 = outOfBoundsY(y2);
         HashSet<String> trees = new HashSet<>();
         
         if(x1 > x2) {
@@ -303,6 +308,8 @@ public class QuadTree {
      * @return Returns the EdgeData with the road closest to a given point.
      */
     public EdgeData getClosestRoad(double x, double y) {
+        x = outOfBoundsX(x);
+        y = outOfBoundsY(y);
         EdgeData ed;
         String ID = getID(x, y);
         double distance;
@@ -467,6 +474,18 @@ public class QuadTree {
         a.addAll(sw.getEdges());
         a.addAll(se.getEdges());
         return a;        
+    }
+    
+    private double outOfBoundsX(double d){
+        if(d > CoordinateBoundaries.xMax) return CoordinateBoundaries.xMax;
+        else if(d < CoordinateBoundaries.xMin) return CoordinateBoundaries.xMin;
+        else return d;
+    }
+    
+    private double outOfBoundsY(double d){
+        if(d > CoordinateBoundaries.yMax) return CoordinateBoundaries.yMax;
+        else if(d < CoordinateBoundaries.yMin) return CoordinateBoundaries.yMin;
+        else return d;        
     }
     
 }
