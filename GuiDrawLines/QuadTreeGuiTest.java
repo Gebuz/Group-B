@@ -76,21 +76,8 @@ public class QuadTreeGuiTest {
         System.out.println("\nRoot neighbour branch id (01) = " + branch.id);
         System.out.println("");
 
-        final HashSet<String> trees = root.getRoadsImproved(CoordinateBoundaries.xMin + 100000,
-                CoordinateBoundaries.yMin + 100000,
-                CoordinateBoundaries.xMin + 200000,
-                CoordinateBoundaries.yMin + 200000);
+        final HashSet<String> trees = root.getAll();
 
-        System.out.println("\nID for branch 0 = " + root.getBranch("0").id);
-        System.out.println("Size of edges in branch 0 = " + root.getBranch("0").getEdges().size());
-        System.out.println("\nID for branch 00 = " + root.getBranch("00").id);
-        System.out.println("Size of edges in branch 00 = " + root.getBranch("00").getEdges().size());
-        System.out.println("\nID for branch 01 = " + root.getBranch("01").id);
-        System.out.println("Size of edges in branch 01 = " + root.getBranch("01").getEdges().size());
-        System.out.println("\nID for branch 02 = " + root.getBranch("02").id);
-        System.out.println("Size of edges in branch 02 = " + root.getBranch("02").getEdges().size());
-        System.out.println("\nID for branch 03 = " + root.getBranch("03").id);
-        System.out.println("Size of edges in branch 03 = " + root.getBranch("03").getEdges().size());
         
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
@@ -101,49 +88,13 @@ public class QuadTreeGuiTest {
                 g.draw(line);
             }
 
+            @Override
             public void paintComponent(Graphics g) {
                 int k = 550;
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
-                ArrayList<EdgeData> zoomEdges = new ArrayList<>();
                 for (String s : trees) {
-                    zoomEdges.addAll(root.getBranch(s).getEdges());
-                }
-                for (EdgeData ed : zoomEdges) {
-
-                    NodeData fn = nodes.get(ed.FNODE);
-                    NodeData tn = nodes.get(ed.TNODE);
-                    int type = ed.TYP;
-
-                    double fnX = (fn.getX() - CoordinateBoundaries.xMin) / k;
-                    double fnY = (fn.getY() - CoordinateBoundaries.yMin) / k;
-                    double tnX = (tn.getX() - CoordinateBoundaries.xMin) / k;
-                    double tnY = (tn.getY() - CoordinateBoundaries.yMin) / k;
-
-                    Line2D line = new Line2D.Double(fnX, fnY, tnX, tnY);
-                    switch (type) {
-                        case 5:
-                        case 6:
-                            drawLine(g2, line, Color.PINK, 1);
-                            break;
-                        case 1:
-                        case 31:
-                        case 41:
-                            drawLine(g2, line, Color.RED, 1);
-                            break;
-                        case 2:
-                        case 32:
-                            drawLine(g2, line, Color.GRAY, 1);
-                            break;
-                        case 8:
-                        case 48:
-                            drawLine(g2, line, Color.GREEN, 1);
-                            break;
-                        default:
-                            drawLine(g2, line, Color.BLUE, 1);
-                            break;
-                    }
-
+                    QuadTree qt = root.getBranch(s);
                 }
             }
         }
