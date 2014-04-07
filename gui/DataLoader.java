@@ -44,17 +44,22 @@ public class DataLoader {
             public void processEdge(EdgeData ed) {
                 edgesGreen.add(ed);
                 switch (ed.TYP) {
-                    case 5:
-                    case 6:
-                        edgesPink.add(ed);
-                        break;
-                    case 8:
-                    case 48:
-                        break;
-                    default:
-                        edgesPink.add(ed);
-                        edgesBlue.add(ed);
-                        break;
+            case 5:
+            case 6:
+                edgesPink.add(ed);
+                break;
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 31:
+            case 32:
+            case 41:              
+            case 42:
+            case 80:
+                edgesPink.add(ed);
+                edgesBlue.add(ed);
+                break;
                 }
             }
         };
