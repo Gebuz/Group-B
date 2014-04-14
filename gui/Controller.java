@@ -27,14 +27,16 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
     private final MapView view;
     private final MapPanel map;
+    private final StartFrame sf;
     private final double initHeight;
     private final double initWidth;
     private double xPress, yPress, xPressLocal, yPressLocal;
     private double mousePosX, mousePosY;
     private boolean centerZoom;
     
-    public Controller(MapView view) {
+    public Controller(MapView view, StartFrame sf) {
         this.view = view;
+        this.sf = sf;
         this.map = (MapPanel) view.mapPanel;
          
         initHeight = map.getSize().height - 1;
@@ -43,6 +45,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         centerZoom = false;
 
         view.addComponentListener(this);
+        sf.krakButton.addActionListener(this);
         view.zoomIn.addActionListener(this);
         view.zoomOut.addActionListener(this);
         view.showFull.addActionListener(this);
@@ -246,7 +249,10 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if      (e.getSource() == view.zoomIn) {
+        if      (e.getSource() == sf.krakButton) {
+            view.setVisible(true);
+        }
+        else if (e.getSource() == view.zoomIn) {
             map.zoomIn(0.10);
         }
         else if (e.getSource() == view.zoomOut) {

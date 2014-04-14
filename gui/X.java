@@ -5,8 +5,13 @@ import java.io.IOException;
 public class X
 {
     public static void main(String[] args) throws IOException {
-        MapPanel panel = new MapPanel();
-        MapView map = new MapView("Super duper map", panel);
-        Controller controller = new Controller(map);
+         javax.swing.SwingUtilities.invokeLater(new Runnable()
+         {
+            @Override
+             public void run()
+             {
+                 StartFrame sf = new StartFrame();        
+             }
+         });
     }
 }

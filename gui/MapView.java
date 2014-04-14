@@ -211,9 +211,9 @@ public class MapView extends JFrame {
         //Show window
         int minHeight = 300;
         int minLength = minHeight*2;
-        this.setMinimumSize(new Dimension(minLength, minHeight));
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setMinimumSize(new Dimension(minLength, minHeight));
         pack();
-        setVisible(true);
+        setLocationRelativeTo(null);
+        setVisible(false);
     }
 }

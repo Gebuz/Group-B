@@ -47,8 +47,8 @@ public class MapPanel extends JPanel implements Observer {
 
     public MapPanel() {  
         area = new Area();
-        
         loader = new DataLoader();
+        
         vectorLastPress = new Point2D.Double(0.0, 0.0);
         vectorLastRelease = new Point2D.Double(0.0, 0.0);
         press = new Point2D.Double(0, 0);  
