@@ -3,6 +3,8 @@ package gui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Random;
@@ -10,16 +12,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
 
+
+
 /**
  *
  * @author flemmingxu
  */
-public class StartFrame extends JFrame {
+public class StartFrame extends JFrame implements ActionListener {
     
-    private MapPanel panel;
-    private MapView map;
+    private MapPanel map;
+    private MapView view;
     private Controller controller;
-    private StartFrame sf = this;
+    public StartFrame sf = this;
     
     public final JButton krakButton;
     public final JButton osmButton;
@@ -27,27 +31,28 @@ public class StartFrame extends JFrame {
     private JPanel buttonPanel;
     private JPanel krakPanel;
     private JPanel osmPanel;
-    private JProgressBar bar;
-    private Task task;
+    Task task;
     private int progress;
+
     
     class Task extends SwingWorker<Void, Void> {
         
         @Override
-        protected Void doInBackground() {            
-            panel = new MapPanel();
-            map = new MapView("Super duper map", panel);
-            Controller controller = new Controller(map, sf);
+        protected Void doInBackground() {  
+            map = new MapPanel();
+            view = new MapView("Super duper map", map);
+            Controller controller = new Controller(view);
             return null;
         }
-        
+            
         @Override
         public void done() {
-            Toolkit.getDefaultToolkit().beep();
-            bar.setValue(100);
-            bar.setString("Loading completed!");
+//            loadBar.bar.setString("Loading completed!");
+//            loadBar.bar.setValue(100);
+//            loadBar.bar.setVisible(false);
             krakButton.setEnabled(true);
             setCursor(null);
+            view.setVisible(true);
         }
     }
     
@@ -58,7 +63,7 @@ public class StartFrame extends JFrame {
         textLabel = new JLabel("Vælg kort af Danmark:");
         krakButton = new JButton("Krak (2001)");
         osmButton = new JButton("Open Street Map (2014)");
-        krakButton.setEnabled(false);
+        krakButton.addActionListener(this);
         
         textLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         
@@ -70,13 +75,8 @@ public class StartFrame extends JFrame {
         krakPanel.setLayout(new FlowLayout());
         osmPanel.setLayout(new FlowLayout());
         
-        bar = new JProgressBar();
-        bar.setStringPainted(true);
-        bar.setString("Loading Krak data...");
-        
         //Adding components to containers
         krakPanel.add(krakButton);
-        krakPanel.add(bar);
         osmPanel.add(osmButton);
         
         buttonPanel.add(textLabel);
@@ -86,8 +86,7 @@ public class StartFrame extends JFrame {
         
         //final touches
         getContentPane().add(buttonPanel, BorderLayout.CENTER);
-        
-        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+     
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
         pack();
@@ -95,7 +94,24 @@ public class StartFrame extends JFrame {
         setVisible(true);
         
         task = new Task();
-        task.execute();
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if(task.isDone()) {
+            view.setVisible(true);
+        }
+        else {
+            //bar.setString("Loading Krak data...");
+            krakButton.setEnabled(false);
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            osmButton.setEnabled(false);
+            task.execute();
+        }
+    }
+}
+
+
         
 //        Random rng = new Random();
 //        progress = 0;
@@ -108,10 +124,7 @@ public class StartFrame extends JFrame {
 //            progress += rng.nextInt(20);
 //            bar.setValue(progress);
 //        }
-    }
-}
-
-
+    
 //    @Override
 //    public void propertyChange(PropertyChangeEvent evt) {
 //        if("progress" == evt.getPropertyName()) {
