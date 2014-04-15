@@ -1,0 +1,74 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package gui;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import krakkit.EdgeData;
+import krakkit.NodeData;
+import java.awt.geom.Point2D;
+
+/**
+ * TODO:
+ * add multiple fields for multiple vehicles (both graphs and trees).
+ * fix newGraph and newTree to match.
+ * @author Johan
+ */
+public class PathFinder {
+    private static final PathFinder pathFinder = new PathFinder();
+    EdgeWeightedDigraph graph;
+    SP tree;
+    HashMap<Point2D.Double, Integer> nodes;
+    int count = 0;
+    
+    public PathFinder(){
+
+    }
+    
+    public static PathFinder getInstance() {
+        return pathFinder;
+    }
+    
+    public void NewGraph(ArrayList<EdgeData> edges){
+        graph = new EdgeWeightedDigraph(edges.size());
+        count = 0;
+        for(EdgeData ed: edges) {
+            NodeData fn = DataLoader.nodes.get(ed.FNODE);
+            NodeData tn = DataLoader.nodes.get(ed.TNODE);
+            Point2D.Double xy1 = new Point2D.Double(fn.getX(), fn.getY());
+            Point2D.Double xy2 = new Point2D.Double(tn.getX(), tn.getY());
+            Integer i = nodes.get(xy1);
+            Integer j = nodes.get(xy2);
+            
+            if(i == null) {
+                nodes.put(xy1, count);
+                i = count++;
+            }
+            if(i == null) {
+                nodes.put(xy2, count);
+                j = count++;
+            }
+            if(ed.ONE_WAY.equals("ft")){
+                graph.addEdge(new DirectedEdge(i, j, ed.DRIVETIME));
+            } else if (ed.ONE_WAY.equals("tf")) {
+                graph.addEdge(new DirectedEdge(j, i, ed.DRIVETIME));
+            } else {
+                graph.addEdge(new DirectedEdge(i, j, ed.DRIVETIME));
+                graph.addEdge(new DirectedEdge(j, i, ed.DRIVETIME));
+            }
+        }
+    }
+    
+    public void NewTree(EdgeData e){
+        //Edgedata to a vertice somehow
+        tree = new SP(graph, s);
+    }
+    
+    public Iterable<DirectedEdge> shortestPath(String name){
+        return tree.pathTo(names.get(name));
+    }
+}
