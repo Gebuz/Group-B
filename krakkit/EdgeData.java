@@ -4,8 +4,8 @@ package krakkit;
  * Represents the raw data from a line in kdv_unload.txt.
  */
 public class EdgeData {
-	public final int FNODE; 
-	public final int TNODE; 
+	public final double FNODE; 
+	public final double TNODE; 
 	public final double LENGTH;
 	public final int DAV_DK;
 	public final int DAV_DK_ID;
@@ -77,8 +77,8 @@ public class EdgeData {
 
 	public EdgeData(String line) {
 		DataLine dl = new DataLine(line);
-		FNODE = dl.getInt();
-		TNODE = dl.getInt();
+		FNODE = dl.getDouble();
+		TNODE = dl.getDouble();
 		LENGTH = dl.getDouble();
 		DAV_DK = dl.getInt();
 		DAV_DK_ID = dl.getInt();
@@ -111,4 +111,41 @@ public class EdgeData {
 		AENDR_DATO = dl.getString();
 		TJEK_ID = dl.getInt();
 	}
+        
+        public EdgeData(String line, int i){
+            	DataLine dl = new DataLine(line);
+		FNODE = dl.getDouble();
+		TNODE = dl.getDouble();
+		LENGTH = dl.getDouble();
+		DAV_DK = 0;
+		DAV_DK_ID = 0;
+		TYP = dl.getInt();
+		VEJNAVN = dl.getString();
+		FROMLEFT = 0;
+		TOLEFT = 0;
+		FROMRIGHT = 0;
+		TORIGHT = 0;
+		FROMLEFT_BOGSTAV = null;
+		TOLEFT_BOGSTAV = null;
+		FROMRIGHT_BOGSTAV = null;
+		TORIGHT_BOGSTAV = null;
+		V_SOGNENR = 0;
+		H_SOGNENR = 0;
+		V_POSTNR = 0;
+		H_POSTNR = 0;
+		KOMMUNENR = 0;
+		VEJKODE = 0;
+		SUBNET = 0;
+		RUTENR = null;
+		FRAKOERSEL = 0;
+		ZONE = 0;
+		SPEED = dl.getInt();
+		DRIVETIME = 0.0;
+		ONE_WAY = dl.getString();
+		F_TURN = null;
+		T_TURN = null;
+		VEJNR = dl.getInt();
+		AENDR_DATO = null;
+		TJEK_ID = 0;
+        }
 }

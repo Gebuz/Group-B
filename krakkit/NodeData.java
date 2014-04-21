@@ -7,7 +7,7 @@ public class NodeData {
 
     final int ARC;
     public final int KDV;
-    final int KDV_ID;
+    final long KDV_ID;
     private double X_COORD;
     private double Y_COORD;
 
@@ -21,9 +21,17 @@ public class NodeData {
         DataLine dl = new DataLine(line);
         ARC = dl.getInt();
         KDV = dl.getInt();
-        KDV_ID = dl.getInt();
+        KDV_ID = (long) dl.getInt();
         X_COORD = dl.getDouble();
         Y_COORD = dl.getDouble();
+    }
+    
+    public NodeData(double x, double y, long id) {
+        X_COORD = x;
+        Y_COORD = y;
+        KDV_ID = id;
+        ARC = 0;
+        KDV = 0;
     }
 
     /**
