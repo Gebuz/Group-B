@@ -1,9 +1,11 @@
 package krakkit;
 
+import interfaces.MapNode;
+
 /**
  * An object storing the raw node data from the krak data file.
  */
-public class NodeData {
+public class KrakNodeData implements MapNode{
 
     final int ARC;
     public final int KDV;
@@ -15,9 +17,9 @@ public class NodeData {
      * Parses node data from line, throws an IOException if something unexpected
      * is read
      *
-     * @param line The source line from which the NodeData fields are parsed
+     * @param line The source line from which the KrakNodeData fields are parsed
      */
-    public NodeData(String line) {
+    public KrakNodeData(String line) {
         DataLine dl = new DataLine(line);
         ARC = dl.getInt();
         KDV = dl.getInt();
@@ -26,7 +28,7 @@ public class NodeData {
         Y_COORD = dl.getDouble();
     }
     
-    public NodeData(double x, double y, long id) {
+    public KrakNodeData(double x, double y, long id) {
         X_COORD = x;
         Y_COORD = y;
         KDV_ID = id;
@@ -42,10 +44,18 @@ public class NodeData {
         return ARC + "," + KDV + "," + KDV_ID + "," + X_COORD + "," + Y_COORD;
     }
 
+    
+    @Override
+    public long getID() {
+        return KDV_ID;
+    }
+    
+    @Override
     public double getX() {
         return X_COORD;
     }
 
+    @Override
     public double getY() {
         return Y_COORD;
     }
@@ -54,6 +64,7 @@ public class NodeData {
         this.X_COORD = X_COORD;
     }
     
+    @Override
     public void setY(double Y_COORD) {
         this.Y_COORD = Y_COORD;
     }

@@ -23,19 +23,19 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 /**
- * Filter a OSM file from any country into two separate XML files. One 
- * containing all Way elements containing tags with specified attributes. 
- * The other containing all the Node elements that are references in the
- * filtered Way elements.
- * This class runs through the input OSM file twice to avoid keeping all Nodes
- * in memory. On the other hand all the NodeReference (&lt;nd ref"long"/&gt;) 
- * values are kept in memory in a HashSet to avoid duplicates.
- * 
- * This class only works if the structure of the input OSM file is as stated
- * on OpenStreetMaps wiki page.
+ * Filter an OSM file from any country into two separate XML files. One
+ * containing all Way elements containing tags with specified attributes. The
+ * other containing all the Node elements that are references in the filtered
+ * Way elements. This class runs through the input OSM file twice to avoid
+ * keeping all Nodes in memory. On the other hand all the NodeReference (&lt;nd
+ * ref"long"/&gt;) values are kept in memory in a HashSet to avoid duplicates.
+ *
+ * This class only works if the structure of the input OSM file is as stated on
+ * OpenStreetMaps wiki page.
+ *
  * @see <a href="http://wiki.openstreetmap.org/wiki/.osm">
  * wiki.openstreetmap.org/wiki/.osm</a>
- * 
+ *
  * @author Sjúrður í Sandagerði
  */
 public class CustomFilter {
@@ -67,15 +67,16 @@ public class CustomFilter {
     /**
      * Create a Node element containing the three attributes; id, lat, lon.
      * Currently not used.
+     *
      * @param node OSMModeData object containing the information for this Node
      * element.
      * @param ef XMLEventFactory used to create the event objects.
-     * @return Returns the "node" XMLEvent 
+     * @return Returns the "node" XMLEvent
      */
     public static XMLEvent createNodeElement(OSMNodeData node, XMLEventFactory ef) {
-        String id = String.valueOf(node.id);
-        String lon = String.valueOf(node.lon);
-        String lat = String.valueOf(node.lat);
+        String id = String.valueOf(node.getID());
+        String lon = String.valueOf(node.getX());
+        String lat = String.valueOf(node.getY());
         Attribute attId = ef.createAttribute("id", id);
         Attribute attLat = ef.createAttribute("lat", lat);
         Attribute attLon = ef.createAttribute("lon", lon);
@@ -93,15 +94,15 @@ public class CustomFilter {
      * containing only the attributes that are in the attributesToKeep array.
      *
      * @param startElement The element whose attributes to filter.
-     * @param ef XMLEventFactory, used to create a new start element with the 
+     * @param ef XMLEventFactory, used to create a new start element with the
      * new attributes.
      * @param attributesToKeep This array works as the filter. Only save the
      * attributes that are in this array.
      * @return Returns a new XMLEvent with the new attributes.
      */
-    public static XMLEvent filterAttributes(StartElement startElement, 
+    public static XMLEvent filterAttributes(StartElement startElement,
             XMLEventFactory ef, String[] attributesToKeep) {
-        
+
         String tagName = startElement.getName().getLocalPart();
         Iterator nameSpaces = startElement.getNamespaces();
         Iterator it = startElement.getAttributes();
@@ -120,22 +121,24 @@ public class CustomFilter {
         }
         XMLEvent event = ef.createStartElement(
                 new QName(tagName), attArray.iterator(), nameSpaces);
-        
+
         return event;
     }
 
     /**
      * Check if an element should be ignored or not, based on an array of
      * specified attribute values.
-     * @param startElement  The element whose attributes to look up.
+     *
+     * @param startElement The element whose attributes to look up.
      * @param nameOfElement Name of the element.
      * @param nameOfAttribute Name of the attribute whose value to filter.
-     * @param attributeValues Array of attributes values. If the  element does 
+     * @param attributeValues Array of attributes values. If the element does
      * not contain this attribute value then ignore this element.
-     * @return Returns true if the element should be ignored and false otherwise.
+     * @return Returns true if the element should be ignored and false
+     * otherwise.
      */
     public static boolean ignoreElementWithAttributeValue(
-            StartElement startElement, String nameOfElement, 
+            StartElement startElement, String nameOfElement,
             String nameOfAttribute, String[] attributeValues) {
 
         String tagName = startElement.getName().getLocalPart();
@@ -158,16 +161,20 @@ public class CustomFilter {
     public static void main(String[] args) throws FileNotFoundException,
             XMLStreamException {
 
-        FileOutputStream foutS = new FileOutputStream(MyInputFile.fileUrl + " ways.xml");
+        boolean firstPass = true;
+        
+        FileOutputStream foutS = new FileOutputStream(MyInputFile.fileUrl + " parsed.xml");
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(foutS));
 
-        try (InputStream in = new FileInputStream(MyInputFile.fileUrl); BufferedWriter out = bw) {
+        try (InputStream inFirstPass = new FileInputStream(MyInputFile.fileUrl); 
+             InputStream inSecondPass = new FileInputStream(MyInputFile.fileUrl); 
+                BufferedWriter out = bw) {
 
             XMLInputFactory factory = XMLInputFactory.newInstance();
             XMLOutputFactory xof = XMLOutputFactory.newInstance();
             XMLEventFactory ef = XMLEventFactory.newInstance();
 
-            XMLEventReader reader = factory.createXMLEventReader(MyInputFile.fileUrl, in);
+            XMLEventReader reader = factory.createXMLEventReader(MyInputFile.fileUrl, inFirstPass);
             XMLEventWriter writer = xof.createXMLEventWriter(out);
 
             while (reader.hasNext()) {
@@ -233,15 +240,15 @@ public class CustomFilter {
                                             if (v.getValue().equalsIgnoreCase(nonos)) {
                                                 highwayTagFound = false;
                                                 break;
-                                            }     
+                                            }
                                         }
-                                    }  
+                                    }
                                 } else if (v != null && v.getValue().equalsIgnoreCase("coastline")) {
                                     coastLineTagFound = true;
                                 }
 
-                                if (startElem.getName().getLocalPart().equalsIgnoreCase("tag") && 
-                                        ignoreElementWithAttributeValue(startElem, "tag", "k", WhatToKeep.tagsToKeep)) {
+                                if (startElem.getName().getLocalPart().equalsIgnoreCase("tag")
+                                        && ignoreElementWithAttributeValue(startElem, "tag", "k", WhatToKeep.tagsToKeep)) {
                                     wayEvents.remove(wayEvent);
 
                                     // Skip twice to get rid of newline and whitespace 
@@ -268,8 +275,6 @@ public class CustomFilter {
 
                     } else if (tagName.equals("relation")) {
                         reader.close(); // Nothing more to read on the first pass.
-                        writer.add(ef.createEndElement(new QName("osm"), null));
-                        writer.add(ef.createEndDocument());
                         break;
                     }
                 } else if (event.isEndElement()) {
@@ -279,38 +284,26 @@ public class CustomFilter {
                 }
             }
 
-            in.close();
+            inFirstPass.close();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            firstPass = false;
 
-        foutS = new FileOutputStream(MyInputFile.fileUrl + " nodes.xml");
-        bw = new BufferedWriter(new OutputStreamWriter(foutS));
-
-        try (InputStream in = new FileInputStream(MyInputFile.fileUrl); BufferedWriter out = bw) {
-
-            XMLInputFactory factory = XMLInputFactory.newInstance();
-            XMLOutputFactory xof = XMLOutputFactory.newInstance();
-            XMLEventFactory ef = XMLEventFactory.newInstance();
-
-            XMLEventReader reader = factory.createXMLEventReader(MyInputFile.fileUrl, in);
-            XMLEventWriter writer = xof.createXMLEventWriter(out);
-
+            reader = factory.createXMLEventReader(MyInputFile.fileUrl, inSecondPass);
+            
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
 
                 if (event.isStartDocument()) {
-                    writer.add(event);
-                    writer.add(ef.createCharacters("\n"));
+
+                    continue; // Skip the StartDocument element <?xml ...>
                 } else if (event.isStartElement()) {
                     StartElement s = event.asStartElement();
                     String tagName = s.getName().getLocalPart();
 
                     if (tagName.equals("osm")) {
-                        writer.add(event);
+                        continue;
                     } else if (tagName.equals("bounds")) {
-                        writer.add(event);
+                        continue;
                     } else if (tagName.equals("node")) {
                         Attribute idAttribute = s.getAttributeByName(new QName("id"));
                         long id = 0;
@@ -324,14 +317,14 @@ public class CustomFilter {
                             nodeReferences.remove(id);
                             event = filterAttributes(s, ef, WhatToKeep.attributesToKeep);
                             writer.add(event);
-                            // Ignore all elements between the Node Start and End element.
+
                             while (reader.hasNext()) {
                                 XMLEvent nodeEvent = reader.nextEvent();
-                                
+                                writer.add(nodeEvent);
+
                                 if (nodeEvent.isEndElement()) {
                                     EndElement endElement = nodeEvent.asEndElement();
                                     if (endElement.getName().getLocalPart().equalsIgnoreCase("node")) {
-                                        writer.add(nodeEvent);
                                         break;
                                     }
                                 }
@@ -341,17 +334,28 @@ public class CustomFilter {
                         }
 
                     } else if (tagName.equalsIgnoreCase("way") || tagName.equalsIgnoreCase("relation")) {
-                        reader.close();
-                        writer.add(ef.createEndElement(new QName("osm"), null));
-                        writer.add(ef.createEndDocument());
                         break;
                     } else {
                         writer.add(event);
+                    }
+                } else if (event.isEndElement()) {
+                    EndElement end = event.asEndElement();
+                    String tagName = end.getName().getLocalPart();
+                    if (tagName.equalsIgnoreCase("node")
+                            || tagName.equalsIgnoreCase("tag")) {
+                        writer.add(event);
+                    } else {
+                        continue;
                     }
                 } else {
                     writer.add(event);
                 }
             }
+
+            writer.add(ef.createEndElement(new QName("osm"), null));
+            writer.add(ef.createEndDocument());
+
+            reader.close();
 
             writer.flush();
             writer.close();

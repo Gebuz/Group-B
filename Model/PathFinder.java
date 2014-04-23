@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package gui;
+package Model;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,19 +1,19 @@
-package GuiDrawLines;
+package Model;
 
+import interfaces.MapEdge;
+import interfaces.MapNode;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
 import java.io.IOException;
-import java.net.CookieHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import krakkit.CoordinateBoundaries;
 import krakkit.KrakLoader;
-import krakkit.EdgeData;
-import krakkit.NodeData;
+import krakkit.KrakEdgeData;
+import krakkit.KrakNodeData;
 
 public class QuadTreeGuiTest {
     
@@ -23,8 +23,8 @@ public class QuadTreeGuiTest {
 
         // For this example, we'll simply load the raw data into
         // ArrayLists.
-        final HashMap<Integer, NodeData> nodes = new HashMap<Integer, NodeData>();
-        final ArrayList<EdgeData> edges = new ArrayList<EdgeData>();
+        final HashMap<Long, MapNode> nodes = new HashMap<>();
+        final ArrayList<MapEdge> edges = new ArrayList<>();
         final QuadTree root;
 
         // For that, we need to inherit from KrakLoader and override
@@ -32,12 +32,12 @@ public class QuadTreeGuiTest {
         // anonymous class. 
         KrakLoader loader = new KrakLoader() {
             @Override
-            public void processNode(NodeData nd) {
-                nodes.put(nd.KDV, nd);
+            public void processNode(KrakNodeData nd) {
+                nodes.put(nd.getID(), nd);
             }
 
             @Override
-            public void processEdge(EdgeData ed) {
+            public void processEdge(KrakEdgeData ed) {
                 edges.add(ed);
             }
         };
@@ -52,10 +52,10 @@ public class QuadTreeGuiTest {
         CoordinateBoundaries.findBoundaries(nodes);
 
         // Spejlvend alle y værdier:
-        Iterator<Map.Entry<Integer, NodeData>> it = nodes.entrySet().iterator();
+        Iterator<Map.Entry<Long, MapNode>> it = nodes.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Integer, NodeData> e = it.next();
-            NodeData nd = e.getValue();
+            Map.Entry<Long, MapNode> e = it.next();
+            MapNode nd = e.getValue();
             nd.setY(CoordinateBoundaries.yMax - nd.getY()
                     + CoordinateBoundaries.yMin);
         }

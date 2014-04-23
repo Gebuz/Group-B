@@ -5,10 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Parse Krak data files (kdv_node_unload.txt, kdv_unload.txt).
@@ -22,9 +18,9 @@ import java.util.HashMap;
 public abstract class KrakLoader
 {
 
-    public abstract void processNode(NodeData nd);
+    public abstract void processNode(KrakNodeData nd);
 
-    public abstract void processEdge(EdgeData ed);
+    public abstract void processEdge(KrakEdgeData ed);
 
     /**
      * Load krak-data from given files, invoking processNode and processEdge
@@ -46,7 +42,7 @@ public abstract class KrakLoader
 
         String line;
         while ((line = br.readLine()) != null) {
-            processNode(new NodeData(line));
+            processNode(new KrakNodeData(line));
         }
         br.close();
 
@@ -56,78 +52,11 @@ public abstract class KrakLoader
         br.readLine(); // Again, first line is column names, not data.
 
         while ((line = br.readLine()) != null) {
-            processEdge(new EdgeData(line));
+            processEdge(new KrakEdgeData(line));
         }
         br.close();
 
         DataLine.resetInterner();
         System.gc();
-    }
-
-    /**
-     * Example usage. You may need to adjust the java heap-size, i.e., -Xmx256M
-     * on the command-line.
-     */
-    public static void main(String[] args) throws IOException
-    {
-        String dir = "";
-
-        // For this example, we'll simply load the raw data into
-        // ArrayLists.
-        final HashMap<Integer, NodeData> nodes = new HashMap<Integer, NodeData>();
-        final ArrayList<EdgeData> edges = new ArrayList<EdgeData>();
-
-        // For that, we need to inherit from KrakLoader and override
-        // processNode and processEdge. We do that with an 
-        // anonymous class. 
-        KrakLoader loader = new KrakLoader()
-        {
-            @Override
-            public void processNode(NodeData nd) { nodes.put(nd.KDV, nd); }
-
-            @Override
-            public void processEdge(EdgeData ed) { edges.add(ed); }
-        };
-
-        // If your machine slows to a crawl doing inputting, try
-        // uncommenting this. 
-        // Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-
-        // Invoke the loader class.
-        loader.load(dir + "kdv_node_unload.txt",
-                dir + "kdv_unload.txt");
-
-        // Check the results.
-        System.out.printf("Loaded %d nodes, %d edges\n",
-                nodes.size(), edges.size());
-        MemoryMXBean mxbean = ManagementFactory.getMemoryMXBean();
-        System.out.printf("Heap memory usage: %d MB%n",
-                mxbean.getHeapMemoryUsage().getUsed() / (1000000));
-        
-        CoordinateBoundaries.findBoundaries(nodes);
-        System.out.println("yMax = " + CoordinateBoundaries.yMax);
-        System.out.println("yMin = " + CoordinateBoundaries.yMin);
-        System.out.println("xMax = " + CoordinateBoundaries.xMax);
-        System.out.println("xMin = " + CoordinateBoundaries.xMin);
-
-        for (int i = 0; i < 812301; i++) {
-            NodeData fn = nodes.get(edges.get(i).FNODE);
-            NodeData tn = nodes.get(edges.get(i).TNODE);
-            double fnX = fn.getX();
-            double fnY = fn.getY();
-            double tnX = fn.getX();
-            double tnY = fn.getY();
-            //drawLine(fnX, fnY, tnX, tnY);
-            //System.out.println("Edge " + edges.get(i));
-        }
-
-        /*
-         PrintStream out = new PrintStream(dir + "nodes.txt");
-         for (NodeData node : nodes) out.println(node);
-         out.close();
-         out = new PrintStream(dir + "edges.txt");
-         for (EdgeData edge : edges) out.println(edge);
-         out.close();
-         */
     }
 }

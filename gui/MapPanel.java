@@ -5,10 +5,10 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
-import krakkit.CoordinateBoundaries;
-import krakkit.EdgeData;
-import krakkit.NodeData;
-import GuiDrawLines.QuadTree;
+import Model.CoordinateBoundaries;
+import Model.QuadTree;
+import interfaces.MapEdge;
+import interfaces.MapNode;
 
 /**
  *
@@ -25,7 +25,7 @@ public class MapPanel extends JPanel implements Observer {
     private HashSet<Integer> roadListHashSet = new HashSet<>();
     private boolean roadOn = true;
     
-    public final int k = 550;
+    public double k = 550;
     private double resizeConstant = 1, zoomConstant = 1;
     private double xk = 0, yk = 0;
     public final double ratio;
@@ -48,6 +48,11 @@ public class MapPanel extends JPanel implements Observer {
     public MapPanel() {  
         area = new Area();
         loader = new DataLoader();
+        if (DataLoader.isOSM) {
+            this.k = 0.010017435;
+        } else {
+            this.k = 550;
+        }
         
         vectorLastPress = new Point2D.Double(0.0, 0.0);
         vectorLastRelease = new Point2D.Double(0.0, 0.0);
@@ -86,7 +91,7 @@ public class MapPanel extends JPanel implements Observer {
               
         Graphics2D g2 = (Graphics2D) g;
         
-        NodeData fn, tn;
+        MapNode fn, tn;
         int type;
         double fnX, fnY, tnX, tnY;
 
@@ -114,24 +119,24 @@ public class MapPanel extends JPanel implements Observer {
             if (releaseY > CoordinateBoundaries.yMax) releaseY = CoordinateBoundaries.yMax;
             
             HashSet<String> trees;
-            ArrayList<EdgeData> edges2 = new ArrayList<>();
+            ArrayList<MapEdge> edges = new ArrayList<>();
             switch(colour) {
                 case BLUE:
                     trees = qtBlue.getRoadsImproved(pressX, pressY, releaseX, releaseY);
                     for(String s : trees) {
-                        edges2.addAll(qtBlue.getBranch(s).getEdges());
+                        edges.addAll(qtBlue.getBranch(s).getEdges());
                     }
                     break;
                 case PINK:
                     trees = qtPink.getRoadsImproved(pressX, pressY, releaseX, releaseY);
                     for(String s : trees) {
-                        edges2.addAll(qtPink.getBranch(s).getEdges());
+                        edges.addAll(qtPink.getBranch(s).getEdges());
                     }
                     break;
                 default:
                     trees = qtGreen.getRoadsImproved(pressX, pressY, releaseX, releaseY);
                     for(String s : trees) {
-                        edges2.addAll(qtGreen.getBranch(s).getEdges());
+                        edges.addAll(qtGreen.getBranch(s).getEdges());
                     }
                     break;
             }   
@@ -142,10 +147,10 @@ public class MapPanel extends JPanel implements Observer {
                 mapG.setRenderingHints(rh);
             }
 
-            for (EdgeData ed : edges2) {
-                fn = loader.nodes.get(ed.FNODE);
-                tn = loader.nodes.get(ed.TNODE);
-                type = ed.TYP;
+            for (MapEdge ed : edges) {
+                fn = loader.nodes.get(ed.getFNode());
+                tn = loader.nodes.get(ed.getTNode());
+                type = ed.getType();
 
                 fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);
                 fnY = (((fn.getY() - CoordinateBoundaries.yMin) / k) + yk); 
@@ -169,7 +174,7 @@ public class MapPanel extends JPanel implements Observer {
         }
     }
     
-    private void drawSpecified(double fnX, double fnY, double tnX, double tnY, int type, EdgeData edge, Graphics2D g2) {
+    private void drawSpecified(double fnX, double fnY, double tnX, double tnY, int type, MapEdge edge, Graphics2D g2) {
         //at this point, only the relevant coordinates (those within the rectangle) are accessed.
         fnX = fnX - press.x;
         fnY = fnY - press.y;
@@ -313,12 +318,12 @@ public class MapPanel extends JPanel implements Observer {
         return Math.toDegrees(Math.atan2(yDiff, xDiff)); 
     }
     
-    public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int fontSize, EdgeData edge, Graphics2D g2) {
+    public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int fontSize, MapEdge edge, Graphics2D g2) {
                                  /* Ignore roadnames that are the empty string. */ 
-        if(zoomConstant < zoomLimit && !edge.VEJNAVN.equals("")) {
+        if(zoomConstant < zoomLimit && !edge.getName().equals("")) {
             boolean found;
-            int roadNum = edge.VEJNR;
-            String roadName = edge.VEJNAVN;
+            int roadNum = edge.getID();
+            String roadName = edge.getName();
  
             found = roadListHashSet.contains(roadNum);
 
@@ -531,7 +536,7 @@ public class MapPanel extends JPanel implements Observer {
         
         x = pressX +  ((releaseX-widthDiff*k) - pressX)*x/INIT_WIDTH;
         y = pressY +  ((releaseY-heightDiff*k) - pressY)*y/INIT_HEIGHT;
-        EdgeData edge;
+        MapEdge edge;
         switch(colour) {
             case BLUE:
                 edge = qtBlue.getClosestRoad(x, y);
@@ -543,7 +548,7 @@ public class MapPanel extends JPanel implements Observer {
                 edge = qtGreen.getClosestRoad(x, y);
                 break;
         }
-        return edge.VEJNAVN;
+        return edge.getName();
     }
 
     @Override
@@ -553,5 +558,4 @@ public class MapPanel extends JPanel implements Observer {
     public double getResizeConstant() {
         return resizeConstant;
     }
-    
 }

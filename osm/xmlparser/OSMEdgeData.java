@@ -4,41 +4,65 @@
  */
 package osm.xmlparser;
 
-import krakkit.EdgeData;
+import interfaces.MapEdge;
 
 /**
  *
- * @author Sjurdur
+ * @author Sjúrður í Sandagerði
  */
-public class OSMEdgeData {
-    public long FNODE;
-    public long TNODE;
-    public double LENGTH = 0.0;
-    public int TYP;
-    public String VEJNAVN;
-    public int SPEED = 0;
-    public String ONE_WAY = "";
-    public int VEJNR; // Maybe use Way ID attribute.
+public class OSMEdgeData implements MapEdge {
+    private long FNODE;
+    private long TNODE;
+    private double LENGTH = 0.0;
+    private int TYPE;
+    private String NAME;
+    private int SPEED = 0;
+    private String ONE_WAY = "";
+    private int ID; // Maybe use Way ID attribute.
 
-    public OSMEdgeData(long FNODE, long TNODE, int TYP, int VEJNR, String VEJNAVN) {
+    public OSMEdgeData(long FNODE, long TNODE, int TYPE, int ID, String NAME) {
         this.FNODE = FNODE;
         this.TNODE = TNODE;
-        this.TYP = TYP;
-        this.VEJNR = VEJNR;
-        this.VEJNAVN = VEJNAVN;
+        this.TYPE = TYPE;
+        this.ID = ID;
+        this.NAME = NAME;
     }
     
     @Override
     public String toString(){
         return ("FN = " + FNODE + 
                 ", TN = " + TNODE +
-                ", TYPE = " + TYP +
-                ", VEJNR = " + VEJNR);
+                ", TYPE = " + TYPE +
+                ", ID = " + ID);
     }
-    
-    public EdgeData toED(){
-        String s = FNODE + " " + TNODE + " " + LENGTH + " " + TYP + " " + VEJNAVN
-                + " " + SPEED + " " + ONE_WAY + " " + VEJNR;
-        return new EdgeData(s, 0);
+
+    @Override
+    public long getFNode() {
+        return FNODE;
+    }
+
+    @Override
+    public long getTNode() {
+        return TNODE;
+    }
+
+    @Override
+    public double getLength() {
+        return LENGTH;
+    }
+
+    @Override
+    public int getType() {
+        return TYPE;
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
+    @Override
+    public int getID() {
+        return ID;
     }
 }

@@ -1,11 +1,10 @@
-package GuiDrawLines;
+package Model;
 
+import interfaces.MapEdge;
+import interfaces.MapNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import krakkit.CoordinateBoundaries;
-import krakkit.EdgeData;
-import krakkit.NodeData;
 
 /**
  * top left corner (x,y) and (x1, y1) bottom right corner (x2, y2)
@@ -15,8 +14,8 @@ import krakkit.NodeData;
 public class QuadTree {
 
     private QuadTree nw, ne, sw, se;
-    private final HashMap<Integer, NodeData> nodes;
-    private ArrayList<EdgeData> edges;
+    private final HashMap<Long, MapNode> nodes;
+    private ArrayList<MapEdge> edges;
     private double x, y, length, height;
 
     /**
@@ -60,14 +59,14 @@ public class QuadTree {
             double midx = x + length / 2;
             double midy = y + height / 2;
 
-            ArrayList<EdgeData> enw = new ArrayList<>();
-            ArrayList<EdgeData> ene = new ArrayList<>();
-            ArrayList<EdgeData> esw = new ArrayList<>();
-            ArrayList<EdgeData> ese = new ArrayList<>();
+            ArrayList<MapEdge> enw = new ArrayList<>();
+            ArrayList<MapEdge> ene = new ArrayList<>();
+            ArrayList<MapEdge> esw = new ArrayList<>();
+            ArrayList<MapEdge> ese = new ArrayList<>();
 
-            for (EdgeData e : edges) {
-                NodeData fn = nodes.get(e.FNODE);
-                NodeData tn = nodes.get(e.TNODE);
+            for (MapEdge e : edges) {
+                MapNode fn = nodes.get(e.getFNode());
+                MapNode tn = nodes.get(e.getTNode());
 
                 if (fn.getX() <= midx && fn.getY() <= midy) {
                     enw.add(e);
@@ -189,10 +188,10 @@ public class QuadTree {
      * @param y1 The y coordinate of the top left corner of the 
      * @param x2 The x coordinate of the lower right corner of the 
      * @param y2 The y coordinate of the lower right corner of the
-     * @return Returns an ArrayList&lt;{@link EdgeData}&gt; of all edges that
+     * @return Returns an ArrayList&lt;{@link MapEdge}&gt; of all edges that
      * are inside the lowest QuadTree based on coordinates.
      */
-    public ArrayList<EdgeData> getRoads(double x1, double y1, double x2, double y2) {
+    public ArrayList<MapEdge> getRoads(double x1, double y1, double x2, double y2) {
         if (nw.canZoom(x1, y1, x2, y2)) return nw.getRoads(x1, y1, x2, y2);
         if (ne.canZoom(x1, y1, x2, y2)) return ne.getRoads(x1, y1, x2, y2);
         if (sw.canZoom(x1, y1, x2, y2)) return sw.getRoads(x1, y1, x2, y2);
@@ -305,27 +304,27 @@ public class QuadTree {
      * Find the road closest to a given point (x1, y1).
      * @param x The x coordinate of the point.
      * @param y The y coordinate of the point.
-     * @return Returns the EdgeData with the road closest to a given point.
+     * @return Returns the MapEdge with the road closest to a given point.
      */
-    public EdgeData getClosestRoad(double x, double y) {
+    public MapEdge getClosestRoad(double x, double y) {
         x = outOfBoundsX(x);
         y = outOfBoundsY(y);
-        EdgeData ed;
+        MapEdge ed;
         String ID = getID(x, y);
         double distance;
-        ArrayList<EdgeData> a = getBranch(ID).getEdges();
+        ArrayList<MapEdge> a = getBranch(ID).getEdges();
         if(a.isEmpty()) a = this.getParent(getBranch(ID)).getEdges();
         
         ed = a.get(0);
-        NodeData edfn = nodes.get(ed.FNODE);
-        NodeData edtn = nodes.get(ed.TNODE);
+        MapNode edfn = nodes.get(ed.getFNode());
+        MapNode edtn = nodes.get(ed.getTNode());
         distance = distanceFromLine(edfn.getX(), edfn.getY(), edtn.getX(), edtn.getY(), x, y);
         
-        for(EdgeData e: a){
-            NodeData fn = nodes.get(e.FNODE);
-            NodeData tn = nodes.get(e.TNODE);
+        for(MapEdge e: a){
+            MapNode fn = nodes.get(e.getFNode());
+            MapNode tn = nodes.get(e.getTNode());
             double d = distanceFromLine(fn.getX(), fn.getY(), tn.getX(), tn.getY(), x, y);
-            if(d < distance && !(e.VEJNAVN.equals(""))) {
+            if(d < distance && !(e.getName().equals(""))) {
                 distance = d;
                 ed = e;
             }
@@ -456,7 +455,7 @@ public class QuadTree {
      * Gets the HashMap containing all nodes.
      * @return returns the HashMap containing all nodes.
      */
-    public HashMap<Integer, NodeData> getNodes()
+    public HashMap<Long, MapNode> getNodes()
     {
         return nodes;
     }
@@ -465,10 +464,10 @@ public class QuadTree {
      * Gets all the Edges in the QuadTree.
      * @return Returns all Edges in the QuadTree.
      */
-    public ArrayList<EdgeData> getEdges()
+    public ArrayList<MapEdge> getEdges()
     {
         if(nw == null) return edges; //if leaf
-        ArrayList<EdgeData> a = new ArrayList<>();
+        ArrayList<MapEdge> a = new ArrayList<>();
         a.addAll(nw.getEdges());
         a.addAll(ne.getEdges());
         a.addAll(sw.getEdges());

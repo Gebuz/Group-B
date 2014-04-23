@@ -1,13 +1,15 @@
-package krakkit;
+package Model;
 
+import interfaces.MapNode;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import krakkit.KrakNodeData;
  
 
 /**
- * Mirror the coordinates of each NodeData in a 
- * HashMap&lt;Integer, {@link NodeData}&gt; based on the maximum coordinate 
+ * Mirror the coordinates of each KrakNodeData in a 
+ * HashMap&lt;Integer, {@link KrakNodeData}&gt; based on the maximum coordinate 
  * found in the HashMap.
  * @author Sjúrður í Sandagerði
  */
@@ -16,17 +18,17 @@ public class MirrorCoordinates {
     /**
      * Mirror the Y coordinates based on the largest Y value found in the 
      * HashMap.
-     * @param nodes HashMap whose NodeData's y-coordinate to mirrir.
+     * @param nodes HashMap whose KrakNodeData's y-coordinate to mirrir.
      */
-    public static void MirrorY(HashMap<Integer, NodeData> nodes) {
+    public static void MirrorY(HashMap<Long, MapNode> nodes) {
         
         // Just to make sure that the boundaries have been found.
         CoordinateBoundaries.findBoundaries(nodes);
         
-        Iterator<Map.Entry<Integer, NodeData>> it = nodes.entrySet().iterator();
+        Iterator<Map.Entry<Long, MapNode>> it = nodes.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Integer, NodeData> e = it.next();
-            NodeData nd = e.getValue();
+            Map.Entry<Long, MapNode> e = it.next();
+            MapNode nd = e.getValue();
             nd.setY(CoordinateBoundaries.yMax - nd.getY() + 
                     CoordinateBoundaries.yMin);
         }

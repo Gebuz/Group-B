@@ -1,11 +1,13 @@
 package krakkit;
 
+import interfaces.MapEdge;
+
 /**
  * Represents the raw data from a line in kdv_unload.txt.
  */
-public class EdgeData {
-	public final double FNODE; 
-	public final double TNODE; 
+public class KrakEdgeData implements MapEdge {
+	public final long FNODE; 
+	public final long TNODE; 
 	public final double LENGTH;
 	public final int DAV_DK;
 	public final int DAV_DK_ID;
@@ -75,10 +77,10 @@ public class EdgeData {
 			TJEK_ID;
 	}
 
-	public EdgeData(String line) {
+	public KrakEdgeData(String line) {
 		DataLine dl = new DataLine(line);
-		FNODE = dl.getDouble();
-		TNODE = dl.getDouble();
+		FNODE = (long) dl.getInt();
+		TNODE = (long) dl.getInt();
 		LENGTH = dl.getDouble();
 		DAV_DK = dl.getInt();
 		DAV_DK_ID = dl.getInt();
@@ -112,10 +114,10 @@ public class EdgeData {
 		TJEK_ID = dl.getInt();
 	}
         
-        public EdgeData(String line, int i){
+        public KrakEdgeData(String line, int i){
             	DataLine dl = new DataLine(line);
-		FNODE = dl.getDouble();
-		TNODE = dl.getDouble();
+		FNODE = (long) dl.getInt();
+		TNODE = (long) dl.getInt();
 		LENGTH = dl.getDouble();
 		DAV_DK = 0;
 		DAV_DK_ID = 0;
@@ -148,4 +150,34 @@ public class EdgeData {
 		AENDR_DATO = null;
 		TJEK_ID = 0;
         }
+
+    @Override
+    public long getFNode() {
+        return FNODE;
+    }
+
+    @Override
+    public long getTNode() {
+        return TNODE;
+    }
+
+    @Override
+    public double getLength() {
+        return LENGTH;
+    }
+
+    @Override
+    public int getType() {
+        return TYP;
+    }
+
+    @Override
+    public String getName() {
+        return VEJNAVN;
+    }
+
+    @Override
+    public int getID() {
+        return VEJNR;
+    }
 }

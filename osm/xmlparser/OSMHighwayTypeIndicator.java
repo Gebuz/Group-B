@@ -4,7 +4,6 @@ package osm.xmlparser;
 /**
  * Translate the value of a highway to an Integer that is similar to the type
  * list used in the Krak dataset.
- * 
  * @author Sjúrður í Sandagerði
  */
 public class OSMHighwayTypeIndicator {
@@ -15,7 +14,7 @@ public class OSMHighwayTypeIndicator {
      * 
      * @param highwayValue The value that is associated to a highway tag in OSM.
      * @return Returns an integer indicating what type the highway is. If the
-     * highway type is not specified then return 0 as a default value, and if no
+     * highway type is specified then return 0 as a default value, and if no
      * highway enum is found then this method returns -1.
      */
     public static int getType(String highwayValue){
