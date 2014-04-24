@@ -6,11 +6,15 @@
 
 package Model;
 
+import Graph.DirectedEdge;
+import Graph.EdgeWeightedDigraph;
+import Graph.SP;
 import java.util.ArrayList;
 import java.util.HashMap;
-import krakkit.KrakEdgeData;
-import krakkit.KrakNodeData;
 import java.awt.geom.Point2D;
+import interfaces.MapEdge;
+import interfaces.MapNode;
+import gui.DataLoader;
 
 /**
  * TODO:
@@ -33,12 +37,12 @@ public class PathFinder {
         return pathFinder;
     }
     
-    public void NewGraph(ArrayList<KrakEdgeData> edges){
+    public void NewGraph(ArrayList<MapEdge> edges){
         graph = new EdgeWeightedDigraph(edges.size());
         count = 0;
-        for(KrakEdgeData ed: edges) {
-            KrakNodeData fn = DataLoaderOSM.nodes.get(ed.FNODE);
-            KrakNodeData tn = DataLoaderOSM.nodes.get(ed.TNODE);
+        for(MapEdge ed: edges) {
+            MapNode fn = DataLoader.nodes.get(ed.getFNode());
+            MapNode tn = DataLoader.nodes.get(ed.getTNode());
             Point2D.Double xy1 = new Point2D.Double(fn.getX(), fn.getY());
             Point2D.Double xy2 = new Point2D.Double(tn.getX(), tn.getY());
             Integer i = nodes.get(xy1);
@@ -63,12 +67,15 @@ public class PathFinder {
         }
     }
     
-    public void NewTree(KrakEdgeData e){
-        //Edgedata to a vertice somehow
-        tree = new SP(graph, s);
+    public void NewTree(MapEdge e){
+        MapNode fn = DataLoader.nodes.get(e.getFNode());
+        Point2D.Double xy = new Point2D.Double(fn.getX(), fn.getY());
+        tree = new SP(graph, nodes.get(xy));
     }
     
-    public Iterable<DirectedEdge> shortestPath(String name){
-        return tree.pathTo(names.get(name));
+    public Iterable<DirectedEdge> shortestPath(MapEdge e){
+        MapNode fn = DataLoader.nodes.get(e.getFNode());
+        Point2D.Double xy = new Point2D.Double(fn.getX(), fn.getY());
+        return tree.pathTo(nodes.get(xy));
     }
 }
