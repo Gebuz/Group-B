@@ -42,4 +42,10 @@ public interface MapEdge {
      * @return
      */
     int getID();
+    
+    /**
+     * 
+     * @return 
+     */
+    String getOneWay();
 }

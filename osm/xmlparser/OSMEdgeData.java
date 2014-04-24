@@ -65,4 +65,9 @@ public class OSMEdgeData implements MapEdge {
     public int getID() {
         return ID;
     }
+
+    @Override
+    public String getOneWay() {
+        return ONE_WAY;
+    }
 }

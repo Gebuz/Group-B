@@ -180,4 +180,9 @@ public class KrakEdgeData implements MapEdge {
     public int getID() {
         return VEJNR;
     }
+
+    @Override
+    public String getOneWay() {
+        return ONE_WAY;
+    }
 }
