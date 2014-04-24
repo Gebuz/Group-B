@@ -63,12 +63,15 @@ public class PathFinder {
         }
     }
     
-    public void NewTree(KrakEdgeData e){
-        //Edgedata to a vertice somehow
-        tree = new SP(graph, s);
+    public void NewTree(EdgeData ed){
+        NodeData fn = DataLoader.nodes.get(ed.FNODE);
+        Point2D.Double xy = new Point2D.Double(fn.getX(), fn.getY());
+        tree = new SP(graph, nodes.get(xy));
     }
     
-    public Iterable<DirectedEdge> shortestPath(String name){
-        return tree.pathTo(names.get(name));
+    public Iterable<DirectedEdge> shortestPath(EdgeData ed){
+        NodeData fn = DataLoader.nodes.get(ed.FNODE);
+        Point2D.Double xy = new Point2D.Double(fn.getX(), fn.getY());
+        return tree.pathTo(nodes.get(xy));
     }
 }
