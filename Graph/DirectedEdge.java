@@ -1,6 +1,6 @@
 package Graph;
 
-import interfaces.MapEdge; //CHANGED
+import interfaces.MapEdge;
 /*************************************************************************
  *  Compilation:  javac DirectedEdge.java
  *  Execution:    java DirectedEdge
@@ -26,7 +26,7 @@ public class DirectedEdge {
     private final int v;
     private final int w;
     private final double weight;
-    private MapEdge me; //CHANGED       
+    private MapEdge me;     
 
     /**
      * Initializes a directed edge from vertex <tt>v</tt> to vertex <tt>w</tt> with
@@ -81,7 +81,6 @@ public class DirectedEdge {
         return v + "->" + w + " " + String.format("%5.2f", weight);
     }
     
-    //CHANGED
     public MapEdge getEdge(){
         return me;
     }

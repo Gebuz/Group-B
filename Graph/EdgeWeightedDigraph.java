@@ -52,49 +52,6 @@ public class EdgeWeightedDigraph {
     }
 
     /**
-     * Initializes a random edge-weighted digraph with <tt>V</tt> vertices and <em>E</em> edges.
-     * param V the number of vertices
-     * param E the number of edges
-     * @throws java.lang.IllegalArgumentException if <tt>V</tt> < 0
-     * @throws java.lang.IllegalArgumentException if <tt>E</tt> < 0
-     */
-    public EdgeWeightedDigraph(int V, int E) {
-        this(V);
-        if (E < 0) throw new IllegalArgumentException("Number of edges in a Digraph must be nonnegative");
-        for (int i = 0; i < E; i++) {
-            int v = (int) (Math.random() * V);
-            int w = (int) (Math.random() * V);
-            double weight = Math.round(100 * Math.random()) / 100.0;
-            DirectedEdge e = new DirectedEdge(v, w, weight);
-            addEdge(e);
-        }
-    }
-
-    /**  
-     * Initializes an edge-weighted digraph from an input stream.
-     * The format is the number of vertices <em>V</em>,
-     * followed by the number of edges <em>E</em>,
-     * followed by <em>E</em> pairs of vertices and edge weights,
-     * with each entry separated by whitespace.
-     * @param in the input stream
-     * @throws java.lang.IndexOutOfBoundsException if the endpoints of any edge are not in prescribed range
-     * @throws java.lang.IllegalArgumentException if the number of vertices or edges is negative
-     */
-    public EdgeWeightedDigraph(In in) {
-        this(in.readInt());
-        int E = in.readInt();
-        if (E < 0) throw new IllegalArgumentException("Number of edges must be nonnegative");
-        for (int i = 0; i < E; i++) {
-            int v = in.readInt();
-            int w = in.readInt();
-            if (v < 0 || v >= V) throw new IndexOutOfBoundsException("vertex " + v + " is not between 0 and " + (V-1));
-            if (w < 0 || w >= V) throw new IndexOutOfBoundsException("vertex " + w + " is not between 0 and " + (V-1));
-            double weight = in.readDouble();
-            addEdge(new DirectedEdge(v, w, weight));
-        }
-    }
-
-    /**
      * Initializes a new edge-weighted digraph that is a deep copy of <tt>G</tt>.
      * @param G the edge-weighted graph to copy
      */
@@ -198,14 +155,4 @@ public class EdgeWeightedDigraph {
         }
         return s.toString();
     }
-
-    /**
-     * Unit tests the <tt>EdgeWeightedDigraph</tt> data type.
-     */
-    public static void main(String[] args) {
-        In in = new In(args[0]);
-        EdgeWeightedDigraph G = new EdgeWeightedDigraph(in);
-        StdOut.println(G);
-    }
-
 }
