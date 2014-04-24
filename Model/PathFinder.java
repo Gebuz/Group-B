@@ -19,7 +19,10 @@ import gui.DataLoader;
 /**
  * TODO:
  * add multiple fields for multiple vehicles (both graphs and trees).
- * fix newGraph and newTree to match.
+ * make NewGraph private and make a new method that creates all graphs needed.
+ * fix weight of edges.
+ * fix oneway.
+ * unit test
  * @author Johan
  */
 public class PathFinder {
@@ -56,25 +59,25 @@ public class PathFinder {
                 nodes.put(xy2, count);
                 j = count++;
             }
-            if(ed.ONE_WAY.equals("ft")){
-                graph.addEdge(new DirectedEdge(i, j, ed.DRIVETIME));
-            } else if (ed.ONE_WAY.equals("tf")) {
-                graph.addEdge(new DirectedEdge(j, i, ed.DRIVETIME));
+            if(ed.getOneWay().equals("ft")){
+                graph.addEdge(new DirectedEdge(i, j, ed.getLength()/ed.getType(), ed));
+            } else if (ed.getOneWay().equals("tf")) {
+                graph.addEdge(new DirectedEdge(i, j, ed.getLength()/ed.getType(), ed));
             } else {
-                graph.addEdge(new DirectedEdge(i, j, ed.DRIVETIME));
-                graph.addEdge(new DirectedEdge(j, i, ed.DRIVETIME));
+                graph.addEdge(new DirectedEdge(i, j, ed.getLength()/ed.getType(), ed));
+                graph.addEdge(new DirectedEdge(j, i, ed.getLength()/ed.getType(), ed));
             }
         }
     }
     
-    public void NewTree(MapEdge e){
-        MapNode fn = DataLoader.nodes.get(e.getFNode());
+    public void NewTree(MapEdge ed){
+        MapNode fn = DataLoader.nodes.get(ed.getFNode());
         Point2D.Double xy = new Point2D.Double(fn.getX(), fn.getY());
         tree = new SP(graph, nodes.get(xy));
     }
     
-    public Iterable<DirectedEdge> shortestPath(MapEdge e){
-        MapNode fn = DataLoader.nodes.get(e.getFNode());
+    public Iterable<DirectedEdge> shortestPath(MapEdge ed){
+        MapNode fn = DataLoader.nodes.get(ed.getFNode());
         Point2D.Double xy = new Point2D.Double(fn.getX(), fn.getY());
         return tree.pathTo(nodes.get(xy));
     }

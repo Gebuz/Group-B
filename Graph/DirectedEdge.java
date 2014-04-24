@@ -1,5 +1,6 @@
 package Graph;
 
+import interfaces.MapEdge; //CHANGED
 /*************************************************************************
  *  Compilation:  javac DirectedEdge.java
  *  Execution:    java DirectedEdge
@@ -25,6 +26,7 @@ public class DirectedEdge {
     private final int v;
     private final int w;
     private final double weight;
+    private MapEdge me; //CHANGED       
 
     /**
      * Initializes a directed edge from vertex <tt>v</tt> to vertex <tt>w</tt> with
@@ -32,17 +34,19 @@ public class DirectedEdge {
      * @param v the tail vertex
      * @param w the head vertex
      * @param weight the weight of the directed edge
+     * @param me the MapEdge
      * @throws java.lang.IndexOutOfBoundsException if either <tt>v</tt> or <tt>w</tt>
      *    is a negative integer
      * @throws IllegalArgumentException if <tt>weight</tt> is <tt>NaN</tt>
      */
-    public DirectedEdge(int v, int w, double weight) {
+    public DirectedEdge(int v, int w, double weight, MapEdge me) {
         if (v < 0) throw new IndexOutOfBoundsException("Vertex names must be nonnegative integers");
         if (w < 0) throw new IndexOutOfBoundsException("Vertex names must be nonnegative integers");
         if (Double.isNaN(weight)) throw new IllegalArgumentException("Weight is NaN");
         this.v = v;
         this.w = w;
         this.weight = weight;
+        this.me = me;
     }
 
     /**
@@ -76,13 +80,10 @@ public class DirectedEdge {
     public String toString() {
         return v + "->" + w + " " + String.format("%5.2f", weight);
     }
-
-    /**
-     * Unit tests the <tt>DirectedEdge</tt> data type.
-     */
-    public static void main(String[] args) {
-        DirectedEdge e = new DirectedEdge(12, 23, 3.14);
-        StdOut.println(e);
+    
+    //CHANGED
+    public MapEdge getEdge(){
+        return me;
     }
 }
 
