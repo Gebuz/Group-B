@@ -185,4 +185,9 @@ public class KrakEdgeData implements MapEdge {
     public String getOneWay() {
         return ONE_WAY;
     }
+
+    @Override
+    public int getMaxSpeed() {
+        return SPEED;
+    }
 }

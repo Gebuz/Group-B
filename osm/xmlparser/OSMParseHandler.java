@@ -26,10 +26,14 @@ public abstract class OSMParseHandler extends DefaultHandler {
     boolean boundsFound = false;
     Queue<Long> nodeRefQueue = new LinkedList<>();
     Projection p; // Maybe do projection later.
+    
     // Temporary fields for each Way element.
     private int typ = 0;
     private int vejnr = 0;
+    private int maxspeed = 0;
+    private String oneway = "";
     private String vejnavn = "";
+
 
     // Temporary fields for each Node element go here:
     @Override
@@ -75,11 +79,37 @@ public abstract class OSMParseHandler extends DefaultHandler {
                         if (v != null) {
                             vejnavn = v;
                         }
+                    } else if (k.equals("maxspeed")) {
+                        String v = attributes.getValue("v");
+                        if (v != null) {
+                            try {
+                                if      (v.contains(";"))       v = v.substring(0, v.indexOf(";"));
+                                else if (v.equalsIgnoreCase("DK:urban"))  v = "50";
+                                else if (v.equalsIgnoreCase("DK:rural"))  v = "80";
+                                else if (v.equals("*"))         v = "50"; // ??
+                                else if (v.contains("signal") && typ == 1) v = "130";
+                                else if (v.contains("signal") && typ == 31) v = "90";
+                                maxspeed = Integer.parseInt(v);
+                                
+                            } catch (NumberFormatException e) {
+                                System.out.println("Bug = " + v + " type is " + typ);
+                                maxspeed = -1;
+                            }
+                        }
+                    } else if (k.equals("oneway")) {
+                        String v = attributes.getValue("v");
+                        if (v != null) {
+                            if      (oneway.equalsIgnoreCase("yes")) oneway = "ft";
+                            else if (oneway.equalsIgnoreCase("no"))  oneway = "";
+                            else if (oneway.equalsIgnoreCase("-1"))  oneway = "tf";
+                            else                                     oneway = "";
+                        }
                     }
                 }
             }
         } else if (inNode) {
             // Insert code to parse the children of a Node element here.
+           
         }
 
 
@@ -104,6 +134,8 @@ public abstract class OSMParseHandler extends DefaultHandler {
         typ = 0;
         vejnr = 0;
         vejnavn = "";
+        oneway = "";
+        maxspeed = 0;
     }
 
     private OSMNodeData getNodeInformation(Attributes attributes) {
@@ -163,7 +195,7 @@ public abstract class OSMParseHandler extends DefaultHandler {
             long fn = nodeRefQueue.poll();
             if (!nodeRefQueue.isEmpty()) {
                 long tn = nodeRefQueue.peek();
-                OSMEdgeData edge = new OSMEdgeData(fn, tn, typ, vejnr, vejnavn);
+                OSMEdgeData edge = new OSMEdgeData(fn, tn, typ, vejnr, vejnavn, maxspeed, oneway);
                 processEdge(edge);
             }
         }

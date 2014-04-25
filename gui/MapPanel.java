@@ -548,7 +548,7 @@ public class MapPanel extends JPanel implements Observer {
                 edge = qtGreen.getClosestRoad(x, y);
                 break;
         }
-        return edge.getName();
+        return edge.getName() + " - " + edge.getOneWay()  + " - " +  edge.getMaxSpeed();
     }
 
     @Override
