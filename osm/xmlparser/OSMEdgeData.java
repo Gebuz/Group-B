@@ -87,7 +87,7 @@ public class OSMEdgeData implements MapEdge {
                     MAXSPEED = 15;
                     break;
                 case 8:
-                    MAXSPEED = 6;
+                    MAXSPEED = 5;
                     break;
                 default:
                     MAXSPEED = 0;
