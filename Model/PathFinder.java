@@ -27,8 +27,10 @@ import gui.DataLoader;
  */
 public class PathFinder {
     private static final PathFinder pathFinder = new PathFinder();
-    EdgeWeightedDigraph graph;
-    SP tree;
+    EdgeWeightedDigraph graphCar;
+    EdgeWeightedDigraph graphWalk;
+    SP treeCar;
+    SP treeWalk;
     HashMap<Point2D.Double, Integer> nodes;
     int count = 0;
     
@@ -40,8 +42,13 @@ public class PathFinder {
         return pathFinder;
     }
     
-    public void NewGraph(ArrayList<MapEdge> edges){
-        graph = new EdgeWeightedDigraph(edges.size());
+    public void addGraphs(ArrayList<MapEdge> car, ArrayList<MapEdge> walk){
+        graphCar = newGraph(car);
+        graphWalk = newGraph(walk);
+    }
+    
+    private EdgeWeightedDigraph newGraph(ArrayList<MapEdge> edges){
+        EdgeWeightedDigraph graph = new EdgeWeightedDigraph(edges.size());
         count = 0;
         for(MapEdge ed: edges) {
             MapNode fn = DataLoader.nodes.get(ed.getFNode());
@@ -60,25 +67,35 @@ public class PathFinder {
                 j = count++;
             }
             if(ed.getOneWay().equals("ft")){
-                graph.addEdge(new DirectedEdge(i, j, ed.getLength()/ed.getType(), ed));
+                graph.addEdge(new DirectedEdge(i, j, ed.getLength()/ed.getMaxSpeed()/3.6 + 10, ed));
             } else if (ed.getOneWay().equals("tf")) {
-                graph.addEdge(new DirectedEdge(i, j, ed.getLength()/ed.getType(), ed));
+                graph.addEdge(new DirectedEdge(i, j, ed.getLength()/ed.getMaxSpeed()/3.6 + 10, ed));
             } else {
-                graph.addEdge(new DirectedEdge(i, j, ed.getLength()/ed.getType(), ed));
-                graph.addEdge(new DirectedEdge(j, i, ed.getLength()/ed.getType(), ed));
+                graph.addEdge(new DirectedEdge(i, j, ed.getLength()/ed.getMaxSpeed()/3.6 + 10, ed));
+                graph.addEdge(new DirectedEdge(j, i, ed.getLength()/ed.getMaxSpeed()/3.6 + 10, ed));
             }
         }
+        return graph;
     }
     
-    public void NewTree(MapEdge ed){
+    public void createTree(MapEdge ed){
+        treeCar = newTree(graphCar, ed);
+        treeWalk = newTree(graphWalk, ed);
+    }
+    
+    private SP newTree(EdgeWeightedDigraph graph, MapEdge ed){
         MapNode fn = DataLoader.nodes.get(ed.getFNode());
         Point2D.Double xy = new Point2D.Double(fn.getX(), fn.getY());
-        tree = new SP(graph, nodes.get(xy));
+        return new SP(graph, nodes.get(xy));
     }
-    
-    public Iterable<DirectedEdge> shortestPath(MapEdge ed){
+           
+    public Iterable<DirectedEdge> shortestPath(int i, MapEdge ed){
+        SP tree;
+        if(i == 0) tree = treeCar;
+        else tree = treeWalk;
         MapNode fn = DataLoader.nodes.get(ed.getFNode());
         Point2D.Double xy = new Point2D.Double(fn.getX(), fn.getY());
         return tree.pathTo(nodes.get(xy));
     }
+
 }
