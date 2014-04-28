@@ -39,4 +39,8 @@ public class OSMNodeData implements MapNode {
     public void setY(double newLat) {
         this.lat = newLat;
     }
+
+    public void setX(double lon) {
+        this.lon = lon;
+    }
 }

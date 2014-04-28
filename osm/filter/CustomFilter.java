@@ -163,7 +163,7 @@ public class CustomFilter {
 
         boolean firstPass = true;
         
-        FileOutputStream foutS = new FileOutputStream(MyInputFile.fileUrl + " parsed.xml");
+        FileOutputStream foutS = new FileOutputStream(MyInputFile.fileUrl + " coast line.xml");
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(foutS));
 
         try (InputStream inFirstPass = new FileInputStream(MyInputFile.fileUrl); 
@@ -243,7 +243,8 @@ public class CustomFilter {
                                             }
                                         }
                                     }
-                                } else if (v != null && v.getValue().equalsIgnoreCase("coastline")) {
+                                } 
+                                else if (v != null && v.getValue().equalsIgnoreCase("coastline")) {
                                     coastLineTagFound = true;
                                 }
 

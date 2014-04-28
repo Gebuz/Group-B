@@ -7,6 +7,8 @@ import java.util.Queue;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+import uk.me.jstott.jcoord.LatLng;
+import uk.me.jstott.jcoord.UTMRef;
 
 /**
  * This class parses an OpenStreetMaps XML data file containing Way and Node
@@ -180,6 +182,7 @@ public abstract class OSMParseHandler extends DefaultHandler {
             CoordinateBoundaries.setyMax(Double.parseDouble(maxLat));
         }
 
+               
         p = new Projection(CoordinateBoundaries.yMin,
                 CoordinateBoundaries.yMax, CoordinateBoundaries.xMin,
                 CoordinateBoundaries.xMax);
@@ -195,7 +198,7 @@ public abstract class OSMParseHandler extends DefaultHandler {
             long fn = nodeRefQueue.poll();
             if (!nodeRefQueue.isEmpty()) {
                 long tn = nodeRefQueue.peek();
-                OSMEdgeData edge = new OSMEdgeData(fn, tn, typ, vejnr, vejnavn, maxspeed, oneway);
+                OSMEdgeData edge = new OSMEdgeDataBuilder().setFNODE(fn).setTNODE(tn).setTYPE(typ).setID(vejnr).setNAME(vejnavn).setMAXSPEED(maxspeed).setONE_WAY(oneway).createOSMEdgeData();
                 processEdge(edge);
             }
         }

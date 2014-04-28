@@ -44,8 +44,8 @@ public class OSMEdgeData implements MapEdge {
 
     /**
      *
-     * Incase the MAX SPEED has not been found in the OSM Data file then set the
-     * speed according to the type of road.
+     * In case the MAX SPEED has not been found in the OSM Data file then set 
+     * the speed according to the type of road.
      */
     private void setSpeedFromRoadType() {
         if (MAXSPEED == 0) {
