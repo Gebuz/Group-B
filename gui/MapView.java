@@ -5,6 +5,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -13,60 +15,95 @@ import java.awt.event.KeyEvent;
 
 public class MapView extends JFrame {
     public final JPanel mapPanel;
-    public final JPanel northPanel, eastPanel, arrowPanel, upPanel, downPanel, roadOnOffPanel, roadPanel, xyPanel;
-    public final JButton zoomIn, zoomOut, showFull, up, down, left, right, roadOn, roadOff;
-    public final JLabel x, y, road, roadOnOff; 
-    public final JCheckBox relativeZoomCheckBox;
+    public final JPanel northPanel, eastPanel, upPanel, downPanel, roadPanel, xyPanel, arrowPanel, zoomPanel;
+    public final JLabel x, y, road;
+    public final JButton up, down, left, right, showFull, zoomIn, zoomOut;
+    public final JMenuBar menuBar;
+    public final JMenu mapOptionsMenu, helpMenu;
+    public final JCheckBoxMenuItem enableRoad, enableRelative, enableNavigation;
+    private int condition;
     
     public MapView(String name, final MapPanel mapPanel) {
         super(name);
         
-        //Initializing components
+        //Setting UIManager settings
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(MapView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        UIManager.put("MenuBar.background", Color.LIGHT_GRAY);
+        UIManager.put("Menu.background", Color.LIGHT_GRAY);
+        
+        //Making menu
+        menuBar = new JMenuBar();
+        
+        mapOptionsMenu = new JMenu("Map options");
+        menuBar.add(mapOptionsMenu);
+        
+        helpMenu = new JMenu("Help");
+        menuBar.add(helpMenu);
+        
+        enableRoad = new JCheckBoxMenuItem("Enable road names");
+        enableRoad.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
+        enableRoad.setEnabled(true);
+        enableRoad.setSelected(true);
+        mapOptionsMenu.add(enableRoad);
+        
+        enableRelative = new JCheckBoxMenuItem("Enable relative mouse zoom");
+        enableRelative.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, ActionEvent.ALT_MASK));
+        enableRelative.setEnabled(true);
+        enableRelative.setSelected(true);
+        mapOptionsMenu.add(enableRelative);
+        
+        mapOptionsMenu.addSeparator();
+        
+        enableNavigation = new JCheckBoxMenuItem("Show navigation panel");
+        enableNavigation.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.ALT_MASK));
+        enableNavigation.setEnabled(true);
+        enableNavigation.setSelected(true);
+        mapOptionsMenu.add(enableNavigation);
+        
+        //Initializing components  
         this.mapPanel = mapPanel;
         
         northPanel = new JPanel();
         xyPanel = new JPanel();
         
         eastPanel = new JPanel();
-        arrowPanel = new JPanel();
         upPanel = new JPanel();
         downPanel = new JPanel();
-        roadOnOffPanel = new JPanel();
+        arrowPanel = new JPanel();
+        zoomPanel = new JPanel();
         roadPanel = new JPanel();
-        
         
         x = new JLabel("0");
         y = new JLabel("0");
         road = new JLabel("");
-        roadOnOff = new JLabel("Show road names: ON");
-       
         
         showFull = new JButton ("▣");
-        zoomIn = new JButton("Zoom In (+)");
-        zoomOut = new JButton("Zoom Out (-)");
+        zoomIn = new JButton("+");
+        zoomOut = new JButton("-");
         
         up = new JButton("↑");
         down = new JButton("↓");
         left = new JButton("←");
         right = new JButton("→");
         
-        roadOn = new JButton("On");
-        roadOff = new JButton("Off");
-        roadOn.setEnabled(false);
-        
-        relativeZoomCheckBox = new JCheckBox("Enable Relative Mouse Zoom");
-        relativeZoomCheckBox.setEnabled(true);
-        relativeZoomCheckBox.setMnemonic(KeyEvent.VK_R);
-        relativeZoomCheckBox.setSelected(true);
+//        relativeZoomCheckBox = new JCheckBox("Enable Relative Mouse Zoom");
+//        relativeZoomCheckBox.setEnabled(true);
+//        relativeZoomCheckBox.setMnemonic(KeyEvent.VK_R);
+//        relativeZoomCheckBox.setSelected(true);
         
         //Mapping key inputs to button
         KeyStroke keyUp = KeyStroke.getKeyStroke("UP"); 
         KeyStroke keyDown = KeyStroke.getKeyStroke("DOWN");
         KeyStroke keyLeft = KeyStroke.getKeyStroke("LEFT");
         KeyStroke keyRight = KeyStroke.getKeyStroke("RIGHT");
+        condition = JComponent.WHEN_IN_FOCUSED_WINDOW;
         
-        up.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(keyUp, "up");
-        up.getActionMap().put("up", new AbstractAction()
+        mapPanel.getInputMap(condition).put(keyUp, "up");
+        mapPanel.getActionMap().put("up", new AbstractAction()
         {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -82,8 +119,8 @@ public class MapView extends JFrame {
                     mapPanel.changeY(0.08);
             }
         });
-        down.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(keyDown, "down");
-        down.getActionMap().put("down", new AbstractAction()
+        mapPanel.getInputMap(condition).put(keyDown, "down");
+        mapPanel.getActionMap().put("down", new AbstractAction()
         {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -99,8 +136,8 @@ public class MapView extends JFrame {
                     mapPanel.changeY(-0.08);
             }
         });
-        left.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(keyLeft, "left");
-        left.getActionMap().put("left", new AbstractAction()
+        mapPanel.getInputMap(condition).put(keyLeft, "left");
+        mapPanel.getActionMap().put("left", new AbstractAction()
         {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -116,8 +153,8 @@ public class MapView extends JFrame {
                     mapPanel.changeX(0.08);
             }
         });
-        right.getInputMap(JButton.WHEN_IN_FOCUSED_WINDOW).put(keyRight, "right");
-        right.getActionMap().put("right", new AbstractAction()
+        mapPanel.getInputMap(condition).put(keyRight, "right");
+        mapPanel.getActionMap().put("right", new AbstractAction()
         {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -145,15 +182,21 @@ public class MapView extends JFrame {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         eastPanel.setBorder(BorderFactory.createEtchedBorder(Color.PINK, Color.MAGENTA));
         
+        
         arrowPanel.setLayout(new BorderLayout());
         upPanel.setLayout(new BoxLayout(upPanel, BoxLayout.LINE_AXIS));
         downPanel.setLayout(new BoxLayout(downPanel, BoxLayout.LINE_AXIS));
         
         roadPanel.setLayout(new FlowLayout());
-        roadOnOffPanel.setLayout(new FlowLayout());
-
         
-        //Adding components to panels
+        //Adding components
+        //zoomIn.setBorderPainted(false);
+        //zoomIn.setAlignmentY(0.0f);
+        mapPanel.add(zoomIn);
+        mapPanel.add(zoomOut);
+        
+        //mapPanel.add(zoomOut);
+        
         upPanel.add(Box.createHorizontalGlue());
         upPanel.add(up);
         upPanel.add(Box.createHorizontalGlue());
@@ -168,14 +211,7 @@ public class MapView extends JFrame {
         arrowPanel.add(right, BorderLayout.EAST);
         arrowPanel.add(showFull, BorderLayout.CENTER);
         
-        roadOnOffPanel.add(roadOn);
-        roadOnOffPanel.add(roadOff);
-        
-        
         eastPanel.add(arrowPanel, gbc);
-        eastPanel.add(roadOnOff, gbc);
-        eastPanel.add(roadOnOffPanel, gbc);
-        eastPanel.add(relativeZoomCheckBox, gbc);
         
         roadPanel.add(road);
         
@@ -183,8 +219,8 @@ public class MapView extends JFrame {
         northPanel.add(Box.createHorizontalGlue());
         
         //Adding components to panels
-        northPanel.add(zoomIn);
-        northPanel.add(zoomOut);
+//        northPanel.add(zoomIn);
+//        northPanel.add(zoomOut);
         
         xyPanel.add(new JLabel("x: "));
         xyPanel.add(x);
@@ -205,13 +241,14 @@ public class MapView extends JFrame {
         
         //Adding final touches to content pane.
         getContentPane().add(mapPanel, BorderLayout.CENTER);
-        getContentPane().add(northPanel, BorderLayout.NORTH);
+        //getContentPane().add(northPanel, BorderLayout.NORTH);
         getContentPane().add(eastPanel, BorderLayout.EAST);
         
         //Show window
         int minHeight = 300;
         int minLength = minHeight*2;
         setMinimumSize(new Dimension(minLength, minHeight));
+        setJMenuBar(menuBar);
         pack();
         setLocationRelativeTo(null);
         setVisible(false);

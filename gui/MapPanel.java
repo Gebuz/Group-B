@@ -45,10 +45,10 @@ public class MapPanel extends JPanel implements Observer {
     
     double pressX, pressY, releaseX, releaseY;
 
-    public MapPanel() {  
+    public MapPanel(int bool) { 
         area = new Area();
-        loader = new DataLoader();
-        if (DataLoader.isOSM) {
+        loader = new DataLoader(bool);
+        if (bool == 1) {
             this.k = 0.010017435;
         } else {
             this.k = 550;
@@ -526,6 +526,11 @@ public class MapPanel extends JPanel implements Observer {
     public void roadSwitch() {
         if(roadOn) roadOn = false;
         else roadOn = true;
+        isMap = false;
+        repaint();
+    }
+    
+    public void updateMap() {
         isMap = false;
         repaint();
     }

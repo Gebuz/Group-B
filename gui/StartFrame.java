@@ -17,6 +17,7 @@ public class StartFrame extends JFrame implements ActionListener {
     
     private MapPanel map;
     private MapView view;
+    private NavigationWindow navigationWindow;
     private Controller controller;
     public StartFrame sf = this;
     
@@ -27,25 +28,27 @@ public class StartFrame extends JFrame implements ActionListener {
     private JPanel krakPanel;
     private JPanel osmPanel;
     Task task;
-    private int progress;
+    private int bool;
 
     
     class Task extends SwingWorker<Void, Void> {
         
         @Override
         protected Void doInBackground() {  
-            map = new MapPanel();
+            map = new MapPanel(bool);
             view = new MapView("Super duper map", map);
-            Controller controller = new Controller(view);
+            controller = new Controller(view);
             return null;
         }
             
         @Override
         public void done() {
-//            loadBar.bar.setString("Loading completed!");
-//            loadBar.bar.setValue(100);
-//            loadBar.bar.setVisible(false);
-            krakButton.setEnabled(true);
+            if(bool == 0) {
+                krakButton.setEnabled(true);
+            }
+            else {
+                osmButton.setEnabled(true);
+            }
             setCursor(null);
             view.setVisible(true);
         }
@@ -59,6 +62,7 @@ public class StartFrame extends JFrame implements ActionListener {
         krakButton = new JButton("Krak (2001)");
         osmButton = new JButton("Open Street Map (2014)");
         krakButton.addActionListener(this);
+        osmButton.addActionListener(this);
         
         textLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         
@@ -93,38 +97,32 @@ public class StartFrame extends JFrame implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(task.isDone()) {
-            view.setVisible(true);
+        if(e.getSource() == krakButton) {
+            if(task.isDone()) {
+                view.setVisible(true);
+            }
+            else {
+                krakButton.setEnabled(false);
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                osmButton.setEnabled(false);
+                bool = 0;
+                task.execute();
+            }
         }
-        else {
-            //bar.setString("Loading Krak data...");
-            krakButton.setEnabled(false);
-            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            osmButton.setEnabled(false);
-            task.execute();
+        else if(e.getSource() == osmButton) {
+            if(task.isDone()) {
+                view.setVisible(true);
+            }
+            else {
+                osmButton.setEnabled(false);
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                krakButton.setEnabled(false);
+                bool = 1;
+                task.execute();
+            }
         }
     }
 }
 
 
         
-//        Random rng = new Random();
-//        progress = 0;
-//        while(progress < 100) {
-//            try {
-//                Thread.sleep(1000);
-//            } catch (InterruptedException ex) {
-//                Logger.getLogger(StartFrame.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//            progress += rng.nextInt(20);
-//            bar.setValue(progress);
-//        }
-    
-//    @Override
-//    public void propertyChange(PropertyChangeEvent evt) {
-//        if("progress" == evt.getPropertyName()) {
-//            int progress = (Integer) evt.getNewValue();
-//            bar.setValue(progress);
-//        }
-//    }
-//}

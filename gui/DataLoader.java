@@ -29,12 +29,12 @@ public class DataLoader {
     public static final ArrayList<MapEdge> edgesBlue = new ArrayList<>();
     public static final ArrayList<MapEdge> edgesPink = new ArrayList<>();
     public static final ArrayList<MapEdge> edgesGreen = new ArrayList<>();
-    public static boolean isOSM = true;
+    public static boolean isOSM = false;
 
-    public DataLoader() {
+    public DataLoader(int bool) {
         String dir = "data/";
 
-        if (!isOSM) {
+        if (bool == 0) {
 
             // For that, we need to inherit from KrakLoader and override
             // processNode and processEdge. We do that with an 

@@ -34,7 +34,9 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     private boolean centerZoom;
     
     public Controller(MapView view) {
+        
         this.view = view;
+        
         this.map = (MapPanel) view.mapPanel;
          
         initHeight = map.getSize().height - 1;
@@ -42,7 +44,6 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         
         centerZoom = false;
 
-        view.addComponentListener(this);
         view.zoomIn.addActionListener(this);
         view.zoomOut.addActionListener(this);
         view.showFull.addActionListener(this);
@@ -50,9 +51,13 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         view.down.addActionListener(this);
         view.left.addActionListener(this);
         view.right.addActionListener(this);
-        view.roadOn.addActionListener(this);
-        view.roadOff.addActionListener(this);
-        view.relativeZoomCheckBox.addItemListener(this);
+        view.addComponentListener(this);
+        view.enableRelative.addItemListener(this);
+        view.enableRoad.addItemListener(this);
+        view.enableNavigation.addItemListener(this);
+//        view.roadOn.addActionListener(this);
+//        view.roadOff.addActionListener(this);
+//        view.relativeZoomCheckBox.addItemListener(this);
         
         map.addMouseListener(this);
         map.addMouseMotionListener(this);
@@ -256,18 +261,18 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             map.defaultMap();
             view.pack();
         }
-        else if (e.getSource() == view.roadOn) {
-            view.roadOn.setEnabled(false);
-            view.roadOff.setEnabled(true);
-            view.roadOnOff.setText("Show Road Names: ON");
-            map.roadSwitch();
-        }
-        else if (e.getSource() == view.roadOff) {
-            view.roadOff.setEnabled(false);
-            view.roadOn.setEnabled(true);
-            view.roadOnOff.setText("Show Road Names: OFF");
-            map.roadSwitch();
-        }
+//        else if (e.getSource() == view.roadOn) {
+//            view.roadOn.setEnabled(false);
+//            view.roadOff.setEnabled(true);
+//            view.roadOnOff.setText("Show Road Names: ON");
+//            map.roadSwitch();
+//        }
+//        else if (e.getSource() == view.roadOff) {
+//            view.roadOff.setEnabled(false);
+//            view.roadOn.setEnabled(true);
+//            view.roadOnOff.setText("Show Road Names: OFF");
+//            map.roadSwitch();
+//        }
         
         else if (e.getSource() == view.up) {
             if      (map.getZoom() >= 0.4)  map.changeY(20);
@@ -302,11 +307,26 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     @Override
     public void itemStateChanged(ItemEvent e) {
         Object source = e.getItemSelectable();
-        if (source == view.relativeZoomCheckBox) {
+        if (source == view.enableRelative) {
             if (centerZoom) {
                 centerZoom = false;
             } else {
                 centerZoom = true;
+            }
+        }
+        else if (source == view.enableRoad) {
+            map.roadSwitch();
+        }
+        else if (source == view.enableNavigation) {
+            if (view.eastPanel.isVisible()) {
+                view.eastPanel.setVisible(false);
+                view.repaint();
+                map.updateMap();
+            }
+            else {
+                view.eastPanel.setVisible(true);
+                view.repaint();
+                map.updateMap();
             }
         }
     }
