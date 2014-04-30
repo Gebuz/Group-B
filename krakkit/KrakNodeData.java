@@ -60,6 +60,7 @@ public class KrakNodeData implements MapNode{
         return Y_COORD;
     }
 
+    @Override
     public void setX(double X_COORD) {
         this.X_COORD = X_COORD;
     }

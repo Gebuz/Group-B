@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import javax.xml.namespace.QName;
@@ -39,7 +41,11 @@ import javax.xml.stream.events.XMLEvent;
  * @author Sjúrður í Sandagerði
  */
 public class CustomFilter {
-
+    
+    // Map the node IDs into this HashMap and give each node a new ID from 1 and up.
+    private static HashMap<Long, Long> idMap = new HashMap<>();
+    private static Long nodeIDCounter = 1L;
+    
     static HashSet<Long> nodeReferences = new HashSet<>();
 
     /**
@@ -114,8 +120,16 @@ public class CustomFilter {
             for (String attributeToGet : attributesToKeep) {
                 String attName = att.getName().getLocalPart();
                 if (attName.equals(attributeToGet)) {
-                    attArray.add(att);
-                    break;
+                    // If the attribute is "id" then we need to create a new
+                    // attribute with the mapped ID.
+                    if (attName.equals("id") && tagName.equals("node")) {
+                        Attribute newAtt = ef.createAttribute(new QName("id"), Long.toString(idMap.get(Long.valueOf(att.getValue()))));
+                        attArray.add(newAtt);
+                        break;
+                    } else {
+                        attArray.add(att);
+                        break;
+                    }
                 }
             }
         }
@@ -163,7 +177,7 @@ public class CustomFilter {
 
         boolean firstPass = true;
         
-        FileOutputStream foutS = new FileOutputStream(MyInputFile.fileUrl + " coast line.xml");
+        FileOutputStream foutS = new FileOutputStream(MyInputFile.fileUrl + " parsed.xml");
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(foutS));
 
         try (InputStream inFirstPass = new FileInputStream(MyInputFile.fileUrl); 
@@ -219,16 +233,36 @@ public class CustomFilter {
                         while (reader.hasNext()) {
 
                             XMLEvent wayEvent = reader.nextEvent();
-                            wayEvents.add(wayEvent);
-
+                            
                             if (wayEvent.isStartElement()) {
                                 StartElement startElem = wayEvent.asStartElement();
                                 if (startElem.getName().getLocalPart().equals("nd")) {
                                     Attribute attNodeRef = startElem.getAttributeByName(new QName("ref"));
                                     if (attNodeRef != null) {
-                                        long nodeRefID = Long.parseLong(attNodeRef.getValue());
-                                        wayNodeRef.add(nodeRefID);
+                                        Long nodeRefID = Long.parseLong(attNodeRef.getValue());
+                                        Long tempID = nodeIDCounter;
+                                        if (!idMap.containsKey(nodeRefID)) {
+                                            idMap.put(nodeRefID, new Long(nodeIDCounter));
+                                            wayNodeRef.add(new Long(nodeIDCounter));
+                                        } else {
+                                            tempID = idMap.get(nodeRefID);
+                                            wayNodeRef.add(tempID);
+                                        }
+                                        
+                                        try {
+                                        Attribute newIDAttribute = ef.createAttribute(new QName("ref"), Long.toString(tempID));
+                                        Iterator attributeTempIT = Arrays.asList(newIDAttribute).iterator();
+                                        XMLEvent newEvent = ef.createStartElement(new QName("nd"), attributeTempIT, null);
+                                        
+                                        wayEvents.add(newEvent);
+                                        nodeIDCounter++; 
+                                        } catch (NullPointerException ex) {
+                                            System.out.println(ex.getMessage());
+                                        }
                                     }
+                                    
+                                } else {
+                                    wayEvents.add(wayEvent);
                                 }
 
                                 Attribute k = startElem.getAttributeByName(new QName("k"));
@@ -244,8 +278,8 @@ public class CustomFilter {
                                         }
                                     }
                                 } 
-                                else if (v != null && v.getValue().equalsIgnoreCase("coastline")) {
-                                    coastLineTagFound = true;
+                                else if (v != null && v.getValue().equalsIgnoreCase("coastlineASD")) {
+                                    coastLineTagFound = false;
                                 }
 
                                 if (startElem.getName().getLocalPart().equalsIgnoreCase("tag")
@@ -258,12 +292,18 @@ public class CustomFilter {
                                     reader.next();
                                 }
                             } else if (wayEvent.isEndElement()) {
+                                
+                                wayEvents.add(wayEvent);
+                                
                                 if (wayEvent.asEndElement().getName().getLocalPart().equals("way")) {
                                     if (reader.hasNext()) {
                                         wayEvents.add(reader.nextEvent());
                                         break;
                                     }
                                 }
+
+                            } else {
+                                wayEvents.add(wayEvent);
                             }
                         }
 
@@ -307,10 +347,11 @@ public class CustomFilter {
                         continue;
                     } else if (tagName.equals("node")) {
                         Attribute idAttribute = s.getAttributeByName(new QName("id"));
-                        long id = 0;
+                        Long id = 1L;
                         if (idAttribute != null) // avoid null pointer reference.
                         {
                             id = Long.parseLong(idAttribute.getValue());
+                            id = idMap.get(id);
                         }
 
                         // Check if the Node is in the nodeReferences.

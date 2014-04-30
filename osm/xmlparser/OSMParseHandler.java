@@ -4,11 +4,11 @@ import Model.CoordinateBoundaries;
 import Model.Projection;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-import uk.me.jstott.jcoord.LatLng;
-import uk.me.jstott.jcoord.UTMRef;
 
 /**
  * This class parses an OpenStreetMaps XML data file containing Way and Node
@@ -21,21 +21,18 @@ public abstract class OSMParseHandler extends DefaultHandler {
     public abstract void processNode(OSMNodeData nd);
 
     public abstract void processEdge(OSMEdgeData ed);
-    
 //    ArrayList<OSMEdgeData> osmEdges = new ArrayList<>();
     boolean inWay = false; // Are we inside a Way element or not.
     boolean inNode = false; // Are we inside a Node element or not.
     boolean boundsFound = false;
     Queue<Long> nodeRefQueue = new LinkedList<>();
     Projection p; // Maybe do projection later.
-    
     // Temporary fields for each Way element.
     private int typ = 0;
     private int vejnr = 0;
     private int maxspeed = 0;
     private String oneway = "";
     private String vejnavn = "";
-
 
     // Temporary fields for each Node element go here:
     @Override
@@ -57,7 +54,12 @@ public abstract class OSMParseHandler extends DefaultHandler {
 
             String id = attributes.getValue("id");
             if (id != null) {
-                vejnr = Integer.parseInt(id);
+                try {
+                    vejnr = Integer.parseInt(id);
+                } catch (NumberFormatException ex) {
+                    Logger.getLogger(OSMParseHandler.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
             }
         }
 
@@ -65,7 +67,12 @@ public abstract class OSMParseHandler extends DefaultHandler {
             if (localName.equalsIgnoreCase("nd")) {
                 String ref = attributes.getValue("ref");
                 if (ref != null) {
-                    nodeRefQueue.add(Long.parseLong(ref));
+                    try {
+                        nodeRefQueue.add(Long.parseLong(ref));
+                    } catch (NumberFormatException ex) {
+                        Logger.getLogger(OSMParseHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
                 }
             } else if (localName.equalsIgnoreCase("tag")) {
                 String k = attributes.getValue("k");
@@ -85,33 +92,45 @@ public abstract class OSMParseHandler extends DefaultHandler {
                         String v = attributes.getValue("v");
                         if (v != null) {
                             try {
-                                if      (v.contains(";"))       v = v.substring(0, v.indexOf(";"));
-                                else if (v.equalsIgnoreCase("DK:urban"))  v = "50";
-                                else if (v.equalsIgnoreCase("DK:rural"))  v = "80";
-                                else if (v.equals("*"))         v = "50"; // ??
-                                else if (v.contains("signal") && typ == 1) v = "130";
-                                else if (v.contains("signal") && typ == 31) v = "90";
+                                if (v.contains(";")) {
+                                    v = v.substring(0, v.indexOf(";"));
+                                } else if (v.equalsIgnoreCase("DK:urban")) {
+                                    v = "50";
+                                } else if (v.equalsIgnoreCase("DK:rural")) {
+                                    v = "80";
+                                } else if (v.equals("*")) {
+                                    v = "50"; // ??
+                                } else if (v.contains("signal") && typ == 1) {
+                                    v = "130";
+                                } else if (v.contains("signal") && typ == 31) {
+                                    v = "90";
+                                }
                                 maxspeed = Integer.parseInt(v);
-                                
-                            } catch (NumberFormatException e) {
-                                System.out.println("Bug = " + v + " type is " + typ);
+
+                            } catch (NumberFormatException ex) {
+                                Logger.getLogger(OSMParseHandler.class.getName()).log(Level.SEVERE, null, ex);
+
                                 maxspeed = -1;
                             }
                         }
                     } else if (k.equals("oneway")) {
                         String v = attributes.getValue("v");
                         if (v != null) {
-                            if      (oneway.equalsIgnoreCase("yes")) oneway = "ft";
-                            else if (oneway.equalsIgnoreCase("no"))  oneway = "";
-                            else if (oneway.equalsIgnoreCase("-1"))  oneway = "tf";
-                            else                                     oneway = "";
+                            if (oneway.equalsIgnoreCase("yes")) {
+                                oneway = "ft";
+                            } else if (oneway.equalsIgnoreCase("no")) {
+                                oneway = "";
+                            } else if (oneway.equalsIgnoreCase("-1")) {
+                                oneway = "tf";
+                            } else {
+                                oneway = "";
+                            }
                         }
                     }
                 }
             }
         } else if (inNode) {
             // Insert code to parse the children of a Node element here.
-           
         }
 
 
@@ -125,9 +144,7 @@ public abstract class OSMParseHandler extends DefaultHandler {
             createEdges();
             nodeRefQueue.clear();
             resetVariables();
-        }
-        
-        else if (localName.equalsIgnoreCase("node")) {
+        } else if (localName.equalsIgnoreCase("node")) {
             inNode = false;
         }
     }
@@ -146,16 +163,22 @@ public abstract class OSMParseHandler extends DefaultHandler {
         String lonStr = attributes.getValue("lon");
         // Avoid null pointer reference!
         if (idStr != null && latStr != null && lonStr != null) {
-            long id = Long.parseLong(idStr);
-            double lat = Double.parseDouble(latStr);
-            double lon = Double.parseDouble(lonStr);
-            
-            return new OSMNodeData(id, CoordinateBoundaries.yMax - p.mercatorY(lat)
-                    + CoordinateBoundaries.yMin,
-                    p.mercatorX(lon));
-        } else {
-            return null;
+            try {
+                long id = Long.parseLong(idStr);
+                double lat = Double.parseDouble(latStr);
+                double lon = Double.parseDouble(lonStr);
+
+//            return new OSMNodeData(id, CoordinateBoundaries.yMax - p.mercatorY(lat)
+//                    + CoordinateBoundaries.yMin,
+//                    p.mercatorX(lon));
+                return new OSMNodeData(id, lat, lon);
+            } catch (NumberFormatException ex) {
+                Logger.getLogger(OSMParseHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         }
+
+        return null;
     }
 
     /**
@@ -169,28 +192,32 @@ public abstract class OSMParseHandler extends DefaultHandler {
         String maxLat = attributes.getValue("maxlat");
         String minLon = attributes.getValue("minlon");
         String maxLon = attributes.getValue("maxlon");
-        if (minLat != null) {
-            CoordinateBoundaries.setxMin(Double.parseDouble(minLon));
-        }
-        if (maxLat != null) {
-            CoordinateBoundaries.setxMax(Double.parseDouble(maxLon));
-        }
-        if (minLon != null) {
-            CoordinateBoundaries.setyMin(Double.parseDouble(minLat));
-        }
-        if (maxLon != null) {
-            CoordinateBoundaries.setyMax(Double.parseDouble(maxLat));
+        try {
+            if (minLat != null) {
+                CoordinateBoundaries.setxMin(Double.parseDouble(minLon));
+            }
+            if (maxLat != null) {
+                CoordinateBoundaries.setxMax(Double.parseDouble(maxLon));
+            }
+            if (minLon != null) {
+                CoordinateBoundaries.setyMin(Double.parseDouble(minLat));
+            }
+            if (maxLon != null) {
+                CoordinateBoundaries.setyMax(Double.parseDouble(maxLat));
+            }
+        } catch (NumberFormatException ex) {
+            Logger.getLogger(OSMParseHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-               
-        p = new Projection(CoordinateBoundaries.yMin,
-                CoordinateBoundaries.yMax, CoordinateBoundaries.xMin,
-                CoordinateBoundaries.xMax);
 
-        CoordinateBoundaries.setxMin(p.mercatorX(CoordinateBoundaries.xMin));
-        CoordinateBoundaries.setxMax(p.mercatorX(CoordinateBoundaries.xMax));
-        CoordinateBoundaries.setyMin(p.mercatorY(CoordinateBoundaries.yMin));
-        CoordinateBoundaries.setyMax(p.mercatorY(CoordinateBoundaries.yMax));
+//        p = new Projection(CoordinateBoundaries.yMin,
+//                CoordinateBoundaries.yMax, CoordinateBoundaries.xMin,
+//                CoordinateBoundaries.xMax);
+//
+//        CoordinateBoundaries.setxMin(p.mercatorX(CoordinateBoundaries.xMin));
+//        CoordinateBoundaries.setxMax(p.mercatorX(CoordinateBoundaries.xMax));
+//        CoordinateBoundaries.setyMin(p.mercatorY(CoordinateBoundaries.yMin));
+//        CoordinateBoundaries.setyMax(p.mercatorY(CoordinateBoundaries.yMax));
     }
 
     private void createEdges() {
@@ -203,5 +230,4 @@ public abstract class OSMParseHandler extends DefaultHandler {
             }
         }
     }
-    
 }

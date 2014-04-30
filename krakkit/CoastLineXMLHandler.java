@@ -15,7 +15,7 @@ import uk.me.jstott.jcoord.UTMRef;
  *
  * @author Sjúrður í Sandagerði
  */
-public abstract class CoastLineHandler extends DefaultHandler {
+public abstract class CoastLineXMLHandler extends DefaultHandler {
 
     public abstract void processNode(OSMNodeData nd);
 
