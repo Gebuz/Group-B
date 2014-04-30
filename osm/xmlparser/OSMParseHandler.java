@@ -168,10 +168,8 @@ public abstract class OSMParseHandler extends DefaultHandler {
                 double lat = Double.parseDouble(latStr);
                 double lon = Double.parseDouble(lonStr);
 
-//            return new OSMNodeData(id, CoordinateBoundaries.yMax - p.mercatorY(lat)
-//                    + CoordinateBoundaries.yMin,
-//                    p.mercatorX(lon));
                 return new OSMNodeData(id, lat, lon);
+                
             } catch (NumberFormatException ex) {
                 Logger.getLogger(OSMParseHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -208,16 +206,6 @@ public abstract class OSMParseHandler extends DefaultHandler {
         } catch (NumberFormatException ex) {
             Logger.getLogger(OSMParseHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-
-//        p = new Projection(CoordinateBoundaries.yMin,
-//                CoordinateBoundaries.yMax, CoordinateBoundaries.xMin,
-//                CoordinateBoundaries.xMax);
-//
-//        CoordinateBoundaries.setxMin(p.mercatorX(CoordinateBoundaries.xMin));
-//        CoordinateBoundaries.setxMax(p.mercatorX(CoordinateBoundaries.xMax));
-//        CoordinateBoundaries.setyMin(p.mercatorY(CoordinateBoundaries.yMin));
-//        CoordinateBoundaries.setyMax(p.mercatorY(CoordinateBoundaries.yMax));
     }
 
     private void createEdges() {
