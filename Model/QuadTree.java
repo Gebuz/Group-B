@@ -65,31 +65,32 @@ public class QuadTree {
             ArrayList<MapEdge> ese = new ArrayList<>();
 
             for (MapEdge e : edges) {
-                MapNode fn = nodes.get(e.getFNode());
-                MapNode tn = nodes.get(e.getTNode());
+                MapNode fn = nodes.get(Long.valueOf(e.getFNode()));
+                MapNode tn = nodes.get(Long.valueOf(e.getTNode()));
+                if (fn != null && tn != null) {
+                    if (fn.getX() <= midx && fn.getY() <= midy) {
+                        enw.add(e);
+                    } else if (fn.getX() > midx && fn.getY() <= midy) {
+                        ene.add(e);
+                    } else if (fn.getX() <= midx && fn.getY() > midy) {
+                        esw.add(e);
+                    } else {
+                        ese.add(e);
+                    }
 
-                if (fn.getX() <= midx && fn.getY() <= midy) {
-                    enw.add(e);
-                } else if (fn.getX() > midx && fn.getY() <= midy) {
-                    ene.add(e);
-                } else if (fn.getX() <= midx && fn.getY() > midy) {
-                    esw.add(e);
-                } else {
-                    ese.add(e);
-                }
-
-                if (tn.getX() <= midx && tn.getY() <= midy 
-                        && !(fn.getX() <= midx && fn.getY() <= midy)) 
-                    { enw.add(e); 
-                } else if (tn.getX() > midx && tn.getY() <= midy 
-                        && !(fn.getX() > midx && fn.getY() <= midy)) 
-                    { ene.add(e); 
-                } else if (tn.getX() <= midx && tn.getY() > midy 
-                        && !(fn.getX() <= midx && fn.getY() > midy)) 
-                    { esw.add(e); 
-                } else if (tn.getX() > midx && tn.getY() > midy 
-                        && !(fn.getX() > midx && fn.getY() > midy)) 
-                    { ese.add(e); 
+                    if (tn.getX() <= midx && tn.getY() <= midy 
+                            && !(fn.getX() <= midx && fn.getY() <= midy)) 
+                        { enw.add(e); 
+                    } else if (tn.getX() > midx && tn.getY() <= midy 
+                            && !(fn.getX() > midx && fn.getY() <= midy)) 
+                        { ene.add(e); 
+                    } else if (tn.getX() <= midx && tn.getY() > midy 
+                            && !(fn.getX() <= midx && fn.getY() > midy)) 
+                        { esw.add(e); 
+                    } else if (tn.getX() > midx && tn.getY() > midy 
+                            && !(fn.getX() > midx && fn.getY() > midy)) 
+                        { ese.add(e); 
+                    }
                 }
             }
             

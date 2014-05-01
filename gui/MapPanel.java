@@ -9,6 +9,9 @@ import Model.CoordinateBoundaries;
 import Model.QuadTree;
 import interfaces.MapEdge;
 import interfaces.MapNode;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import osm.xmlparser.OSMParseHandler;
 
 /**
  *
@@ -46,6 +49,7 @@ public class MapPanel extends JPanel implements Observer {
     double pressX, pressY, releaseX, releaseY;
 
     public MapPanel(int bool) { 
+
         area = new Area();
         loader = new DataLoader(bool);
         if (bool == 1) {
@@ -61,7 +65,7 @@ public class MapPanel extends JPanel implements Observer {
         setPreferredSize(new Dimension(INIT_WIDTH, INIT_HEIGHT));
         ratio = release.x / release.y;
             
-        qtBlue = new QuadTree(loader.edgesBlue, loader.nodes, "0");
+        qtBlue = new QuadTree(DataLoader.edgesBlue, loader.nodes, "0");
         qtBlue.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
@@ -83,6 +87,7 @@ public class MapPanel extends JPanel implements Observer {
         qtGreen.split(500);
         
         colour = Colour.BLUE;
+
     }
     
     @Override
