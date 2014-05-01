@@ -1,5 +1,7 @@
 package Graph;
 
+import java.util.Stack;
+
 /*************************************************************************
  *  Compilation:  javac DijkstraSP.java
  *  Execution:    java DijkstraSP input.txt s
@@ -31,7 +33,6 @@ package Graph;
  *
  *************************************************************************/
 
-
 /**
  *  The <tt>DijkstraSP</tt> class represents a data type for solving the
  *  single-source shortest paths problem in edge-weighted digraphs
@@ -50,11 +51,17 @@ package Graph;
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  */
-public class DijkstraSP {
+public class AstarSP {
     private double[] distTo;          // distTo[v] = distance  of shortest s->v path
     private DirectedEdge[] edgeTo;    // edgeTo[v] = last edge on shortest s->v path
     private IndexMinPQ<Double> pq;    // priority queue of vertices
+    double[] x, y;
 
+    // Guess on dist(i, t)
+    double h(int i, int t) {
+    	return Math.sqrt(Math.pow(x[i]-x[t], 2)+Math.pow(y[i]-y[t], 2));
+    }
+    
     /**
      * Computes a shortest paths tree from <tt>s</tt> to every other vertex in
      * the edge-weighted digraph <tt>G</tt>.
@@ -63,7 +70,7 @@ public class DijkstraSP {
      * @throws IllegalArgumentException if an edge weight is negative
      * @throws IllegalArgumentException unless 0 &le; <tt>s</tt> &le; <tt>V</tt> - 1
      */
-    public DijkstraSP(EdgeWeightedDigraph G, int s) {
+    public AstarSP(EdgeWeightedDigraph G, int s, int t) {
         for (DirectedEdge e : G.edges()) {
             if (e.weight() < 0)
                 throw new IllegalArgumentException("edge " + e + " has negative weight");
@@ -71,31 +78,34 @@ public class DijkstraSP {
 
         distTo = new double[G.V()];
         edgeTo = new DirectedEdge[G.V()];
+        x = G.getX();
+        y = G.getY();
         for (int v = 0; v < G.V(); v++)
             distTo[v] = Double.POSITIVE_INFINITY;
         distTo[s] = 0.0;
 
         // relax vertices in order of distance from s
         pq = new IndexMinPQ<Double>(G.V());
-        pq.insert(s, distTo[s]);
+        pq.insert(s, distTo[s] + h(s, t));
         while (!pq.isEmpty()) {
             int v = pq.delMin();
+            if (v == t) break;
             for (DirectedEdge e : G.adj(v))
-                relax(e);
+                relax(e, t);
         }
 
         // check optimality conditions
-        assert check(G, s);
+        //assert check(G, s);
     }
 
     // relax edge e and update pq if changed
-    private void relax(DirectedEdge e) {
+    private void relax(DirectedEdge e, int t) {
         int v = e.from(), w = e.to();
         if (distTo[w] > distTo[v] + e.weight()) {
             distTo[w] = distTo[v] + e.weight();
             edgeTo[w] = e;
-            if (pq.contains(w)) pq.decreaseKey(w, distTo[w]);
-            else                pq.insert(w, distTo[w]);
+            if (pq.contains(w)) pq.decreaseKey(w, distTo[w] + h(w, t));
+            else                pq.insert(w, distTo[w] + h(w, t));
         }
     }
 
@@ -185,6 +195,4 @@ public class DijkstraSP {
         }
         return true;
     }
-
 }
-

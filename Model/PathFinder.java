@@ -7,7 +7,7 @@ package Model;
 
 import Graph.DirectedEdge;
 import Graph.EdgeWeightedDigraph;
-import Graph.DijkstraSP;
+import Graph.AstarSP;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.awt.geom.Point2D;
@@ -26,7 +26,7 @@ public class PathFinder {
 
     private static final PathFinder pathFinder = new PathFinder();
     EdgeWeightedDigraph graph;
-    DijkstraSP tree;
+    AstarSP tree;
     HashMap<Point2D.Double, Integer> nodes;
     int count;    
 
@@ -46,13 +46,11 @@ public class PathFinder {
     }
 
     /**
-     * Creates the graphs for an area.
      *
      * @param type vehicle type
-     * @param edges list of edges in the area
+     * @param edges all edges
      */
-
-    public void newGraph(int type, ArrayList<MapEdge> edges) {
+    public void createGraph(int type, ArrayList<MapEdge> edges) {
         graph = null;
         EdgeWeightedDigraph grapht = new EdgeWeightedDigraph(edges.size());
         count = 0;
@@ -73,11 +71,13 @@ public class PathFinder {
 
                         if (i == null) {
                             nodes.put(xy1, count);
+                            grapht.addXY(xy1, count);
                             i = count++;
                         }
 
                         if (j == null) {
                             nodes.put(xy2, count);
+                            grapht.addXY(xy2, count);
                             j = count++;
                         }
 
@@ -139,29 +139,20 @@ public class PathFinder {
         graph = grapht;
     }
 
-    /**
-     * Creates the trees for an area.
-     *
-     * @param ed root of the tree.
-     */
-
-    public void newTree(MapEdge ed) {
-        MapNode fn = DataLoader.nodes.get(ed.getFNode());
-        Point2D.Double xy = new Point2D.Double(fn.getX(), fn.getY());
-        tree = new DijkstraSP(graph, nodes.get(xy));
+    private ArrayList<MapEdge> createTree(MapEdge start, MapEdge end) {
+        MapNode fn1 = DataLoader.nodes.get(start.getFNode());
+        Point2D.Double xy1 = new Point2D.Double(fn1.getX(), fn1.getY());
+        MapNode fn2 = DataLoader.nodes.get(end.getFNode());
+        Point2D.Double xy2 = new Point2D.Double(fn2.getX(), fn2.getY());
+        int idEnd = nodes.get(xy2);
+        tree = new AstarSP(graph, nodes.get(xy1), idEnd);
+        return shortestPath(idEnd);
+        
     }
 
-    /**
-     *
-     * @param ed end road
-     * @return returns a list of ordered roads connecting the root (start) to
-     * input ed.
-     */
-    public ArrayList<MapEdge> shortestPath(MapEdge ed) {
-        MapNode fn = DataLoader.nodes.get(ed.getFNode());
-        Point2D.Double xy = new Point2D.Double(fn.getX(), fn.getY());
+    private ArrayList<MapEdge> shortestPath(int id) {
         ArrayList<MapEdge> edges = new ArrayList<>();
-        Iterable<DirectedEdge> list = tree.pathTo(nodes.get(xy));
+        Iterable<DirectedEdge> list = tree.pathTo(id);
         if (list == null) {
             return edges;
         }
@@ -171,10 +162,15 @@ public class PathFinder {
         return edges;
     }
     
+    /**
+     *
+     * @param type
+     * @param start
+     * @param end
+     * @return
+     */
     public ArrayList<MapEdge> getShortestPath(int type, MapEdge start, MapEdge end){
-        newGraph(type, DataLoader.edgesGreen);
-        newTree(start);
-        return shortestPath(end);
+        return createTree(start, end);
     }
 
 }

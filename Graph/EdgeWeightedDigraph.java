@@ -1,5 +1,7 @@
 package Graph;
 
+import java.awt.geom.Point2D;
+
 /*************************************************************************
  *  Compilation:  javac EdgeWeightedDigraph.java
  *  Execution:    java EdgeWeightedDigraph V E
@@ -36,6 +38,7 @@ public class EdgeWeightedDigraph {
     private final int V;
     private int E;
     private Bag<DirectedEdge>[] adj;
+    private double[] x, y;
     
     /**
      * Initializes an empty edge-weighted digraph with <tt>V</tt> vertices and 0 edges.
@@ -46,6 +49,8 @@ public class EdgeWeightedDigraph {
         if (V < 0) throw new IllegalArgumentException("Number of vertices in a Digraph must be nonnegative");
         this.V = V;
         this.E = 0;
+        this.x = new double[V];
+        this.y = new double[V];
         adj = (Bag<DirectedEdge>[]) new Bag[V];
         for (int v = 0; v < V; v++)
             adj[v] = new Bag<DirectedEdge>();
@@ -155,4 +160,18 @@ public class EdgeWeightedDigraph {
         }
         return s.toString();
     }
+    
+    public void addXY(Point2D.Double xy, int i){
+        this.x[i] = xy.x;
+        this.y[i] = xy.y;
+    }
+
+    public double[] getX() {
+        return x;
+    }
+
+    public double[] getY() {
+        return y;
+    }
+
 }
