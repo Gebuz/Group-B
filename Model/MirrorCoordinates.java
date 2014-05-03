@@ -18,7 +18,7 @@ public class MirrorCoordinates {
     /**
      * Mirror the Y coordinates based on the largest Y value found in the 
      * HashMap.
-     * @param nodes HashMap whose KrakNodeData's y-coordinate to mirrir.
+     * @param nodes HashMap whose KrakNodeData's y-coordinate to mirror.
      */
     public static void MirrorY(HashMap<Long, MapNode> nodes) {
         

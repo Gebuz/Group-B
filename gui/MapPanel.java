@@ -1,5 +1,7 @@
 package gui;
 
+import GmtShape.GMTShape;
+import GmtShape.GMTShapeConverter;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
@@ -7,11 +9,9 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import Model.CoordinateBoundaries;
 import Model.QuadTree;
+import static gui.Colour.BLUE;
 import interfaces.MapEdge;
 import interfaces.MapNode;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import osm.xmlparser.OSMParseHandler;
 
 /**
  *
@@ -22,6 +22,10 @@ public class MapPanel extends JPanel implements Observer {
     public final QuadTree qtBlue;
     public final QuadTree qtPink;
     public final QuadTree qtGreen;
+   
+    public final QuadTree qtShapesGreen;
+    
+    
     private Colour colour;
     public final DataLoader loader;
     
@@ -51,12 +55,11 @@ public class MapPanel extends JPanel implements Observer {
     public MapPanel(int bool) { 
 
         area = new Area();
+
         loader = new DataLoader(bool);
-        if (bool == 1) {
-            this.k = 0.010017435;
-        } else {
-            this.k = 550;
-        }
+
+        // Set K
+        this.k = (CoordinateBoundaries.yMax-CoordinateBoundaries.yMin) / INIT_HEIGHT;
         
         vectorLastPress = new Point2D.Double(0.0, 0.0);
         vectorLastRelease = new Point2D.Double(0.0, 0.0);
@@ -65,26 +68,37 @@ public class MapPanel extends JPanel implements Observer {
         setPreferredSize(new Dimension(INIT_WIDTH, INIT_HEIGHT));
         ratio = release.x / release.y;
             
-        qtBlue = new QuadTree(DataLoader.edgesBlue, loader.nodes, "0");
+        qtBlue = new QuadTree(DataLoader.edgesBlue, DataLoader.nodes, "0");
         qtBlue.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
         qtBlue.split(250);
 
-        qtPink = new QuadTree(loader.edgesPink, loader.nodes, "0");
+        qtPink = new QuadTree(DataLoader.edgesPink, DataLoader.nodes, "0");
         qtPink.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
         qtPink.split(500);
         
-        qtGreen = new QuadTree(loader.edgesGreen, loader.nodes, "0");
+        qtGreen = new QuadTree(DataLoader.edgesGreen, DataLoader.nodes, "0");
         qtGreen.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
         qtGreen.split(500);
+
+        final long startTime = System.currentTimeMillis();
+        qtShapesGreen = new QuadTree(DataLoader.shapeEdgesGreen, DataLoader.shapeNodesGreen, "0");
+        qtShapesGreen.addCoords(CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMin,
+                CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
+        qtShapesGreen.split(200);
+        final long endTime = System.currentTimeMillis();
+        System.out.println("Total time to load create quadtree was " + (endTime - startTime) + " milliseconds.");
+        
         
         colour = Colour.BLUE;
 
@@ -145,16 +159,76 @@ public class MapPanel extends JPanel implements Observer {
                     }
                     break;
             }   
+            
 
+            
             if(zoomConstant < 0.10){
                 RenderingHints rh = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 rh.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 mapG.setRenderingHints(rh);
             }
 
+
+            // Get the shapesBlue do draw
+            HashSet<String> shapeTrees;
+            ArrayList<MapEdge> shapeEdges = new ArrayList<>();
+            HashSet<GMTShape> shapes = new HashSet<>();
+            switch(colour) {
+                case GREEN:
+                    shapeTrees = qtShapesGreen.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+                    for(String s : shapeTrees) {
+                            shapeEdges.addAll(qtShapesGreen.getBranch(s).getEdges());
+                    }
+                    for (MapEdge ed : shapeEdges) {
+                        shapes.add(DataLoader.shapesGreen.get(ed.getID()));
+                    }
+                    break;
+            }
+            
+
+            
+            for (GMTShape shape : shapes) {
+                String shapeType = shape.getTYPE();
+                switch (shapeType.toLowerCase()) {
+                    case "forest":
+                    case "grass":
+                    case "park":
+                    case "pitch":
+                    case "meadow":
+                    case "farmland":
+                    case "farmyard":
+                        mapG.setColor(new Color(180, 255, 173, 100));
+                        break;
+                    case "water":
+                    case "riverbank":
+                        mapG.setColor(new Color(173, 218, 255, 100));
+                        break;
+                    case "cemetery":
+                        mapG.setColor(new Color(212, 212, 212, 100));
+                        break;
+                    case "house":
+                    case "hospital":
+                    case "silo":
+                    case "":
+                        mapG.setColor(new Color(120, 120, 120, 100));
+                    case "residential":
+                        mapG.setColor(new Color(250, 167, 167, 100));
+                        break;
+                    case "industrial":
+                        mapG.setColor(new Color(0, 80, 145, 80));
+                        break;
+                    default:
+                        mapG.setColor(new Color(120, 120, 120, 100));
+                        break;
+                }
+
+                mapG.fill(GMTShapeConverter.createPolygon(shape, k, xk, yk, CoordinateBoundaries.xMin, CoordinateBoundaries.yMin, zoomConstant, resizeConstant, press.x, press.y));
+                isMap = true;
+            }
+
             for (MapEdge ed : edges) {
-                fn = loader.nodes.get(ed.getFNode());
-                tn = loader.nodes.get(ed.getTNode());
+                fn = DataLoader.nodes.get(ed.getFNode());
+                tn = DataLoader.nodes.get(ed.getTNode());
                 type = ed.getType();
 
                 fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);
@@ -164,6 +238,7 @@ public class MapPanel extends JPanel implements Observer {
 
                 drawSpecified(fnX, fnY, tnX, tnY, type, ed, mapG);
             }
+            
             roadListHashSet.clear();
 
         }
@@ -234,13 +309,13 @@ public class MapPanel extends JPanel implements Observer {
             switch (type) {
                 case 5:
                 case 6:
-                    drawRoadNames(fnX, tnX, fnY, tnY, 0.0025, 11, edge, g2);
+                    drawRoadNames(fnX, tnX, fnY, tnY, 0.0020, 11, edge, g2);
                     break;
                 case 1:
-                    drawRoadNames(fnX, tnX, fnY, tnY, 0.05, 14, edge, g2);
+                    drawRoadNames(fnX, tnX, fnY, tnY, 0.040, 14, edge, g2);
                     break;
                 case 4:
-                    drawRoadNames(fnX, tnX, fnY, tnY, 0.03, 12, edge, g2);
+                    drawRoadNames(fnX, tnX, fnY, tnY, 0.025, 12, edge, g2);
             }
         }
         isMap = true;

@@ -1,24 +1,27 @@
-
-package Coastline;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package GmtShape;
 
 import interfaces.MapNode;
 
 /**
  *
- * @author Sjúrður í Sandagerði
+ * @author Sjurdur
  */
-public class CoastlineNode implements MapNode{
+public class ShapeNode implements MapNode {
 
     private long ID;
     private double X;
     private double Y;
 
-    public CoastlineNode(long ID, double X, double Y) {
+    public ShapeNode(long ID, double X, double Y) {
         this.ID = ID;
         this.X = X;
         this.Y = Y;
     }
-    
+
     @Override
     public long getID() {
         return ID;
@@ -38,10 +41,9 @@ public class CoastlineNode implements MapNode{
     public void setY(double newY) {
         this.Y = newY;
     }
-    
+
     @Override
     public void setX(double newX) {
         this.X = newX;
     }
-    
 }

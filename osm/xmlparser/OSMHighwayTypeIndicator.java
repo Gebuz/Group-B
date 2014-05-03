@@ -1,6 +1,10 @@
 
 package osm.xmlparser;
 
+import static osm.xmlparser.OSMHighwayType.RESIDENTIAL;
+import static osm.xmlparser.OSMHighwayType.SERVICE;
+import static osm.xmlparser.OSMHighwayType.UNCLASSIFIED;
+
 /**
  * Translate the value of a highway to an Integer that is similar to the type
  * list used in the Krak dataset.
@@ -30,10 +34,11 @@ public class OSMHighwayTypeIndicator {
             case SECONDARY:
                 return 4;
             case TERTIARY:
-            case UNCLASSIFIED:
             case RESIDENTIAL:
             case SERVICE:
                 return 6;
+            case UNCLASSIFIED:
+                return 5;
             case MOTORWAY_LINK:
                 return 31;
             case TRUNK_LINK:

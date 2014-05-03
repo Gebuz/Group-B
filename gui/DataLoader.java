@@ -14,6 +14,12 @@ import Coastline.CoastlineLoader;
 import krakkit.GeoConvert;
 import Coastline.CoastlineEdge;
 import Coastline.CoastlineNode;
+import GmtShape.GMTParser;
+import GmtShape.GMTShape;
+import GmtShape.ShapeEdge;
+import GmtShape.ShapeNode;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import krakkit.KrakEdgeData;
 import krakkit.KrakLoader;
 import krakkit.KrakNodeData;
@@ -30,10 +36,17 @@ import osm.xmlparser.OSMParseHandler;
  */
 public class DataLoader {
 
-    public static final HashMap<Long, MapNode> nodes = new HashMap<>();
-    public static final ArrayList<MapEdge> edgesBlue = new ArrayList<>();
-    public static final ArrayList<MapEdge> edgesPink = new ArrayList<>();
-    public static final ArrayList<MapEdge> edgesGreen = new ArrayList<>();
+    // Edges for roads and coastline
+    public static HashMap<Long, MapNode> nodes = new HashMap<>();
+    public static ArrayList<MapEdge> edgesBlue = new ArrayList<>();
+    public static ArrayList<MapEdge> edgesPink = new ArrayList<>();
+    public static ArrayList<MapEdge> edgesGreen = new ArrayList<>();
+    
+    // Shape objects for Lakes, Landmarks etc.
+    public static HashMap<Integer, GMTShape> shapesGreen = new HashMap<>();
+    public static HashMap<Long, MapNode> shapeNodesGreen = new HashMap<>();
+    public static ArrayList<MapEdge> shapeEdgesGreen = new ArrayList<>();
+    
     public static boolean isOSM = false;
 
     public DataLoader(int bool) {
@@ -160,7 +173,6 @@ public class DataLoader {
                 public void processEdge(OSMEdgeData ed) {
                     edgesGreen.add(ed);
                     switch (ed.getType()) {
-                        case 5:
                         case 6:
                             edgesPink.add(ed);
                             break;
@@ -168,6 +180,7 @@ public class DataLoader {
                         case 2:
                         case 3:
                         case 4:
+                        //case 5:
                         case 31:
                         case 32:
                         case 41:
@@ -196,7 +209,7 @@ public class DataLoader {
                 Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            CoastlineLoader clPinkGreen = new CoastlineLoader(100000000, 200000000) {
+            CoastlineLoader clPinkGreen = new CoastlineLoader(10000000, 20000000) {
                 @Override
                 public void processNode(CoastlineNode nd) {
                     if (nd != null) {
@@ -211,7 +224,7 @@ public class DataLoader {
                 }
             };
 
-            CoastlineLoader clBlue = new CoastlineLoader(300000000, 400000000) {
+            CoastlineLoader clBlue = new CoastlineLoader(30000000, 40000000) {
                 @Override
                 public void processNode(CoastlineNode nd) {
                     if (nd != null) {
@@ -235,8 +248,7 @@ public class DataLoader {
             } catch (Exception ex) {
                 Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-            
+                
             CoordinateBoundaries.findBoundaries(nodes);
             MirrorCoordinates.MirrorY(nodes);
             
@@ -244,18 +256,65 @@ public class DataLoader {
                     CoordinateBoundaries.yMax, CoordinateBoundaries.xMin,
                     CoordinateBoundaries.xMax);
 
-            CoordinateBoundaries.setxMin(p.mercatorX(CoordinateBoundaries.xMin));
-            CoordinateBoundaries.setxMax(p.mercatorX(CoordinateBoundaries.xMax));
-            CoordinateBoundaries.setyMin(p.mercatorY(CoordinateBoundaries.yMin));
-            CoordinateBoundaries.setyMax(p.mercatorY(CoordinateBoundaries.yMax));
-            
             for (MapNode nd : nodes.values()) {
                 double lon = nd.getX();
                 double lat = nd.getY();
                 nd.setX(p.mercatorX(lon));
                 nd.setY(p.mercatorY(lat));
             }
+            
+            long startTime = System.currentTimeMillis();
+            
+            GMTParser gmtpGreen = new GMTParser() {
 
+                @Override
+                public void processShape(GMTShape shape) {
+                    shapesGreen.put(shape.getID(), shape);
+                }
+            };
+            
+            try {
+                gmtpGreen.load("data/gmt/landuseNew.gmt");
+                gmtpGreen.load("data/gmt/naturalNew.gmt");
+//                gmtpGreen.load("data/gmt/buildingsNew.gmt");
+
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            for (GMTShape shape : shapesGreen.values()) {
+                shape.mirrorY(CoordinateBoundaries.yMin, CoordinateBoundaries.yMax);
+                shape.applyMercatorProjection(p);
+            }
+            
+            CoordinateBoundaries.setxMin(p.mercatorX(CoordinateBoundaries.xMin));
+            CoordinateBoundaries.setxMax(p.mercatorX(CoordinateBoundaries.xMax));
+            CoordinateBoundaries.setyMin(p.mercatorY(CoordinateBoundaries.yMin));
+            CoordinateBoundaries.setyMax(p.mercatorY(CoordinateBoundaries.yMax));
+            
+            for (GMTShape shape : shapesGreen.values()) {
+                
+                int id = shape.getID();
+                String name = shape.getTYPE();
+                
+                double[] centroid = shape.centroid();
+                double x = centroid[0];
+                double y = centroid[1];
+                ShapeNode nd = new ShapeNode(GMTParser.nodeID, x, y);
+                shapeNodesGreen.put(nd.getID(), nd);
+                shapeEdgesGreen.add(new ShapeEdge(id, GMTParser.nodeID, GMTParser.nodeID, name));
+                GMTParser.nodeID++;
+
+            }
+            
+            long endTime = System.currentTimeMillis();
+            System.out.println("Total time to load buildings file was " + (endTime - startTime) + " milliseconds.");
+            
         }
     }
 }
+
