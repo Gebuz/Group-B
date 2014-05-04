@@ -1,4 +1,4 @@
-package mapofdenmark;
+package AdressParser;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -259,7 +259,7 @@ public class AddressParser
         BufferedReader br;
         String line;
 
-        fis = new FileInputStream("C:\\Users\\Sjurdur\\Desktop\\road_names.txt");
+        fis = new FileInputStream("data/roadNames.txt"); //skal ændres til det rigtige fil navn
         br = new BufferedReader(new InputStreamReader(fis, "LATIN1"));
         while ((line = br.readLine()) != null) {
             if (road.equalsIgnoreCase(line)) {
@@ -304,8 +304,6 @@ public class AddressParser
             } catch (InputException ex) {
                 System.out.println(ex);
                 System.out.println();
-            } catch (IOException ex) {
-                System.out.println(ex);
             }
         }
 //        AddressParser ap2 = new AddressParser();
