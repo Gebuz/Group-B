@@ -2,7 +2,6 @@ package gui;
 
 import Model.CoordinateBoundaries;
 import Model.MirrorCoordinates;
-import Model.Projection;
 import interfaces.MapEdge;
 import interfaces.MapNode;
 import java.io.IOException;
@@ -10,16 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import Coastline.CoastlineLoader;
-import krakkit.GeoConvert;
-import Coastline.CoastlineEdge;
-import Coastline.CoastlineNode;
-import GmtShape.GMTParser;
-import GmtShape.GMTShape;
-import GmtShape.ShapeEdge;
-import GmtShape.ShapeNode;
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
 import krakkit.KrakEdgeData;
 import krakkit.KrakLoader;
 import krakkit.KrakNodeData;
@@ -29,6 +18,19 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import osm.xmlparser.OSMEdgeData;
 import osm.xmlparser.OSMNodeData;
 import osm.xmlparser.OSMParseHandler;
+import Coastline.CoastlineLoader;
+import GmtShape.GMTParser;
+import GmtShape.GMTShape;
+import GmtShape.ShapeEdge;
+import GmtShape.ShapeNode;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+import krakkit.GeoConvert;
+import Coastline.CoastlineEdge;
+import Coastline.CoastlineNode;
+import Model.PathFinder;
+import Model.Projection;
+
 
 /**
  *
@@ -36,7 +38,7 @@ import osm.xmlparser.OSMParseHandler;
  */
 public class DataLoader {
 
-    // Edges for roads and coastline
+      // Edges for roads and coastline
     public static HashMap<Long, MapNode> nodes = new HashMap<>();
     public static ArrayList<MapEdge> edgesBlue = new ArrayList<>();
     public static ArrayList<MapEdge> edgesPink = new ArrayList<>();
@@ -46,25 +48,39 @@ public class DataLoader {
     public static HashMap<Integer, GMTShape> shapesGreen = new HashMap<>();
     public static HashMap<Long, MapNode> shapeNodesGreen = new HashMap<>();
     public static ArrayList<MapEdge> shapeEdgesGreen = new ArrayList<>();
-    
+
     public static boolean isOSM = false;
+    public static final LoadingBar loadBar = new LoadingBar();
+    private int lineCount = 0;
+    private int progress = 0;
 
     public DataLoader(int bool) {
         String dir = "data/";
-
+        loadBar.showLoadingBar();
         if (bool == 0) {
-
             // For that, we need to inherit from KrakLoader and override
             // processNode and processEdge. We do that with an 
             // anonymous class. 
             KrakLoader loader = new KrakLoader() {
                 @Override
                 public void processNode(KrakNodeData nd) {
+                    if(lineCount == 24009) {
+                        progress++;
+                        loadBar.bar.setValue(progress);
+                        lineCount = 0;
+                    }
+                    lineCount++;
                     nodes.put(nd.getID(), nd);
                 }
 
                 @Override
                 public void processEdge(KrakEdgeData ed) {
+                    if(lineCount == 24009) {                       
+                        progress++;
+                        loadBar.bar.setValue(progress);            
+                        lineCount = 0;
+                    }
+                    lineCount++;
                     edgesGreen.add(ed);
                     switch (ed.TYP) {
                         case 5:
@@ -94,13 +110,13 @@ public class DataLoader {
                 // Invoke the loader class.
                 loader.load(dir + "kdv_node_unload.txt",
                         dir + "kdv_unload.txt");
+                         
             } catch (IOException ex) {
                 System.out.println("ERROR: Could not find kdv_node_unload.txt or kdv_unload.txt in specified directory " + dir);
                 Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-
-            CoastlineLoader clPinkGreen = new CoastlineLoader(1000000, 2000000) {
+            
+                        CoastlineLoader clPinkGreen = new CoastlineLoader(1000000, 2000000) {
                 @Override
                 public void processNode(CoastlineNode nd) {
                     if (nd != null) {
@@ -109,6 +125,12 @@ public class DataLoader {
                             double latToUtm32 = GeoConvert.toUtmX(32, nd.getX(), nd.getY())[1];
                             nd.setX(lonToUtm32);
                             nd.setY(latToUtm32);
+                            if(lineCount == 24009) {                       
+                                progress++;
+                                loadBar.bar.setValue(progress);
+                                lineCount = 0;
+                            }
+                            lineCount++;
                             nodes.put(nd.getID(), nd);
                         } catch (Exception ex) {
                             Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
@@ -118,6 +140,12 @@ public class DataLoader {
 
                 @Override
                 public void processEdge(CoastlineEdge ed) {
+                    if(lineCount == 24009) {                       
+                        progress++;
+                        loadBar.bar.setValue(progress);
+                        lineCount = 0;
+                    }
+                    lineCount++;
                     edgesPink.add(ed);
                     edgesGreen.add(ed);
                 }
@@ -132,6 +160,12 @@ public class DataLoader {
                             double latToUtm32 = GeoConvert.toUtmX(32, nd.getX(), nd.getY())[1];
                             nd.setX(lonToUtm32);
                             nd.setY(latToUtm32);
+                            if(lineCount == 24009) {                       
+                                progress++;
+                                loadBar.bar.setValue(progress);
+                                lineCount = 0;
+                            }
+                            lineCount++;
                             nodes.put(nd.getID(), nd);
                         } catch (Exception ex) {
                             Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
@@ -141,6 +175,12 @@ public class DataLoader {
 
                 @Override
                 public void processEdge(CoastlineEdge ed) {
+                    if(lineCount == 24009) {                       
+                        progress++;
+                        loadBar.bar.setValue(progress);
+                        lineCount = 0;
+                    }
+                    lineCount++;
                     edgesBlue.add(ed);
                 }
             };
@@ -155,22 +195,36 @@ public class DataLoader {
             } catch (Exception ex) {
                 Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-
+            
+            loadBar.bar.setValue(100);
+            loadBar.bar.setString("Load complete!");
+            loadBar.changeText("Now drawing map. Please wait...");
+            
             CoordinateBoundaries.findBoundaries(nodes);
             MirrorCoordinates.MirrorY(nodes);
-
 
         } else { /* isOSM */
 
             OSMParseHandler ph = new OSMParseHandler() {
                 @Override
                 public void processNode(OSMNodeData nd) {
+                    if(lineCount == 73221) {
+                        progress++;
+                        loadBar.bar.setValue(progress);
+                        lineCount = 0;
+                    }
+                    lineCount++;
                     nodes.put(Long.valueOf(nd.getID()), nd);
                 }
 
                 @Override
                 public void processEdge(OSMEdgeData ed) {
+                    if(lineCount == 73221) {
+                        progress++;
+                        loadBar.bar.setValue(progress);
+                        lineCount = 0;
+                    }
+                    lineCount++;
                     edgesGreen.add(ed);
                     switch (ed.getType()) {
                         case 6:
@@ -200,25 +254,35 @@ public class DataLoader {
 
                 reader.setContentHandler(ph);
                 reader.parse(dir + "denmark-latest.osm parsed.xml");
-
+                
             } catch (SAXException ex) {
                 Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
                 Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (Exception ex) {
-                Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            CoastlineLoader clPinkGreen = new CoastlineLoader(10000000, 20000000) {
+                        CoastlineLoader clPinkGreen = new CoastlineLoader(10000000, 20000000) {
                 @Override
                 public void processNode(CoastlineNode nd) {
                     if (nd != null) {
+                        if(lineCount == 73221) {
+                            progress++;
+                            loadBar.bar.setValue(progress);
+                            lineCount = 0;
+                        }
+                        lineCount++;
                         nodes.put(nd.getID(), nd);
                     }
                 }
 
                 @Override
                 public void processEdge(CoastlineEdge ed) {
+                    if(lineCount == 73221) {
+                        progress++;
+                        loadBar.bar.setValue(progress);
+                        lineCount = 0;
+                    }
+                    lineCount++;
                     edgesPink.add(ed);
                     edgesGreen.add(ed);
                 }
@@ -228,12 +292,24 @@ public class DataLoader {
                 @Override
                 public void processNode(CoastlineNode nd) {
                     if (nd != null) {
+                        if(lineCount == 73221) {
+                            progress++;
+                            loadBar.bar.setValue(progress);
+                            lineCount = 0;
+                        }
+                        lineCount++;
                         nodes.put(nd.getID(), nd);
                     }
                 }
 
                 @Override
                 public void processEdge(CoastlineEdge ed) {
+                    if(lineCount == 73221) {
+                        progress++;
+                        loadBar.bar.setValue(progress);
+                        lineCount = 0;
+                    }
+                    lineCount++;
                     edgesBlue.add(ed);
                 }
             };
@@ -248,14 +324,18 @@ public class DataLoader {
             } catch (Exception ex) {
                 Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
             }
-                
+            
+            loadBar.bar.setValue(100);
+            loadBar.bar.setString("Load complete!");
+            loadBar.changeText("Now drawing map. Please wait...");
+            
             CoordinateBoundaries.findBoundaries(nodes);
             MirrorCoordinates.MirrorY(nodes);
             
             Projection p = new Projection(CoordinateBoundaries.yMin,
                     CoordinateBoundaries.yMax, CoordinateBoundaries.xMin,
                     CoordinateBoundaries.xMax);
-
+            
             for (MapNode nd : nodes.values()) {
                 double lon = nd.getX();
                 double lat = nd.getY();
@@ -310,11 +390,12 @@ public class DataLoader {
                 GMTParser.nodeID++;
 
             }
-            
             long endTime = System.currentTimeMillis();
             System.out.println("Total time to load buildings file was " + (endTime - startTime) + " milliseconds.");
-            
         }
+        long startTime = System.currentTimeMillis();
+        PathFinder.createGraph(edgesGreen);
+        long endTime = System.currentTimeMillis();
+        System.out.println("Total time to create graph: " + (endTime - startTime) + " milliseconds.");
     }
 }
-

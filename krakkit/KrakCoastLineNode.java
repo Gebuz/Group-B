@@ -38,5 +38,10 @@ public class KrakCoastLineNode implements MapNode{
     public void setY(double newY) {
         this.Y = newY;
     }
+
+    @Override
+    public void setX(double newX) {
+        this.X = newX;
+    }
     
 }

@@ -4,12 +4,15 @@
  */
 package gui;
 
+import Model.PathFinder;
+import interfaces.MapEdge;
 import java.awt.event.MouseListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
@@ -18,6 +21,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
@@ -35,9 +39,11 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     private final double initWidth;
     private double xPress, yPress, xPressLocal, yPressLocal;
     private double mousePosX, mousePosY;
+    private double popUpPosX, popUpPosY;
+    private boolean fromSet, toSet;
+    private MapEdge fromEdge, toEdge;
     private boolean centerZoom;
-    
-    private boolean cancelDrag = false;
+    private boolean cancelDrag;
     
     public Controller(MapView view) {
         
@@ -57,6 +63,9 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         view.down.addActionListener(this);
         view.left.addActionListener(this);
         view.right.addActionListener(this);
+        view.showHelp.addActionListener(this);
+        view.setFrom.addActionListener(this);
+        view.setTo.addActionListener(this);
         view.addComponentListener(this);
         view.enableRelative.addItemListener(this);
         view.enableRoad.addItemListener(this);
@@ -68,7 +77,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         map.addMouseListener(this);
         map.addMouseMotionListener(this);
         map.addMouseWheelListener(this);
-
+        
         map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),"cancelDrag");
         map.getActionMap().put("cancelDrag", new AbstractAction() {
             @Override
@@ -78,6 +87,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 cancelDrag = true;
             }
         });
+
     }
     
     @Override
@@ -92,6 +102,11 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             yPress = e.getY()* map.getResizeConstant();
             xPressLocal = map.getPress().x + (map.getRelease().x - map.getPress().x)*xPress/850;
             yPressLocal = map.getPress().y + (map.getRelease().y - map.getPress().y)*yPress/660;
+        }
+        if(e.isPopupTrigger() && e.isShiftDown()) {
+            popUpPosX = e.getX();
+            popUpPosY = e.getY();
+            view.popUp.show(e.getComponent(),(int) popUpPosX,(int) popUpPosY);
         }
     }
     
@@ -204,7 +219,6 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 map.setVectorLastRelease(map.getVectorLastRelease().x + vectorNewReleaseX,
                 map.getVectorLastRelease().y + vectorNewReleaseY);
                
-     
                 map.assignCoords(press, release);
                 
                 double heightRatio = map.getHeight()/(map.INIT_HEIGHT * 1.0);
@@ -212,6 +226,12 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 heightRatio = (heightRatio * map.INIT_HEIGHT - map.INIT_HEIGHT) * map.getZoom() / 2;    
 
                 map.changeX(widthDiff - heightRatio);
+
+            }
+        }
+        else if (e.getComponent() == map && SwingUtilities.isRightMouseButton(e)) {
+            if(e.isPopupTrigger()) {
+                view.popUp.show(e.getComponent(), e.getX(), e.getY());
             }
         }
     }
@@ -228,15 +248,16 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     @Override
     public void componentResized(ComponentEvent e) {
         double resizeHeight = map.getHeight();
+        
         double resizeWidth = map.getWidth();
         double widthDiff = resizeWidth - map.lastWidth;
         double heightRatio = resizeHeight/map.lastHeight;
-        
+
         if (resizeHeight < initHeight || resizeHeight > initHeight) {
             double constant = (initHeight+1) / resizeHeight;
             map.updateResize(constant);
         }
-           
+        
         widthDiff = widthDiff * map.getResizeConstant() * map.getZoom() / 2;
         heightRatio = (heightRatio * map.lastWidth - map.lastWidth) * map.getZoom() * map.getResizeConstant() / 2;
         
@@ -252,9 +273,6 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         map.setVectorLastRelease(release.x - map.getWidth(),
                 release.y - map.getHeight());
         map.assignCoords(press, release);
-        
-
-
     }
     
     @Override
@@ -300,6 +318,61 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         else if (e.getSource() == view.showFull) {
             map.defaultMap();
             view.pack();
+        }
+        else if (e.getSource() == view.showHelp) {
+            view.helpWindow.setVisible(true);
+        }
+        else if (e.getSource() == view.setFrom) {
+            if(toSet) {
+                int type;
+                fromEdge = map.getClosestRoad(popUpPosX, popUpPosY);
+                int edgeType = fromEdge.getType();
+                if(edgeType != 8 || edgeType != 48) {
+                    type = 0;
+                }
+                else {
+                    type = 1;
+                }
+                System.out.println("Road " + fromEdge.getName() + " has the type: " + type);
+//                System.out.println("Road " + fromEdge.getName() + " has the x coordinate: " + DataLoader.nodes.get(fromEdge.getFNode()).getX() + " and the y coordinate : " + DataLoader.nodes.get(fromEdge.getFNode()).getY());
+                ArrayList<MapEdge> path = PathFinder.getShortestPath(type, fromEdge, toEdge);
+                System.out.print("Path from " + fromEdge.getName() + " to " + toEdge.getName() + ":");
+                for(MapEdge ed : path) {
+                    System.out.print(" " + ed.getName());
+                }
+                map.drawShortestPath(path);
+                toSet = false;
+            }
+            else {
+                fromEdge = map.getClosestRoad(popUpPosX, popUpPosY);
+                fromSet = true;
+            }
+        }
+        else if (e.getSource() == view.setTo) {
+            if(fromSet) {
+                int type;
+                toEdge = map.getClosestRoad(popUpPosX, popUpPosY);
+                int edgeType = toEdge.getType();
+                if(edgeType != 8 || edgeType != 48) {
+                    type = 0;
+                }
+                else {
+                    type = 1;
+                }
+                System.out.println("Road " + toEdge.getName() + " has the type: " + type);
+                System.out.println("Road " + toEdge.getName() + " has the x coordinate: " + DataLoader.nodes.get(toEdge.getFNode()).getX() + " and the y coordinate : " + DataLoader.nodes.get(toEdge.getFNode()).getY());
+                ArrayList<MapEdge> path = PathFinder.getShortestPath(type, fromEdge, toEdge);
+                System.out.print("Path from " + fromEdge.getName() + " to " + toEdge.getName() + ":");
+                for(MapEdge ed : path) {
+                    System.out.print(" " + ed.getName());
+                }
+                map.drawShortestPath(path);
+                fromSet = false;
+            }
+            else {
+                toEdge = map.getClosestRoad(popUpPosX, popUpPosY);
+                toSet = true;
+            }
         }
 //        else if (e.getSource() == view.roadOn) {
 //            view.roadOn.setEnabled(false);

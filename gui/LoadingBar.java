@@ -15,7 +15,7 @@ public class LoadingBar extends JFrame {
     public JPanel barPanel;
     
     public LoadingBar() {
-        super("Super Exxo Loader v1.0");
+        super("Super Exxo Loader v2.0");
         
         loadPanel = new JPanel();
         barPanel = new JPanel();
@@ -35,8 +35,7 @@ public class LoadingBar extends JFrame {
         loadPanel.add(loadText);
         loadPanel.add(barPanel);
         
-        getContentPane().add(loadPanel, BorderLayout.CENTER);
-        
+        getContentPane().add(loadPanel, BorderLayout.CENTER);   
     }
     
     public void showLoadingBar() {
@@ -45,6 +44,10 @@ public class LoadingBar extends JFrame {
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+    
+    public void changeText(String s) {
+        loadText.setText(s);
     }
     
 //    public void changeText() {

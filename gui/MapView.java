@@ -14,6 +14,7 @@ import java.util.logging.Logger;
  */
 
 public class MapView extends JFrame {
+    public final HelpWindow helpWindow;
     public final JPanel mapPanel;
     public final JPanel northPanel, eastPanel, upPanel, downPanel, roadPanel, xyPanel, arrowPanel, zoomPanel;
     public final JLabel x, y, road;
@@ -21,10 +22,15 @@ public class MapView extends JFrame {
     public final JMenuBar menuBar;
     public final JMenu mapOptionsMenu, helpMenu;
     public final JCheckBoxMenuItem enableRoad, enableRelative, enableNavigation;
+    public final JMenuItem setFrom, setTo, showHelp;
+    public final JPopupMenu popUp;
     private int condition;
     
     public MapView(String name, final MapPanel mapPanel) {
         super(name);
+        
+        DataLoader.loadBar.setVisible(false);
+        helpWindow = new HelpWindow();
         
         //Setting UIManager settings
         try {
@@ -35,14 +41,11 @@ public class MapView extends JFrame {
         UIManager.put("MenuBar.background", Color.LIGHT_GRAY);
         UIManager.put("Menu.background", Color.LIGHT_GRAY);
         
-        //Making menu
+        //Making menus
         menuBar = new JMenuBar();
         
         mapOptionsMenu = new JMenu("Map options");
         menuBar.add(mapOptionsMenu);
-        
-        helpMenu = new JMenu("Help");
-        menuBar.add(helpMenu);
         
         enableRoad = new JCheckBoxMenuItem("Enable road names");
         enableRoad.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
@@ -64,6 +67,20 @@ public class MapView extends JFrame {
         enableNavigation.setSelected(true);
         mapOptionsMenu.add(enableNavigation);
         
+        helpMenu = new JMenu("Help");
+        menuBar.add(helpMenu);
+        
+        showHelp = new JMenuItem("Help window");
+        showHelp.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, ActionEvent.ALT_MASK));
+        helpMenu.add(showHelp);
+        
+        popUp = new JPopupMenu();
+        setFrom = new JMenuItem("Set from");
+        setTo = new JMenuItem("Set to");
+        
+        popUp.add(setFrom);
+        popUp.add(setTo);
+        
         //Initializing components  
         this.mapPanel = mapPanel;
         mapPanel.setFocusable(true);
@@ -80,7 +97,7 @@ public class MapView extends JFrame {
         
         x = new JLabel("0");
         y = new JLabel("0");
-        road = new JLabel("");
+        road = new JLabel("jgvvj");
         
         showFull = new JButton ("▣");
         zoomIn = new JButton("+");
@@ -90,11 +107,6 @@ public class MapView extends JFrame {
         down = new JButton("↓");
         left = new JButton("←");
         right = new JButton("→");
-        
-//        relativeZoomCheckBox = new JCheckBox("Enable Relative Mouse Zoom");
-//        relativeZoomCheckBox.setEnabled(true);
-//        relativeZoomCheckBox.setMnemonic(KeyEvent.VK_R);
-//        relativeZoomCheckBox.setSelected(true);
         
         //Mapping key inputs to button
         KeyStroke keyUp = KeyStroke.getKeyStroke("UP"); 
@@ -183,20 +195,17 @@ public class MapView extends JFrame {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         eastPanel.setBorder(BorderFactory.createEtchedBorder(Color.PINK, Color.MAGENTA));
         
-        
         arrowPanel.setLayout(new BorderLayout());
         upPanel.setLayout(new BoxLayout(upPanel, BoxLayout.LINE_AXIS));
         downPanel.setLayout(new BoxLayout(downPanel, BoxLayout.LINE_AXIS));
         
-        roadPanel.setLayout(new FlowLayout());
+        //roadPanel.setLayout(new FlowLayout());
         
         //Adding components
         //zoomIn.setBorderPainted(false);
         //zoomIn.setAlignmentY(0.0f);
         mapPanel.add(zoomIn);
         mapPanel.add(zoomOut);
-        
-        //mapPanel.add(zoomOut);
         
         upPanel.add(Box.createHorizontalGlue());
         upPanel.add(up);
@@ -216,33 +225,23 @@ public class MapView extends JFrame {
         
         roadPanel.add(road);
         
-        //Spacing
-        northPanel.add(Box.createHorizontalGlue());
+        eastPanel.add(road, gbc);
         
-        //Adding components to panels
-//        northPanel.add(zoomIn);
-//        northPanel.add(zoomOut);
-        
+        //x-y panel
         xyPanel.add(new JLabel("x: "));
         xyPanel.add(x);
         xyPanel.add(new JLabel(" y: "));
         xyPanel.add(y);
         
-        northPanel.add(Box.createHorizontalGlue());
-        
-        northPanel.add(roadPanel);
-        
-        
-        
-        //Spacing, uncomment this if removing xyPanel from northPanel
         //northPanel.add(Box.createHorizontalGlue());
         
+        //northPanel.add(roadPanel);
+        
         //Adding components to panels
-        northPanel.add(xyPanel);
+        //northPanel.add(xyPanel);
         
         //Adding final touches to content pane.
         getContentPane().add(mapPanel, BorderLayout.CENTER);
-        //getContentPane().add(northPanel, BorderLayout.NORTH);
         getContentPane().add(eastPanel, BorderLayout.EAST);
         
         //Show window

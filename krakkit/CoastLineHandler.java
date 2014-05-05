@@ -15,7 +15,7 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  * @author Sjúrður í Sandagerði
  */
-public abstract class CoastLineXMLHandler extends DefaultHandler {
+public abstract class CoastLineHandler extends DefaultHandler {
 
     public abstract void processNode(OSMNodeData nd);
 

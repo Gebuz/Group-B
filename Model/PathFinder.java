@@ -25,11 +25,11 @@ import gui.DataLoader;
 public class PathFinder {
 
     private static final PathFinder pathFinder = new PathFinder();
-    EdgeWeightedDigraph graphCar;
-    EdgeWeightedDigraph graphWalk;
-    AstarSP tree;
-    HashMap<Point2D.Double, Integer> nodes;
-    int count;
+    private static EdgeWeightedDigraph graphCar;
+    private static EdgeWeightedDigraph graphWalk;
+    private static AstarSP tree;
+    private static HashMap<Point2D.Double, Integer> nodes;
+    private static int count;
 
     /**
      *
@@ -51,12 +51,12 @@ public class PathFinder {
      * @param type vehicle type
      * @param edges all edges
      */
-    public void createGraph(ArrayList<MapEdge> edges) {
+    public static void createGraph(ArrayList<MapEdge> edges) {
         graphCar = Graphs(0, edges);
         graphWalk = Graphs(1, edges);
     }
 
-    private EdgeWeightedDigraph Graphs(int type, ArrayList<MapEdge> edges) {
+    private static EdgeWeightedDigraph Graphs(int type, ArrayList<MapEdge> edges) {
         EdgeWeightedDigraph graph = new EdgeWeightedDigraph(edges.size());
         count = 0;
         nodes = new HashMap<>();
@@ -142,24 +142,25 @@ public class PathFinder {
         return graph;
     }
 
-    private ArrayList<MapEdge> createTree(int type, MapEdge start, MapEdge end) {
+    private static ArrayList<MapEdge> createTree(int type, MapEdge start, MapEdge end) {
         MapNode fn1 = DataLoader.nodes.get(start.getFNode());
         Point2D.Double xy1 = new Point2D.Double(fn1.getX(), fn1.getY());
         MapNode fn2 = DataLoader.nodes.get(end.getFNode());
         Point2D.Double xy2 = new Point2D.Double(fn2.getX(), fn2.getY());
-        int idEnd = nodes.get(xy2);
+        Integer idEnd = nodes.get(xy2);
+        Integer idStart = nodes.get(xy1);
         EdgeWeightedDigraph graph;
         if (type == 0) {
             graph = graphCar;
         } else {
             graph = graphWalk;
         }
-        tree = new AstarSP(graph, nodes.get(xy1), idEnd);
+        tree = new AstarSP(graph, idStart, idEnd);
         return shortestPath(idEnd);
 
     }
 
-    private ArrayList<MapEdge> shortestPath(int id) {
+    private static ArrayList<MapEdge> shortestPath(int id) {
         ArrayList<MapEdge> edges = new ArrayList<>();
         Iterable<DirectedEdge> list = tree.pathTo(id);
         if (list == null) {
@@ -178,7 +179,7 @@ public class PathFinder {
      * @param end
      * @return
      */
-    public ArrayList<MapEdge> getShortestPath(int type, MapEdge start, MapEdge end) {
+    public static ArrayList<MapEdge> getShortestPath(int type, MapEdge start, MapEdge end) {
         return createTree(type, start, end);
     }
 

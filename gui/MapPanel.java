@@ -10,6 +10,7 @@ import java.util.*;
 import Model.CoordinateBoundaries;
 import Model.QuadTree;
 import static gui.Colour.BLUE;
+import static gui.Colour.PINK;
 import interfaces.MapEdge;
 import interfaces.MapNode;
 
@@ -25,6 +26,7 @@ public class MapPanel extends JPanel implements Observer {
    
     public final QuadTree qtShapesGreen;
     
+    private ArrayList<MapEdge> path = new ArrayList<MapEdge>();
     
     private Colour colour;
     public final DataLoader loader;
@@ -42,7 +44,7 @@ public class MapPanel extends JPanel implements Observer {
     private Rectangle rect;
     private Point2D.Double press, release, vectorLastPress, vectorLastRelease;
         
-    private boolean isMap = false;
+    private boolean drawMap = true;
     private Graphics2D mapG;
     private BufferedImage map;
     
@@ -53,9 +55,9 @@ public class MapPanel extends JPanel implements Observer {
     
     public double lastWidth = INIT_WIDTH;
     public double lastHeight = INIT_HEIGHT;
+
     
     double pressX, pressY, releaseX, releaseY;
-    
 
     public MapPanel(int bool) { 
 
@@ -119,7 +121,7 @@ public class MapPanel extends JPanel implements Observer {
         int type;
         double fnX, fnY, tnX, tnY;
 
-        if(isMap == false) {
+        if(drawMap == true) {
             map = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
             mapG = (Graphics2D) map.getGraphics();
             mapG.setColor(Color.WHITE);
@@ -141,8 +143,6 @@ public class MapPanel extends JPanel implements Observer {
             if (pressY   < CoordinateBoundaries.yMin)   pressY = CoordinateBoundaries.yMin;
             if (releaseX > CoordinateBoundaries.xMax) releaseX = CoordinateBoundaries.xMax;
             if (releaseY > CoordinateBoundaries.yMax) releaseY = CoordinateBoundaries.yMax;
-            
-
             
             HashSet<String> trees;
             ArrayList<MapEdge> edges = new ArrayList<>();
@@ -244,15 +244,24 @@ public class MapPanel extends JPanel implements Observer {
 
                 drawSpecified(fnX, fnY, tnX, tnY, type, ed, mapG);
             }
-            
+            if(!path.isEmpty()) {
+                for(MapEdge ed : path) {
+                    fn = DataLoader.nodes.get(ed.getFNode());
+                    tn = DataLoader.nodes.get(ed.getTNode());
 
+                    fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);
+                    fnY = (((fn.getY() - CoordinateBoundaries.yMin) / k) + yk); 
+                    tnX = (((tn.getX() - CoordinateBoundaries.xMin) / k) + xk);
+                    tnY = (((tn.getY() - CoordinateBoundaries.yMin) / k) + yk);
+
+                    drawSpecified(fnX, fnY, tnX, tnY, -100, ed, mapG);
+                }
+            }
+            
             roadListHashSet.clear();
-            
             roadListNameHashSet.clear();
-
         }
         g2.drawImage(map, 0, 0, null);
-
         mapG.dispose();
         if (rect != null) {
             area.add(new Area(new Rectangle2D.Float(0, 0, getWidth(), getHeight())));
@@ -290,7 +299,7 @@ public class MapPanel extends JPanel implements Observer {
             case 1:
             case 31:
             case 41:
-                drawLine(g2, line, Color.RED, 1);
+                drawLine(g2, line, Color.YELLOW, 1);
                 break;
             case 2:
             case 32:
@@ -311,6 +320,9 @@ public class MapPanel extends JPanel implements Observer {
             case 80:
                 drawLine(g2, line, Color.ORANGE, 1);
                 break;
+            case -100:
+                drawLine(g2, line, Color.RED, 2);
+                break;
             default:
                 drawLine(g2, line, Color.BLACK, 1);
                 break;
@@ -328,7 +340,7 @@ public class MapPanel extends JPanel implements Observer {
                     drawRoadNames(fnX, tnX, fnY, tnY, 0.025, 12, edge, g2);
             }
         }
-        isMap = true;
+        drawMap = false;
     }
     
     public void drawLine(Graphics2D g2, Line2D line, Color color, float width) {
@@ -350,7 +362,7 @@ public class MapPanel extends JPanel implements Observer {
         this.press = press;
         this.release = release;
         
-        isMap = false;
+        drawMap = true;
       
         updateZoom(Math.abs(release.y - press.y) / INIT_HEIGHT);
         repaint();
@@ -411,14 +423,18 @@ public class MapPanel extends JPanel implements Observer {
     public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int fontSize, MapEdge edge, Graphics2D g2) {
                                  /* Ignore roadnames that are the empty string. */ 
         if(zoomConstant < zoomLimit && !edge.getName().equals("")) {
+            boolean found;
             boolean foundID;
             boolean foundName;
+
             int roadNum = edge.getID();
             String roadName = edge.getName();
  
+            found = roadListHashSet.contains(roadNum);
             foundID = roadListHashSet.contains(roadNum);
             foundName = roadListNameHashSet.contains(roadName);
 
+            
             double xMid = (fnX + tnX)/2.0;
             double yMid = (fnY + tnY)/2.0;
             g2.setColor(Color.BLACK);
@@ -450,20 +466,22 @@ public class MapPanel extends JPanel implements Observer {
         zoomConstant = 1;
         colour = colour.BLUE;
         resizeConstant = 1;
+        
         lastWidth = INIT_WIDTH;
         lastHeight = INIT_HEIGHT;
+        
         yk = 0;
         xk = 0;
         setPreferredSize(new Dimension(INIT_WIDTH, INIT_HEIGHT));
         setVectorLastPress(0.0, 0.0);
         setVectorLastRelease(0.0, 0.0);
-        isMap = false;
+        drawMap = true;
         repaint();
     }
 
     public void updateResize(double j) {
         resizeConstant = j;
-        isMap = false;
+        drawMap = true;
         repaint();
     }
 
@@ -480,7 +498,7 @@ public class MapPanel extends JPanel implements Observer {
      * zero, the slower the zoom will be.
      */
     public void zoomInOld(double factor) {
-        isMap = false;
+        drawMap = true;
         double deltaX = (release.x - press.x) * factor;
         double deltaY = (release.y - press.y) * factor;
         press.setLocation(press.x + deltaX, press.y + deltaY);
@@ -493,7 +511,7 @@ public class MapPanel extends JPanel implements Observer {
         setVectorLastRelease(vectorLastRelease.x - deltaX,
                 vectorLastRelease.y - deltaY);
     }
-    
+
     /**
      * Center zoom out by a certain factor.
      *
@@ -501,7 +519,7 @@ public class MapPanel extends JPanel implements Observer {
      * zero, the slower the zoom will be.
      */
     public void zoomOutOld(double factor) {
-        isMap = false;
+        drawMap = true;
         double deltaX = (release.x - press.x) * factor;
         double deltaY = (release.y - press.y) * factor;
         press.setLocation(press.x - deltaX, press.y - deltaY);
@@ -513,16 +531,16 @@ public class MapPanel extends JPanel implements Observer {
                 vectorLastPress.y - deltaY);
         setVectorLastRelease(vectorLastRelease.x + deltaX,
                 vectorLastRelease.y + deltaY);
-    }    
+    }
     
-    /**
+     /**
      * Center zoom in by a certain factor.
      *
      * @param factor How much to zoom in each time. The closer the number is to
      * zero, the slower the zoom will be.
      */
     public void zoomIn(double factor) {
-        isMap = false;
+        drawMap = false;
         
         double heightRatio = getHeight()/(INIT_HEIGHT * 1.0);
         double widthDiff = (getWidth() - INIT_WIDTH )* resizeConstant * zoomConstant;
@@ -554,7 +572,7 @@ public class MapPanel extends JPanel implements Observer {
      * zero, the slower the zoom will be.
      */
     public void zoomOut(double factor) {
-        isMap = false;
+        drawMap = false;
 
         
         double heightRatio = getHeight()/(INIT_HEIGHT * 1.0);
@@ -728,13 +746,13 @@ public class MapPanel extends JPanel implements Observer {
     }
 
     public void changeX(double j) {
-        isMap = false;
+        drawMap = true;
         xk += j;
         repaint();
     }
 
     public void changeY(double j) {
-        isMap = false;
+        drawMap = true;
         yk += j;
         repaint();
     }
@@ -759,21 +777,26 @@ public class MapPanel extends JPanel implements Observer {
     public void roadSwitch() {
         if(roadOn) roadOn = false;
         else roadOn = true;
-        isMap = false;
+        drawMap = true;
         repaint();
     }
     
     public void updateMap() {
-        isMap = false;
+        drawMap = true;
         repaint();
     }
     
     public String getRoadName(double x, double y) {
+        MapEdge edge = getClosestRoad(x, y);
+        return edge.getName() + " - " + edge.getOneWay()  + " - " +  edge.getMaxSpeed();
+    }
+    
+    public MapEdge getClosestRoad(double x, double y) {
         double widthDiff  = (getWidth()  * resizeConstant - INIT_WIDTH)  * zoomConstant;
         double heightDiff = (getHeight() * resizeConstant - INIT_HEIGHT) * zoomConstant;
         
-        x = pressX +  ((releaseX-widthDiff*k) - pressX)*x/INIT_WIDTH;
-        y = pressY +  ((releaseY-heightDiff*k) - pressY)*y/INIT_HEIGHT;
+        x = pressX + ((releaseX-widthDiff*k) - pressX)*x/INIT_WIDTH;
+        y = pressY + ((releaseY-heightDiff*k) - pressY)*y/INIT_HEIGHT;
         MapEdge edge;
         switch(colour) {
             case BLUE:
@@ -786,7 +809,13 @@ public class MapPanel extends JPanel implements Observer {
                 edge = qtGreen.getClosestRoad(x, y);
                 break;
         }
-        return edge.getName() + " - " + edge.getOneWay()  + " - " +  edge.getMaxSpeed();
+        return edge;
+    }
+    
+    public void drawShortestPath(ArrayList<MapEdge> path) {
+        this.path = path;
+        drawMap = true;
+        repaint();
     }
 
     @Override
