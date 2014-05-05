@@ -259,7 +259,7 @@ public class AddressParser
         BufferedReader br;
         String line;
 
-        fis = new FileInputStream("data/roadNames.txt"); //skal ændres til det rigtige fil navn
+        fis = new FileInputStream("data/road_names.txt"); //skal ændres til det rigtige fil navn
         br = new BufferedReader(new InputStreamReader(fis, "LATIN1"));
         while ((line = br.readLine()) != null) {
             if (road.equalsIgnoreCase(line)) {

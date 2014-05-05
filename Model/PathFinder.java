@@ -25,10 +25,11 @@ import gui.DataLoader;
 public class PathFinder {
 
     private static final PathFinder pathFinder = new PathFinder();
-    EdgeWeightedDigraph graph;
+    EdgeWeightedDigraph graphCar;
+    EdgeWeightedDigraph graphWalk;
     AstarSP tree;
     HashMap<Point2D.Double, Integer> nodes;
-    int count;    
+    int count;
 
     /**
      *
@@ -50,9 +51,13 @@ public class PathFinder {
      * @param type vehicle type
      * @param edges all edges
      */
-    public void createGraph(int type, ArrayList<MapEdge> edges) {
-        graph = null;
-        EdgeWeightedDigraph grapht = new EdgeWeightedDigraph(edges.size());
+    public void createGraph(ArrayList<MapEdge> edges) {
+        graphCar = Graphs(0, edges);
+        graphWalk = Graphs(1, edges);
+    }
+
+    private EdgeWeightedDigraph Graphs(int type, ArrayList<MapEdge> edges) {
+        EdgeWeightedDigraph graph = new EdgeWeightedDigraph(edges.size());
         count = 0;
         nodes = new HashMap<>();
         for (MapEdge ed : edges) {
@@ -71,25 +76,25 @@ public class PathFinder {
 
                         if (i == null) {
                             nodes.put(xy1, count);
-                            grapht.addXY(xy1, count);
+                            graph.addXY(xy1, count);
                             i = count++;
                         }
 
                         if (j == null) {
                             nodes.put(xy2, count);
-                            grapht.addXY(xy2, count);
+                            graph.addXY(xy2, count);
                             j = count++;
                         }
 
                         if (ed.getOneWay().equals("n") || ed.getMaxSpeed() == 0) {
                             break;
                         } else if (ed.getOneWay().equals("ft")) {
-                            grapht.addEdge(new DirectedEdge(i, j, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
+                            graph.addEdge(new DirectedEdge(i, j, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
                         } else if (ed.getOneWay().equals("tf")) {
-                            grapht.addEdge(new DirectedEdge(i, j, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
+                            graph.addEdge(new DirectedEdge(i, j, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
                         } else {
-                            grapht.addEdge(new DirectedEdge(i, j, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
-                            grapht.addEdge(new DirectedEdge(j, i, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
+                            graph.addEdge(new DirectedEdge(i, j, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
+                            graph.addEdge(new DirectedEdge(j, i, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
                         }
                         break;
                 }
@@ -104,50 +109,54 @@ public class PathFinder {
                         MapNode tn = DataLoader.nodes.get(ed.getTNode());
                         Point2D.Double xy1 = new Point2D.Double(fn.getX(), fn.getY());
                         Point2D.Double xy2 = new Point2D.Double(tn.getX(), tn.getY());
-                        Integer i;
-                        Integer j;
+                        Integer i = nodes.get(xy1);
+                        Integer j = nodes.get(xy2);
 
-                        if (nodes.get(xy1) == null) {
+                        if (i == null) {
                             nodes.put(xy1, count);
+                            graph.addXY(xy1, count);
                             i = count++;
-                        } else {
-                            i = nodes.get(xy1);
                         }
 
-                        if (nodes.get(xy2) == null) {
+                        if (j == null) {
                             nodes.put(xy2, count);
+                            graph.addXY(xy2, count);
                             j = count++;
-                        } else {
-                            j = nodes.get(xy1);
                         }
 
                         if (ed.getOneWay().equals("n") || ed.getMaxSpeed() == 0) {
                             break;
                         } else if (ed.getOneWay().equals("ft")) {
-                            grapht.addEdge(new DirectedEdge(i, j, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
+                            graph.addEdge(new DirectedEdge(i, j, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
                         } else if (ed.getOneWay().equals("tf")) {
-                            grapht.addEdge(new DirectedEdge(i, j, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
+                            graph.addEdge(new DirectedEdge(i, j, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
                         } else {
-                            grapht.addEdge(new DirectedEdge(i, j, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
-                            grapht.addEdge(new DirectedEdge(j, i, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
+                            graph.addEdge(new DirectedEdge(i, j, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
+                            graph.addEdge(new DirectedEdge(j, i, ed.getLength() / ed.getMaxSpeed() / 3.6 + 10, ed));
                         }
                         break;
                 }
             }
 
         }
-        graph = grapht;
+        return graph;
     }
 
-    private ArrayList<MapEdge> createTree(MapEdge start, MapEdge end) {
+    private ArrayList<MapEdge> createTree(int type, MapEdge start, MapEdge end) {
         MapNode fn1 = DataLoader.nodes.get(start.getFNode());
         Point2D.Double xy1 = new Point2D.Double(fn1.getX(), fn1.getY());
         MapNode fn2 = DataLoader.nodes.get(end.getFNode());
         Point2D.Double xy2 = new Point2D.Double(fn2.getX(), fn2.getY());
         int idEnd = nodes.get(xy2);
+        EdgeWeightedDigraph graph;
+        if (type == 0) {
+            graph = graphCar;
+        } else {
+            graph = graphWalk;
+        }
         tree = new AstarSP(graph, nodes.get(xy1), idEnd);
         return shortestPath(idEnd);
-        
+
     }
 
     private ArrayList<MapEdge> shortestPath(int id) {
@@ -161,7 +170,7 @@ public class PathFinder {
         }
         return edges;
     }
-    
+
     /**
      *
      * @param type
@@ -169,8 +178,8 @@ public class PathFinder {
      * @param end
      * @return
      */
-    public ArrayList<MapEdge> getShortestPath(int type, MapEdge start, MapEdge end){
-        return createTree(start, end);
+    public ArrayList<MapEdge> getShortestPath(int type, MapEdge start, MapEdge end) {
+        return createTree(type, start, end);
     }
 
 }
