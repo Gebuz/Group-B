@@ -353,26 +353,26 @@ public class DataLoader {
             
             long startTime = System.currentTimeMillis();
             
-//            GMTParser gmtpBuildings = new GMTParser() {
-//
-//                @Override
-//                public void processShape(GMTShape shape) {
-//                    shapesBuilding.put(shape.getID(), shape);
-//                }
-//            };
-//  
-//            try {
-////                gmtpBuildings.load("data/gmt/landuseNew.gmt");
-////                gmtpBuildings.load("data/gmt/naturalNew.gmt");
-////                gmtpBuildings.load("data/gmt/buildingsNew.gmt");
-//
-//            } catch (FileNotFoundException ex) {
-//                Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
-//            } catch (UnsupportedEncodingException ex) {
-//                Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
-//            } catch (IOException ex) {
-//                Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
-//            }
+            GMTParser gmtpBuildings = new GMTParser() {
+
+                @Override
+                public void processShape(GMTShape shape) {
+                    shapesBuilding.put(shape.getID(), shape);
+                }
+            };
+  
+            try {
+//                gmtpBuildings.load("data/gmt/landuseNew.gmt");
+//                gmtpBuildings.load("data/gmt/naturalNew.gmt");
+                gmtpBuildings.load("data/gmt/buildingsNew.gmt");
+
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
             GMTParser gmtpLandPolygons = new GMTParser() {
 
