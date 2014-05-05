@@ -60,8 +60,11 @@ public class PathFinder {
     private static EdgeWeightedDigraph Graphs(int type, ArrayList<MapEdge> edges) {
         EdgeWeightedDigraph graph = new EdgeWeightedDigraph(edges.size());
         count = 0;
-        nodesCar = new HashMap<>();
-        nodesWalk = new HashMap<>();
+        if(type == 0){
+            nodesCar = new HashMap<>();
+        }else {
+            nodesWalk = new HashMap<>();
+        }
         for (MapEdge ed : edges) {
             if (type == 0) {
                 switch (ed.getType()) {
