@@ -1,4 +1,4 @@
-package mapofdenmark;
+package AdressParser;
 
 /**
  *

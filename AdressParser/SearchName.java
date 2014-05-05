@@ -13,13 +13,13 @@ import java.util.HashMap;
  */
 public class SearchName {
 
-    public static String getRoadNumber(String input) {
+    public static String getRoadNumber(String input) throws InputException {
         AddressParser parser = new AddressParser();
         String[] output;
         try {
             output = parser.addressParser(input);
         } catch (InputException ex) {
-            throw new InputException();
+            throw ex;
         }
         return output[0];
     }

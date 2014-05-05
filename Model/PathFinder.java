@@ -71,21 +71,26 @@ public class PathFinder {
                         MapNode tn = DataLoader.nodes.get(ed.getTNode());
                         Point2D.Double xy1 = new Point2D.Double(fn.getX(), fn.getY());
                         Point2D.Double xy2 = new Point2D.Double(tn.getX(), tn.getY());
-                        Integer i = nodes.get(xy1);
-                        Integer j = nodes.get(xy2);
-
-                        if (i == null) {
+                        Integer i;
+                        Integer j;
+                                
+                        if (nodes.get(xy1) == null) {
                             nodes.put(xy1, count);
                             graph.addXY(xy1, count);
                             i = count++;
+                        } else {
+                            i = nodes.get(xy1);
                         }
+                        
 
-                        if (j == null) {
+                        if (nodes.get(xy2) == null) {
                             nodes.put(xy2, count);
                             graph.addXY(xy2, count);
                             j = count++;
+                        } else{
+                            j = nodes.get(xy2);
                         }
-
+                        
                         if (ed.getOneWay().equals("n") || ed.getMaxSpeed() == 0) {
                             break;
                         } else if (ed.getOneWay().equals("ft")) {
@@ -109,21 +114,26 @@ public class PathFinder {
                         MapNode tn = DataLoader.nodes.get(ed.getTNode());
                         Point2D.Double xy1 = new Point2D.Double(fn.getX(), fn.getY());
                         Point2D.Double xy2 = new Point2D.Double(tn.getX(), tn.getY());
-                        Integer i = nodes.get(xy1);
-                        Integer j = nodes.get(xy2);
-
-                        if (i == null) {
+                        Integer i;
+                        Integer j;
+                                
+                        if (nodes.get(xy1) == null) {
                             nodes.put(xy1, count);
                             graph.addXY(xy1, count);
                             i = count++;
+                        } else {
+                            i = nodes.get(xy1);
                         }
+                        
 
-                        if (j == null) {
+                        if (nodes.get(xy2) == null) {
                             nodes.put(xy2, count);
                             graph.addXY(xy2, count);
                             j = count++;
+                        } else{
+                            j = nodes.get(xy2);
                         }
-
+                        
                         if (ed.getOneWay().equals("n") || ed.getMaxSpeed() == 0) {
                             break;
                         } else if (ed.getOneWay().equals("ft")) {
