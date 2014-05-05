@@ -13,19 +13,21 @@ import java.awt.event.ComponentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 /**
  *
  * @author flemmingxu
  */
-public class Controller implements MouseListener, MouseMotionListener, ComponentListener, ActionListener, MouseWheelListener, ItemListener, KeyListener {
+public class Controller implements MouseListener, MouseMotionListener, ComponentListener, ActionListener, MouseWheelListener, ItemListener {
 
     private final MapView view;
     private final MapPanel map;
@@ -66,7 +68,16 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         map.addMouseListener(this);
         map.addMouseMotionListener(this);
         map.addMouseWheelListener(this);
-        map.addKeyListener(this);
+
+        map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),"cancelDrag");
+        map.getActionMap().put("cancelDrag", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                map.removeRect();
+                map.repaint();
+                cancelDrag = true;
+            }
+        });
     }
     
     @Override
@@ -358,22 +369,5 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 map.updateMap();
             }
         }
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            map.removeRect();
-            map.repaint();
-            cancelDrag = true;
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
     }
 }
