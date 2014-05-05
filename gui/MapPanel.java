@@ -10,7 +10,6 @@ import java.util.*;
 import Model.CoordinateBoundaries;
 import Model.QuadTree;
 import static gui.Colour.BLUE;
-import static gui.Colour.PINK;
 import interfaces.MapEdge;
 import interfaces.MapNode;
 
@@ -25,6 +24,7 @@ public class MapPanel extends JPanel implements Observer {
     public final QuadTree qtGreen;
    
     public final QuadTree qtShapesGreen;
+    public final QuadTree qtShapesLandPolygons;
     
     private ArrayList<MapEdge> path = new ArrayList<MapEdge>();
     
@@ -55,9 +55,9 @@ public class MapPanel extends JPanel implements Observer {
     
     public double lastWidth = INIT_WIDTH;
     public double lastHeight = INIT_HEIGHT;
-
     
     double pressX, pressY, releaseX, releaseY;
+    
 
     public MapPanel(int bool) { 
 
@@ -96,16 +96,20 @@ public class MapPanel extends JPanel implements Observer {
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
         qtGreen.split(500);
 
-        final long startTime = System.currentTimeMillis();
-        qtShapesGreen = new QuadTree(DataLoader.shapeEdgesGreen, DataLoader.shapeNodesGreen, "0");
+
+        qtShapesGreen = new QuadTree(DataLoader.shapeEdgesBuilding, DataLoader.shapeNodesBuilding, "0");
         qtShapesGreen.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
         qtShapesGreen.split(200);
-        final long endTime = System.currentTimeMillis();
-        System.out.println("Total time to load create quadtree was " + (endTime - startTime) + " milliseconds.");
-        
+
+        qtShapesLandPolygons = new QuadTree(DataLoader.shapeEdgesLandPolygons, DataLoader.shapeNodesLandPolygons, "0");
+        qtShapesLandPolygons.addCoords(CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMin,
+                CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
+                CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
+        qtShapesLandPolygons.split(500);
         
         colour = Colour.BLUE;
 
@@ -124,7 +128,7 @@ public class MapPanel extends JPanel implements Observer {
         if(drawMap == true) {
             map = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
             mapG = (Graphics2D) map.getGraphics();
-            mapG.setColor(Color.WHITE);
+            mapG.setColor(new Color(15, 129, 209, 255));
             mapG.fillRect(0, 0, getWidth(), getHeight());
             
             double widthDiff  = (getWidth() * resizeConstant - INIT_WIDTH)  * zoomConstant;
@@ -143,6 +147,8 @@ public class MapPanel extends JPanel implements Observer {
             if (pressY   < CoordinateBoundaries.yMin)   pressY = CoordinateBoundaries.yMin;
             if (releaseX > CoordinateBoundaries.xMax) releaseX = CoordinateBoundaries.xMax;
             if (releaseY > CoordinateBoundaries.yMax) releaseY = CoordinateBoundaries.yMax;
+            
+
             
             HashSet<String> trees;
             ArrayList<MapEdge> edges = new ArrayList<>();
@@ -175,61 +181,84 @@ public class MapPanel extends JPanel implements Observer {
                 mapG.setRenderingHints(rh);
             }
 
-
-            // Get the shapesBlue do draw
-            HashSet<String> shapeTrees;
-            ArrayList<MapEdge> shapeEdges = new ArrayList<>();
-            HashSet<GMTShape> shapes = new HashSet<>();
+            // Get the land polygons to draw
+            HashSet<String> shapeLandTrees;
+            ArrayList<MapEdge> shapeEdgeLandPolygon = new ArrayList<>();
+            HashSet<GMTShape> shapeLandPolygons = new HashSet<>();
+            shapeLandTrees = qtShapesLandPolygons.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+            for(String s : shapeLandTrees) {
+                    shapeEdgeLandPolygon.addAll(qtShapesLandPolygons.getBranch(s).getEdges());
+            }
+            for (MapEdge ed : shapeEdgeLandPolygon) {
+                shapeLandPolygons.add(DataLoader.shapesLandPolygons.get(ed.getID()));
+            }
+            
+            // Draw landpolygons first
+            mapG.setColor(new Color(180, 255, 173, 255));
+            for (GMTShape landpolygon : shapeLandPolygons) {
+                if (landpolygon.getxPoly().length > 0) {
+                    mapG.fill(GMTShapeConverter.createPolygon(landpolygon, k, xk, yk, CoordinateBoundaries.xMin, CoordinateBoundaries.yMin, zoomConstant, resizeConstant, press.x, press.y));
+                }
+            }
+            
+            
+            // Get the shapes buildings to draw
+            HashSet<String> shapeBuildingTrees;
+            ArrayList<MapEdge> shapeBuildingEdges = new ArrayList<>();
+            HashSet<GMTShape> shapeBuildings = new HashSet<>();
             switch(colour) {
                 case GREEN:
-                    shapeTrees = qtShapesGreen.getRoadsImproved(pressX, pressY, releaseX, releaseY);
-                    for(String s : shapeTrees) {
-                            shapeEdges.addAll(qtShapesGreen.getBranch(s).getEdges());
+                    shapeBuildingTrees = qtShapesGreen.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+                    for(String s : shapeBuildingTrees) {
+                            shapeBuildingEdges.addAll(qtShapesGreen.getBranch(s).getEdges());
                     }
-                    for (MapEdge ed : shapeEdges) {
-                        shapes.add(DataLoader.shapesGreen.get(ed.getID()));
+                    for (MapEdge ed : shapeBuildingEdges) {
+                        shapeBuildings.add(DataLoader.shapesBuilding.get(ed.getID()));
                     }
                     break;
             }
             
 
             
-            for (GMTShape shape : shapes) {
-                String shapeType = shape.getTYPE();
-                switch (shapeType.toLowerCase()) {
-                    case "forest":
-                    case "grass":
-                    case "park":
-                    case "pitch":
-                    case "meadow":
-                    case "farmland":
-                    case "farmyard":
-                        mapG.setColor(new Color(180, 255, 173, 100));
-                        break;
-                    case "water":
-                    case "riverbank":
-                        mapG.setColor(new Color(173, 218, 255, 100));
-                        break;
-                    case "cemetery":
-                        mapG.setColor(new Color(212, 212, 212, 100));
-                        break;
-                    case "house":
-                    case "hospital":
-                    case "silo":
-                    case "":
-                        mapG.setColor(new Color(120, 120, 120, 100));
-                    case "residential":
-                        mapG.setColor(new Color(250, 167, 167, 100));
-                        break;
-                    case "industrial":
-                        mapG.setColor(new Color(0, 80, 145, 80));
-                        break;
-                    default:
-                        mapG.setColor(new Color(120, 120, 120, 100));
-                        break;
-                }
+            // Draw shapes (buildings, lakes, etc)
+            for (GMTShape shape : shapeBuildings) {
+                if (shape.getxPoly().length > 0) {
+                    String shapeType = shape.getTYPE();
+                    switch (shapeType.toLowerCase()) {
+                        case "forest":
+                        case "grass":
+                        case "park":
+                        case "pitch":
+                        case "meadow":
+                        case "farmland":
+                        case "farmyard":
+                            mapG.setColor(new Color(180, 255, 173, 150));
+                            break;
+                        case "water":
+                        case "riverbank":
+                            mapG.setColor(new Color(173, 218, 255, 100));
+                            break;
+                        case "cemetery":
+                            mapG.setColor(new Color(212, 212, 212, 100));
+                            break;
+                        case "house":
+                        case "hospital":
+                        case "silo":
+                        case "":
+                            mapG.setColor(new Color(120, 120, 120, 150));
+                        case "residential":
+                            mapG.setColor(new Color(250, 167, 167, 100));
+                            break;
+                        case "industrial":
+                            mapG.setColor(new Color(0, 80, 145, 80));
+                            break;
+                        default:
+                            mapG.setColor(new Color(120, 120, 120, 100));
+                            break;
+                    }
 
-                mapG.fill(GMTShapeConverter.createPolygon(shape, k, xk, yk, CoordinateBoundaries.xMin, CoordinateBoundaries.yMin, zoomConstant, resizeConstant, press.x, press.y));
+                    mapG.fill(GMTShapeConverter.createPolygon(shape, k, xk, yk, CoordinateBoundaries.xMin, CoordinateBoundaries.yMin, zoomConstant, resizeConstant, press.x, press.y));
+                }
             }
 
             for (MapEdge ed : edges) {
@@ -244,6 +273,7 @@ public class MapPanel extends JPanel implements Observer {
 
                 drawSpecified(fnX, fnY, tnX, tnY, type, ed, mapG);
             }
+            
             if(!path.isEmpty()) {
                 for(MapEdge ed : path) {
                     fn = DataLoader.nodes.get(ed.getFNode());
@@ -257,11 +287,13 @@ public class MapPanel extends JPanel implements Observer {
                     drawSpecified(fnX, fnY, tnX, tnY, -100, ed, mapG);
                 }
             }
-            
+			
             roadListHashSet.clear();
             roadListNameHashSet.clear();
+
         }
         g2.drawImage(map, 0, 0, null);
+
         mapG.dispose();
         if (rect != null) {
             area.add(new Area(new Rectangle2D.Float(0, 0, getWidth(), getHeight())));
@@ -423,18 +455,14 @@ public class MapPanel extends JPanel implements Observer {
     public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int fontSize, MapEdge edge, Graphics2D g2) {
                                  /* Ignore roadnames that are the empty string. */ 
         if(zoomConstant < zoomLimit && !edge.getName().equals("")) {
-            boolean found;
             boolean foundID;
             boolean foundName;
-
             int roadNum = edge.getID();
             String roadName = edge.getName();
  
-            found = roadListHashSet.contains(roadNum);
             foundID = roadListHashSet.contains(roadNum);
             foundName = roadListNameHashSet.contains(roadName);
 
-            
             double xMid = (fnX + tnX)/2.0;
             double yMid = (fnY + tnY)/2.0;
             g2.setColor(Color.BLACK);
@@ -497,56 +525,11 @@ public class MapPanel extends JPanel implements Observer {
      * @param factor How much to zoom in each time. The closer the number is to
      * zero, the slower the zoom will be.
      */
-    public void zoomInOld(double factor) {
-        drawMap = true;
-        double deltaX = (release.x - press.x) * factor;
-        double deltaY = (release.y - press.y) * factor;
-        press.setLocation(press.x + deltaX, press.y + deltaY);
-        release.setLocation(release.x - deltaX, release.y - deltaY);
- 
-        assignCoords(press, release);
- 
-        setVectorLastPress(vectorLastPress.x + deltaX,
-                vectorLastPress.y + deltaY);
-        setVectorLastRelease(vectorLastRelease.x - deltaX,
-                vectorLastRelease.y - deltaY);
-    }
-
-    /**
-     * Center zoom out by a certain factor.
-     *
-     * @param factor How much to zoom out each time. The closer the number is to
-     * zero, the slower the zoom will be.
-     */
-    public void zoomOutOld(double factor) {
-        drawMap = true;
-        double deltaX = (release.x - press.x) * factor;
-        double deltaY = (release.y - press.y) * factor;
-        press.setLocation(press.x - deltaX, press.y - deltaY);
-        release.setLocation(release.x + deltaX, release.y + deltaY);
- 
-        assignCoords(press, release);
- 
-        setVectorLastPress(vectorLastPress.x - deltaX,
-                vectorLastPress.y - deltaY);
-        setVectorLastRelease(vectorLastRelease.x + deltaX,
-                vectorLastRelease.y + deltaY);
-    }
-    
-     /**
-     * Center zoom in by a certain factor.
-     *
-     * @param factor How much to zoom in each time. The closer the number is to
-     * zero, the slower the zoom will be.
-     */
     public void zoomIn(double factor) {
-        drawMap = false;
+        drawMap = true;
         
-        double heightRatio = getHeight()/(INIT_HEIGHT * 1.0);
-        double widthDiff = (getWidth() - INIT_WIDTH )* resizeConstant * zoomConstant;
-        heightRatio = (heightRatio * (INIT_HEIGHT * 1.0) - INIT_HEIGHT) * zoomConstant / 2;
-
-        changeX(-widthDiff * factor + heightRatio * factor);
+        double mapNudge = calculateZoomNudge(factor);
+        changeX(-mapNudge);
         
         
         double deltaX = (release.x - press.x) * factor;
@@ -572,14 +555,10 @@ public class MapPanel extends JPanel implements Observer {
      * zero, the slower the zoom will be.
      */
     public void zoomOut(double factor) {
-        drawMap = false;
+        drawMap = true;
 
-        
-        double heightRatio = getHeight()/(INIT_HEIGHT * 1.0);
-        double widthDiff = (getWidth() - INIT_WIDTH )* resizeConstant * zoomConstant;
-        heightRatio = (heightRatio * (INIT_HEIGHT * 1.0) - INIT_HEIGHT) * zoomConstant / 2;
-
-        changeX(widthDiff * factor - heightRatio * factor);
+        double zoomNudge = calculateZoomNudge(factor);
+        changeX(zoomNudge);
 
         double deltaX = (release.x - press.x) * factor;
         double deltaY = (release.y - press.y) * factor;
@@ -614,20 +593,16 @@ public class MapPanel extends JPanel implements Observer {
         double rcY = (mousePosY - release.y)* relativeFactor;
 
         double moveVectorX = pcX + rcX + (pressPositionX + releasePositionX);
-        double moveVectorY = pcY + rcY + (pressPositionY + releasePositionY);
+        double moveVectorY = pcY + rcY + (pressPositionY + releasePositionY);     
         
-        double heightRatio = getHeight()/(INIT_HEIGHT * 1.0);
-        double widthDiff = (getWidth() - INIT_WIDTH )* resizeConstant * zoomConstant;
-        heightRatio = (heightRatio * (INIT_HEIGHT * 1.0) - INIT_HEIGHT) * zoomConstant / 2;          
+        double zoomNudge = calculateZoomNudge(factor);
         
         zoomIn(factor);
         changeX(-moveVectorX);
         changeY(-moveVectorY);
 
-        changeX(widthDiff * factor - heightRatio * factor);
+        changeX(zoomNudge);
     }
-    
-
    
     public void zoomOutRelativeToMouse(double factor, double mousePosX, double mousePosY) {
         
@@ -650,68 +625,30 @@ public class MapPanel extends JPanel implements Observer {
         double moveVectorX = pcX + rcX + (pressPositionX + releasePositionX);
         double moveVectorY = pcY + rcY + (pressPositionY + releasePositionY);
 
-        double heightRatio = getHeight()/(INIT_HEIGHT * 1.0);
-        double widthDiff = (getWidth() - INIT_WIDTH )* resizeConstant * zoomConstant;
-        heightRatio = (heightRatio * (INIT_HEIGHT * 1.0) - INIT_HEIGHT) * zoomConstant / 2;       
+        double mapNudge = calculateZoomNudge(factor);  
         
         zoomOut(factor);
         changeX(moveVectorX);
         changeY(moveVectorY);
         
-        changeX(- widthDiff * factor + heightRatio * factor);
+        changeX(-mapNudge);
     }
     
-     public void zoomInRelativeToMouseOld(double factor, double mousePosX, double mousePosY) { 
+    /**
+     * Helper method for the zoom methods. This method calculates how much to
+     * move the map to the left and right so the map is always centered in the
+     * middle of the window.
+     * @param factor
+     * @return Returns the value for X on how much to move the map 
+    */
+    private double calculateZoomNudge(double factor) {
+        double heightRatio = getHeight()/(INIT_HEIGHT * 1.0);
+        double widthDiff = (getWidth() - INIT_WIDTH )* resizeConstant * zoomConstant;
+        double heightDiff = (heightRatio * (INIT_HEIGHT * 1.0) - INIT_HEIGHT) * resizeConstant * zoomConstant;
         
-        double relativeFactor = factor * zoomConstant;
-        
-        double pressPositionX = (press.x - 0) * relativeFactor;
-        double pressPositionY = (press.y - 0) * relativeFactor;
-        double releasePositionX = (release.x - INIT_WIDTH)  * relativeFactor;
-        double releasePositionY = (release.y - INIT_HEIGHT) * relativeFactor;
-        
-        // vector from press to mousePosition
-        double pcX = (mousePosX - press.x)* relativeFactor;
-        double pcY = (mousePosY - press.y)* relativeFactor;
-        
-        
-        // vector from release to mousePosition
-        double rcX = (mousePosX - release.x)* relativeFactor;
-        double rcY = (mousePosY - release.y)* relativeFactor;
-
-        double moveVectorX = pcX + rcX + (pressPositionX + releasePositionX);
-        double moveVectorY = pcY + rcY + (pressPositionY + releasePositionY);
-                
-        zoomIn(factor);
-        changeX(-moveVectorX);
-        changeY(-moveVectorY);
-    }   
-     
-    public void zoomOutRelativeToMouseOld(double factor, double mousePosX, double mousePosY) {
-        
-        double relativeFactor = factor * zoomConstant;
-        
-        double pressPositionX = (press.x - 0) * relativeFactor;
-        double pressPositionY = (press.y - 0) * relativeFactor;
-        double releasePositionX = (release.x - INIT_WIDTH)  * relativeFactor;
-        double releasePositionY = (release.y - INIT_HEIGHT) * relativeFactor;
-        
-        // vector from press to mousePosition
-        double pcX = (mousePosX - press.x)* relativeFactor;
-        double pcY = (mousePosY - press.y)* relativeFactor;
-        
-        
-        // vector from release to mousePosition
-        double rcX = (mousePosX - release.x)* relativeFactor;
-        double rcY = (mousePosY - release.y)* relativeFactor;
-
-        double moveVectorX = pcX + rcX + (pressPositionX + releasePositionX);
-        double moveVectorY = pcY + rcY + (pressPositionY + releasePositionY);
-        
-        zoomOut(factor);
-        changeX(moveVectorX);
-        changeY(moveVectorY);
+        return (widthDiff - heightDiff) * factor;
     }
+    
         
     public Point2D.Double getPress() {
         return press;
@@ -811,7 +748,7 @@ public class MapPanel extends JPanel implements Observer {
         }
         return edge;
     }
-    
+	
     public void drawShortestPath(ArrayList<MapEdge> path) {
         this.path = path;
         drawMap = true;

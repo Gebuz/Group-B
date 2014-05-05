@@ -39,9 +39,17 @@ public abstract class GMTParser {
         } catch (Exception ex) {
             Logger.getLogger(GMTParser.class.getName()).log(Level.SEVERE, null, ex);
         }
-        String[] output = tempLine.split("\\|", -1);
-        output[1] = output[1].replaceAll("\"", "");
-        return output;
+        if (tempLine.contains("|")) {
+            String[] output = tempLine.split("\\|", -1);
+            output[1] = output[1].replaceAll("\"", "");
+            return output;
+        } else {
+            String[] output = new String[3];
+            output[0] = tempLine;
+            output[2] = "landPolygon";
+            return output;
+        }
+        
     }
 
     public static boolean isPolygon(String line) {

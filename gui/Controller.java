@@ -87,7 +87,6 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 cancelDrag = true;
             }
         });
-
     }
     
     @Override
@@ -103,6 +102,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             xPressLocal = map.getPress().x + (map.getRelease().x - map.getPress().x)*xPress/850;
             yPressLocal = map.getPress().y + (map.getRelease().y - map.getPress().y)*yPress/660;
         }
+        
         if(e.isPopupTrigger() && e.isShiftDown()) {
             popUpPosX = e.getX();
             popUpPosY = e.getY();
@@ -221,16 +221,17 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                
                 map.assignCoords(press, release);
                 
+                // Fix this part.
                 double heightRatio = map.getHeight()/(map.INIT_HEIGHT * 1.0);
                 double widthDiff = (map.getWidth() - map.INIT_WIDTH )* map.getResizeConstant() * map.getZoom() / 2;
-                heightRatio = (heightRatio * map.INIT_HEIGHT - map.INIT_HEIGHT) * map.getZoom() / 2;    
+                heightRatio = (heightRatio * map.INIT_HEIGHT - map.INIT_HEIGHT)* map.getResizeConstant() * map.getZoom() / 2;    
 
                 map.changeX(widthDiff - heightRatio);
 
             }
         }
         else if (e.getComponent() == map && SwingUtilities.isRightMouseButton(e)) {
-            if(e.isPopupTrigger()) {
+            if(e.isPopupTrigger() && e.isShiftDown()) {
                 view.popUp.show(e.getComponent(), e.getX(), e.getY());
             }
         }
@@ -248,24 +249,23 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     @Override
     public void componentResized(ComponentEvent e) {
         double resizeHeight = map.getHeight();
-        
         double resizeWidth = map.getWidth();
         double widthDiff = resizeWidth - map.lastWidth;
         double heightRatio = resizeHeight/map.lastHeight;
-
+        
         if (resizeHeight < initHeight || resizeHeight > initHeight) {
             double constant = (initHeight+1) / resizeHeight;
             map.updateResize(constant);
         }
-        
+           
         widthDiff = widthDiff * map.getResizeConstant() * map.getZoom() / 2;
         heightRatio = (heightRatio * map.lastWidth - map.lastWidth) * map.getZoom() * map.getResizeConstant() / 2;
+        
+        map.changeX(widthDiff - heightRatio);
         
         Point2D.Double press = map.getPress();
         Point2D.Double release = map.getRelease();
         
-        map.changeX(widthDiff - heightRatio);
-       
         // Update maps last width.
         map.lastWidth = resizeWidth;
         map.lastHeight = resizeHeight;
@@ -273,6 +273,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         map.setVectorLastRelease(release.x - map.getWidth(),
                 release.y - map.getHeight());
         map.assignCoords(press, release);
+        
     }
     
     @Override
