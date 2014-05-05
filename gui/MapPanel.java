@@ -29,6 +29,7 @@ public class MapPanel extends JPanel implements Observer {
     private Colour colour;
     public final DataLoader loader;
     
+    private HashSet<String> roadListNameHashSet = new HashSet<>();
     private HashSet<Integer> roadListHashSet = new HashSet<>();
     private boolean roadOn = true;
     
@@ -50,7 +51,11 @@ public class MapPanel extends JPanel implements Observer {
     public final int INIT_WIDTH = 850;
     public final int INIT_HEIGHT = 660;
     
+    public double lastWidth = INIT_WIDTH;
+    public double lastHeight = INIT_HEIGHT;
+    
     double pressX, pressY, releaseX, releaseY;
+    
 
     public MapPanel(int bool) { 
 
@@ -136,6 +141,8 @@ public class MapPanel extends JPanel implements Observer {
             if (pressY   < CoordinateBoundaries.yMin)   pressY = CoordinateBoundaries.yMin;
             if (releaseX > CoordinateBoundaries.xMax) releaseX = CoordinateBoundaries.xMax;
             if (releaseY > CoordinateBoundaries.yMax) releaseY = CoordinateBoundaries.yMax;
+            
+
             
             HashSet<String> trees;
             ArrayList<MapEdge> edges = new ArrayList<>();
@@ -223,7 +230,6 @@ public class MapPanel extends JPanel implements Observer {
                 }
 
                 mapG.fill(GMTShapeConverter.createPolygon(shape, k, xk, yk, CoordinateBoundaries.xMin, CoordinateBoundaries.yMin, zoomConstant, resizeConstant, press.x, press.y));
-                isMap = true;
             }
 
             for (MapEdge ed : edges) {
@@ -239,10 +245,14 @@ public class MapPanel extends JPanel implements Observer {
                 drawSpecified(fnX, fnY, tnX, tnY, type, ed, mapG);
             }
             
+
             roadListHashSet.clear();
+            
+            roadListNameHashSet.clear();
 
         }
         g2.drawImage(map, 0, 0, null);
+
         mapG.dispose();
         if (rect != null) {
             area.add(new Area(new Rectangle2D.Float(0, 0, getWidth(), getHeight())));
@@ -401,11 +411,13 @@ public class MapPanel extends JPanel implements Observer {
     public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int fontSize, MapEdge edge, Graphics2D g2) {
                                  /* Ignore roadnames that are the empty string. */ 
         if(zoomConstant < zoomLimit && !edge.getName().equals("")) {
-            boolean found;
+            boolean foundID;
+            boolean foundName;
             int roadNum = edge.getID();
             String roadName = edge.getName();
  
-            found = roadListHashSet.contains(roadNum);
+            foundID = roadListHashSet.contains(roadNum);
+            foundName = roadListNameHashSet.contains(roadName);
 
             double xMid = (fnX + tnX)/2.0;
             double yMid = (fnY + tnY)/2.0;
@@ -422,8 +434,9 @@ public class MapPanel extends JPanel implements Observer {
             double radians = Math.toRadians(degrees);
 
             if(xMid < getWidth() && xMid > 0 && yMid < getHeight() && yMid > 0) {
-                if(!found) {
+                if(!foundID && !foundName) {
                     roadListHashSet.add(roadNum);
+                    roadListNameHashSet.add(roadName);
                     drawString(g2, roadName, xMid, yMid, radians);
                 }
             }
@@ -433,13 +446,15 @@ public class MapPanel extends JPanel implements Observer {
     
     public void defaultMap() {
         press = new Point2D.Double(0, 0);
-        release = new Point2D.Double(850, 660);
+        release = new Point2D.Double(INIT_WIDTH, INIT_HEIGHT);
         zoomConstant = 1;
         colour = colour.BLUE;
         resizeConstant = 1;
+        lastWidth = INIT_WIDTH;
+        lastHeight = INIT_HEIGHT;
         yk = 0;
         xk = 0;
-        setPreferredSize(new Dimension(850, 660));
+        setPreferredSize(new Dimension(INIT_WIDTH, INIT_HEIGHT));
         setVectorLastPress(0.0, 0.0);
         setVectorLastRelease(0.0, 0.0);
         isMap = false;
@@ -464,7 +479,7 @@ public class MapPanel extends JPanel implements Observer {
      * @param factor How much to zoom in each time. The closer the number is to
      * zero, the slower the zoom will be.
      */
-    public void zoomIn(double factor) {
+    public void zoomInOld(double factor) {
         isMap = false;
         double deltaX = (release.x - press.x) * factor;
         double deltaY = (release.y - press.y) * factor;
@@ -478,6 +493,59 @@ public class MapPanel extends JPanel implements Observer {
         setVectorLastRelease(vectorLastRelease.x - deltaX,
                 vectorLastRelease.y - deltaY);
     }
+    
+    /**
+     * Center zoom out by a certain factor.
+     *
+     * @param factor How much to zoom out each time. The closer the number is to
+     * zero, the slower the zoom will be.
+     */
+    public void zoomOutOld(double factor) {
+        isMap = false;
+        double deltaX = (release.x - press.x) * factor;
+        double deltaY = (release.y - press.y) * factor;
+        press.setLocation(press.x - deltaX, press.y - deltaY);
+        release.setLocation(release.x + deltaX, release.y + deltaY);
+ 
+        assignCoords(press, release);
+ 
+        setVectorLastPress(vectorLastPress.x - deltaX,
+                vectorLastPress.y - deltaY);
+        setVectorLastRelease(vectorLastRelease.x + deltaX,
+                vectorLastRelease.y + deltaY);
+    }    
+    
+    /**
+     * Center zoom in by a certain factor.
+     *
+     * @param factor How much to zoom in each time. The closer the number is to
+     * zero, the slower the zoom will be.
+     */
+    public void zoomIn(double factor) {
+        isMap = false;
+        
+        double heightRatio = getHeight()/(INIT_HEIGHT * 1.0);
+        double widthDiff = (getWidth() - INIT_WIDTH )* resizeConstant * zoomConstant;
+        heightRatio = (heightRatio * (INIT_HEIGHT * 1.0) - INIT_HEIGHT) * zoomConstant / 2;
+
+        changeX(-widthDiff * factor + heightRatio * factor);
+        
+        
+        double deltaX = (release.x - press.x) * factor;
+        double deltaY = (release.y - press.y) * factor;
+        
+        press.setLocation(press.x + deltaX, press.y + deltaY);
+        release.setLocation(release.x - deltaX, release.y - deltaY);
+        
+        
+        assignCoords(press, release);
+ 
+        setVectorLastPress(vectorLastPress.x + deltaX,
+                vectorLastPress.y + deltaY);
+        setVectorLastRelease(vectorLastRelease.x - deltaX,
+                vectorLastRelease.y - deltaY);
+    }
+
 
     /**
      * Center zoom out by a certain factor.
@@ -487,8 +555,17 @@ public class MapPanel extends JPanel implements Observer {
      */
     public void zoomOut(double factor) {
         isMap = false;
+
+        
+        double heightRatio = getHeight()/(INIT_HEIGHT * 1.0);
+        double widthDiff = (getWidth() - INIT_WIDTH )* resizeConstant * zoomConstant;
+        heightRatio = (heightRatio * (INIT_HEIGHT * 1.0) - INIT_HEIGHT) * zoomConstant / 2;
+
+        changeX(widthDiff * factor - heightRatio * factor);
+
         double deltaX = (release.x - press.x) * factor;
         double deltaY = (release.y - press.y) * factor;
+        
         press.setLocation(press.x - deltaX, press.y - deltaY);
         release.setLocation(release.x + deltaX, release.y + deltaY);
  
@@ -520,11 +597,19 @@ public class MapPanel extends JPanel implements Observer {
 
         double moveVectorX = pcX + rcX + (pressPositionX + releasePositionX);
         double moveVectorY = pcY + rcY + (pressPositionY + releasePositionY);
-                
+        
+        double heightRatio = getHeight()/(INIT_HEIGHT * 1.0);
+        double widthDiff = (getWidth() - INIT_WIDTH )* resizeConstant * zoomConstant;
+        heightRatio = (heightRatio * (INIT_HEIGHT * 1.0) - INIT_HEIGHT) * zoomConstant / 2;          
+        
         zoomIn(factor);
         changeX(-moveVectorX);
         changeY(-moveVectorY);
+
+        changeX(widthDiff * factor - heightRatio * factor);
     }
+    
+
    
     public void zoomOutRelativeToMouse(double factor, double mousePosX, double mousePosY) {
         
@@ -534,9 +619,69 @@ public class MapPanel extends JPanel implements Observer {
         double pressPositionY = (press.y - 0) * relativeFactor;
         double releasePositionX = (release.x - INIT_WIDTH)  * relativeFactor;
         double releasePositionY = (release.y - INIT_HEIGHT) * relativeFactor;
+        
         // vector from press to mousePosition
         double pcX = (mousePosX - press.x)* relativeFactor;
         double pcY = (mousePosY - press.y)* relativeFactor;
+        
+        
+        // vector from release to mousePosition
+        double rcX = (mousePosX - release.x)* relativeFactor;
+        double rcY = (mousePosY - release.y)* relativeFactor;
+
+        double moveVectorX = pcX + rcX + (pressPositionX + releasePositionX);
+        double moveVectorY = pcY + rcY + (pressPositionY + releasePositionY);
+
+        double heightRatio = getHeight()/(INIT_HEIGHT * 1.0);
+        double widthDiff = (getWidth() - INIT_WIDTH )* resizeConstant * zoomConstant;
+        heightRatio = (heightRatio * (INIT_HEIGHT * 1.0) - INIT_HEIGHT) * zoomConstant / 2;       
+        
+        zoomOut(factor);
+        changeX(moveVectorX);
+        changeY(moveVectorY);
+        
+        changeX(- widthDiff * factor + heightRatio * factor);
+    }
+    
+     public void zoomInRelativeToMouseOld(double factor, double mousePosX, double mousePosY) { 
+        
+        double relativeFactor = factor * zoomConstant;
+        
+        double pressPositionX = (press.x - 0) * relativeFactor;
+        double pressPositionY = (press.y - 0) * relativeFactor;
+        double releasePositionX = (release.x - INIT_WIDTH)  * relativeFactor;
+        double releasePositionY = (release.y - INIT_HEIGHT) * relativeFactor;
+        
+        // vector from press to mousePosition
+        double pcX = (mousePosX - press.x)* relativeFactor;
+        double pcY = (mousePosY - press.y)* relativeFactor;
+        
+        
+        // vector from release to mousePosition
+        double rcX = (mousePosX - release.x)* relativeFactor;
+        double rcY = (mousePosY - release.y)* relativeFactor;
+
+        double moveVectorX = pcX + rcX + (pressPositionX + releasePositionX);
+        double moveVectorY = pcY + rcY + (pressPositionY + releasePositionY);
+                
+        zoomIn(factor);
+        changeX(-moveVectorX);
+        changeY(-moveVectorY);
+    }   
+     
+    public void zoomOutRelativeToMouseOld(double factor, double mousePosX, double mousePosY) {
+        
+        double relativeFactor = factor * zoomConstant;
+        
+        double pressPositionX = (press.x - 0) * relativeFactor;
+        double pressPositionY = (press.y - 0) * relativeFactor;
+        double releasePositionX = (release.x - INIT_WIDTH)  * relativeFactor;
+        double releasePositionY = (release.y - INIT_HEIGHT) * relativeFactor;
+        
+        // vector from press to mousePosition
+        double pcX = (mousePosX - press.x)* relativeFactor;
+        double pcY = (mousePosY - press.y)* relativeFactor;
+        
         
         // vector from release to mousePosition
         double rcX = (mousePosX - release.x)* relativeFactor;
@@ -556,6 +701,14 @@ public class MapPanel extends JPanel implements Observer {
 
     public Point2D.Double getRelease() {
         return release;
+    }
+    
+    public void setPress(double x, double y) {
+        this.press = new Point2D.Double(x, y);
+    }
+    
+    public void setRelease(double x, double y) {
+        this.release = new Point2D.Double(x, y);
     }
 
     public Point2D.Double getVectorLastPress() {

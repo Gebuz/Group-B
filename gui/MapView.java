@@ -66,6 +66,7 @@ public class MapView extends JFrame {
         
         //Initializing components  
         this.mapPanel = mapPanel;
+        mapPanel.setFocusable(true);
         
         northPanel = new JPanel();
         xyPanel = new JPanel();
