@@ -28,7 +28,8 @@ public class PathFinder {
     private static EdgeWeightedDigraph graphCar;
     private static EdgeWeightedDigraph graphWalk;
     private static AstarSP tree;
-    private static HashMap<Point2D.Double, Integer> nodes;
+    private static HashMap<Point2D.Double, Integer> nodesCar;
+    private static HashMap<Point2D.Double, Integer> nodesWalk;
     private static int count;
 
     /**
@@ -59,7 +60,8 @@ public class PathFinder {
     private static EdgeWeightedDigraph Graphs(int type, ArrayList<MapEdge> edges) {
         EdgeWeightedDigraph graph = new EdgeWeightedDigraph(edges.size());
         count = 0;
-        nodes = new HashMap<>();
+        nodesCar = new HashMap<>();
+        nodesWalk = new HashMap<>();
         for (MapEdge ed : edges) {
             if (type == 0) {
                 switch (ed.getType()) {
@@ -74,21 +76,21 @@ public class PathFinder {
                         Integer i;
                         Integer j;
                                 
-                        if (nodes.get(xy1) == null) {
-                            nodes.put(xy1, count);
+                        if (nodesCar.get(xy1) == null) {
+                            nodesCar.put(xy1, count);
                             graph.addXY(xy1, count);
                             i = count++;
                         } else {
-                            i = nodes.get(xy1);
+                            i = nodesCar.get(xy1);
                         }
                         
 
-                        if (nodes.get(xy2) == null) {
-                            nodes.put(xy2, count);
+                        if (nodesCar.get(xy2) == null) {
+                            nodesCar.put(xy2, count);
                             graph.addXY(xy2, count);
                             j = count++;
                         } else{
-                            j = nodes.get(xy2);
+                            j = nodesCar.get(xy2);
                         }
                         
                         if (ed.getOneWay().equals("n") || ed.getMaxSpeed() == 0) {
@@ -117,21 +119,21 @@ public class PathFinder {
                         Integer i;
                         Integer j;
                                 
-                        if (nodes.get(xy1) == null) {
-                            nodes.put(xy1, count);
+                        if (nodesWalk.get(xy1) == null) {
+                            nodesWalk.put(xy1, count);
                             graph.addXY(xy1, count);
                             i = count++;
                         } else {
-                            i = nodes.get(xy1);
+                            i = nodesWalk.get(xy1);
                         }
                         
 
-                        if (nodes.get(xy2) == null) {
-                            nodes.put(xy2, count);
+                        if (nodesWalk.get(xy2) == null) {
+                            nodesWalk.put(xy2, count);
                             graph.addXY(xy2, count);
                             j = count++;
                         } else{
-                            j = nodes.get(xy2);
+                            j = nodesWalk.get(xy2);
                         }
                         
                         if (ed.getOneWay().equals("n") || ed.getMaxSpeed() == 0) {
@@ -157,13 +159,17 @@ public class PathFinder {
         Point2D.Double xy1 = new Point2D.Double(fn1.getX(), fn1.getY());
         MapNode fn2 = DataLoader.nodes.get(end.getFNode());
         Point2D.Double xy2 = new Point2D.Double(fn2.getX(), fn2.getY());
-        Integer idEnd = nodes.get(xy2);
-        Integer idStart = nodes.get(xy1);
+        Integer idStart;
+        Integer idEnd;
         EdgeWeightedDigraph graph;
         if (type == 0) {
             graph = graphCar;
+            idStart = nodesCar.get(xy1);
+            idEnd = nodesCar.get(xy2);
         } else {
             graph = graphWalk;
+            idStart = nodesWalk.get(xy1);
+            idEnd = nodesWalk.get(xy2);
         }
         tree = new AstarSP(graph, idStart, idEnd);
         return shortestPath(idEnd);
