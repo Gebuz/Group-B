@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-//import uk.me.jstott.jcoord.UTMRef;
+import uk.me.jstott.jcoord.UTMRef;
 
 /**
  *
@@ -123,11 +123,11 @@ public abstract class CoastlineLoader {
         System.out.println("ymax = " + ymax);
 
 
-        //UTMRef utmNewRef = new UTMRef(32, 'V', 442254.35659, 6049914.43018);
-//        System.out.println(utmNewRef.toLatLng().getLatitude());
-//        System.out.println(utmNewRef.toLatLng().getLongitude());
-//        UTMRef utmNewRef2 = new UTMRef(33, 'U', 892658.21706, 6402050.98297);
-//        System.out.println(utmNewRef2.toLatLng().getLatitude());
-//        System.out.println(utmNewRef2.toLatLng().getLongitude());
+        UTMRef utmNewRef = new UTMRef(32, 'V', 442254.35659, 6049914.43018);
+        System.out.println(utmNewRef.toLatLng().getLatitude());
+        System.out.println(utmNewRef.toLatLng().getLongitude());
+        UTMRef utmNewRef2 = new UTMRef(33, 'U', 892658.21706, 6402050.98297);
+        System.out.println(utmNewRef2.toLatLng().getLatitude());
+        System.out.println(utmNewRef2.toLatLng().getLongitude());
     }
 }
