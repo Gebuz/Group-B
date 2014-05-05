@@ -276,7 +276,7 @@ public class DataLoader {
             try {
                 gmtpGreen.load("data/gmt/landuseNew.gmt");
                 gmtpGreen.load("data/gmt/naturalNew.gmt");
-//                gmtpGreen.load("data/gmt/buildingsNew.gmt");
+                gmtpGreen.load("data/gmt/buildingsNew.gmt");
 
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);

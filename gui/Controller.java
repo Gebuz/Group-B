@@ -12,11 +12,15 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 /**
@@ -32,6 +36,8 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     private double xPress, yPress, xPressLocal, yPressLocal;
     private double mousePosX, mousePosY;
     private boolean centerZoom;
+    
+    private boolean cancelDrag = false;
     
     public Controller(MapView view) {
         
@@ -62,6 +68,16 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         map.addMouseListener(this);
         map.addMouseMotionListener(this);
         map.addMouseWheelListener(this);
+
+        map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),"cancelDrag");
+        map.getActionMap().put("cancelDrag", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                map.removeRect();
+                map.repaint();
+                cancelDrag = true;
+            }
+        });
     }
     
     @Override
@@ -70,6 +86,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
     @Override
     public void mousePressed(MouseEvent e) {
+        cancelDrag = false;
         if (e.getComponent() == map) {
             xPress = e.getX()* map.getResizeConstant();
             yPress = e.getY()* map.getResizeConstant();
@@ -101,7 +118,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             map.changeY(yDiff);
         }
 
-        else if(SwingUtilities.isLeftMouseButton(e)) {
+        else if(SwingUtilities.isLeftMouseButton(e) && !cancelDrag) {
             double xPressTemp = xPress / map.getResizeConstant();
             double yPressTemp = yPress / map.getResizeConstant();
             
@@ -127,7 +144,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (e.getComponent() == map && SwingUtilities.isLeftMouseButton(e)) {
+        if (!cancelDrag && e.getComponent() == map && SwingUtilities.isLeftMouseButton(e)) {
             map.removeRect();
             
             double yRelease = e.getY()* map.getResizeConstant();
@@ -187,7 +204,14 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 map.setVectorLastRelease(map.getVectorLastRelease().x + vectorNewReleaseX,
                 map.getVectorLastRelease().y + vectorNewReleaseY);
                
+     
                 map.assignCoords(press, release);
+                
+                double heightRatio = map.getHeight()/(map.INIT_HEIGHT * 1.0);
+                double widthDiff = (map.getWidth() - map.INIT_WIDTH )* map.getResizeConstant() * map.getZoom() / 2;
+                heightRatio = (heightRatio * map.INIT_HEIGHT - map.INIT_HEIGHT) * map.getZoom() / 2;    
+
+                map.changeX(widthDiff - heightRatio);
             }
         }
     }
@@ -204,17 +228,33 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     @Override
     public void componentResized(ComponentEvent e) {
         double resizeHeight = map.getHeight();
- 
-        Point2D.Double release = map.getRelease();
-        Point2D.Double press = map.getPress();
-        map.setVectorLastRelease(release.x - map.getWidth(),
-                release.y - map.getHeight());
-        map.assignCoords(press, release);
+        double resizeWidth = map.getWidth();
+        double widthDiff = resizeWidth - map.lastWidth;
+        double heightRatio = resizeHeight/map.lastHeight;
         
         if (resizeHeight < initHeight || resizeHeight > initHeight) {
             double constant = (initHeight+1) / resizeHeight;
             map.updateResize(constant);
         }
+           
+        widthDiff = widthDiff * map.getResizeConstant() * map.getZoom() / 2;
+        heightRatio = (heightRatio * map.lastWidth - map.lastWidth) * map.getZoom() * map.getResizeConstant() / 2;
+        
+        Point2D.Double press = map.getPress();
+        Point2D.Double release = map.getRelease();
+        
+        map.changeX(widthDiff - heightRatio);
+       
+        // Update maps last width.
+        map.lastWidth = resizeWidth;
+        map.lastHeight = resizeHeight;
+
+        map.setVectorLastRelease(release.x - map.getWidth(),
+                release.y - map.getHeight());
+        map.assignCoords(press, release);
+        
+
+
     }
     
     @Override
