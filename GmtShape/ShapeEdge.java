@@ -12,15 +12,15 @@ import interfaces.MapEdge;
  */
 public class ShapeEdge implements MapEdge {
     private int ID;
-    private long FNODE;
-    private long TNODE;
+    private int FNODE;
+    private int TNODE;
     private double LENGTH = 0;
     private int TYPE = 200;
     private String NAME;
     private String ONEWAY = "";
     private int MAX_SPEED = 0;
 
-    public ShapeEdge(int ID, long FNODE, long TNODE, String NAME) {
+    public ShapeEdge(int ID, int FNODE, int TNODE, String NAME) {
         this.ID = ID;
         this.FNODE = FNODE;
         this.TNODE = TNODE;
@@ -28,12 +28,12 @@ public class ShapeEdge implements MapEdge {
     }
     
     @Override
-    public long getFNode() {
+    public int getFNode() {
         return FNODE;
     }
 
     @Override
-    public long getTNode() {
+    public int getTNode() {
         return TNODE;
     }
 

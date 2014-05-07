@@ -97,14 +97,14 @@ public class MapPanel extends JPanel implements Observer {
         qtGreen.split(500);
 
 
-        qtShapesGreen = new QuadTree(DataLoader.shapeEdgesBuilding, DataLoader.shapeNodesBuilding, "0");
+        qtShapesGreen = new QuadTree(DataLoader.shapeEdges, DataLoader.shapeNodes, "0");
         qtShapesGreen.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
         qtShapesGreen.split(200);
 
-        qtShapesLandPolygons = new QuadTree(DataLoader.shapeEdgesLandPolygons, DataLoader.shapeNodesLandPolygons, "0");
+        qtShapesLandPolygons = new QuadTree(DataLoader.landPolygonEdges, DataLoader.landPolygonNodes, "0");
         qtShapesLandPolygons.addCoords(CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
@@ -128,6 +128,7 @@ public class MapPanel extends JPanel implements Observer {
         if(drawMap == true) {
             map = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
             mapG = (Graphics2D) map.getGraphics();
+            // Set green land colour
             mapG.setColor(new Color(15, 129, 209, 255));
             mapG.fillRect(0, 0, getWidth(), getHeight());
             
@@ -213,7 +214,7 @@ public class MapPanel extends JPanel implements Observer {
                             shapeBuildingEdges.addAll(qtShapesGreen.getBranch(s).getEdges());
                     }
                     for (MapEdge ed : shapeBuildingEdges) {
-                        shapeBuildings.add(DataLoader.shapesBuilding.get(ed.getID()));
+                        shapeBuildings.add(DataLoader.shapes.get(ed.getID()));
                     }
                     break;
             }

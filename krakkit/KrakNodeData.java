@@ -9,7 +9,7 @@ public class KrakNodeData implements MapNode{
 
     final int ARC;
     public final int KDV;
-    final long KDV_ID;
+    final int KDV_ID;
     private double X_COORD;
     private double Y_COORD;
 
@@ -23,12 +23,12 @@ public class KrakNodeData implements MapNode{
         DataLine dl = new DataLine(line);
         ARC = dl.getInt();
         KDV = dl.getInt();
-        KDV_ID = (long) dl.getInt();
+        KDV_ID = dl.getInt();
         X_COORD = dl.getDouble();
         Y_COORD = dl.getDouble();
     }
     
-    public KrakNodeData(double x, double y, long id) {
+    public KrakNodeData(double x, double y, int id) {
         X_COORD = x;
         Y_COORD = y;
         KDV_ID = id;
@@ -46,7 +46,7 @@ public class KrakNodeData implements MapNode{
 
     
     @Override
-    public long getID() {
+    public int getID() {
         return KDV_ID;
     }
     

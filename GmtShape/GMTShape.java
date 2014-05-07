@@ -1,6 +1,9 @@
 package GmtShape;
 
 import Model.Projection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import krakkit.GeoConvert;
 
 /**
  *
@@ -21,12 +24,37 @@ public class GMTShape {
         this.yPoly = yPoly;
     }
 
+    /**
+     * Apply Mercator projection to each coordinate in this shape.
+     * @param p Mercator projection object.
+     */
     public void applyMercatorProjection(Projection p) {
         for (int i = 0; i < xPoly.length; i++) {
             double x = xPoly[i];
             double y = yPoly[i];
             xPoly[i] = p.mercatorX(x);
             yPoly[i] = p.mercatorY(y);
+        }
+    }
+    
+    /**
+     * Apply UTM32 projection to each coordinate in this shape.
+     * This method uses a modified version of GeoConvert.toUTM's method to fit
+     * with the overlapping of more than one UTM zone.
+     * 
+     * @param zone The UTM zone to convert to.
+     */
+    public void applyUTMProjection(int zone) {
+        for (int i = 0; i < xPoly.length; i++) {
+            try {
+                double x = xPoly[i];
+                double y = yPoly[i];
+                double[] xy = GeoConvert.toUtmX(zone, x, y);
+                xPoly[i] = xy[0];
+                yPoly[i] = xy[1];
+            } catch (Exception ex) {
+                Logger.getLogger(GMTShape.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

@@ -12,18 +12,18 @@ import interfaces.MapNode;
  */
 public class ShapeNode implements MapNode {
 
-    private long ID;
+    private int ID;
     private double X;
     private double Y;
 
-    public ShapeNode(long ID, double X, double Y) {
+    public ShapeNode(int ID, double X, double Y) {
         this.ID = ID;
         this.X = X;
         this.Y = Y;
     }
 
     @Override
-    public long getID() {
+    public int getID() {
         return ID;
     }
 

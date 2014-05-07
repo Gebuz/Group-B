@@ -6,8 +6,8 @@ package osm.xmlparser;
 
 
 public class OSMEdgeDataBuilder {
-    private long FNODE;
-    private long TNODE;
+    private int FNODE;
+    private int TNODE;
     private int TYPE;
     private int ID;
     private String NAME;
@@ -17,12 +17,12 @@ public class OSMEdgeDataBuilder {
     public OSMEdgeDataBuilder() {
     }
 
-    public OSMEdgeDataBuilder setFNODE(long FNODE) {
+    public OSMEdgeDataBuilder setFNODE(int FNODE) {
         this.FNODE = FNODE;
         return this;
     }
 
-    public OSMEdgeDataBuilder setTNODE(long TNODE) {
+    public OSMEdgeDataBuilder setTNODE(int TNODE) {
         this.TNODE = TNODE;
         return this;
     }

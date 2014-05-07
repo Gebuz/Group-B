@@ -23,7 +23,7 @@ public class QuadTreeGuiTest {
 
         // For this example, we'll simply load the raw data into
         // ArrayLists.
-        final HashMap<Long, MapNode> nodes = new HashMap<>();
+        final HashMap<Integer, MapNode> nodes = new HashMap<>();
         final ArrayList<MapEdge> edges = new ArrayList<>();
         final QuadTree root;
 
@@ -52,9 +52,9 @@ public class QuadTreeGuiTest {
         CoordinateBoundaries.findBoundaries(nodes);
 
         // Spejlvend alle y værdier:
-        Iterator<Map.Entry<Long, MapNode>> it = nodes.entrySet().iterator();
+        Iterator<Map.Entry<Integer, MapNode>> it = nodes.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Long, MapNode> e = it.next();
+            Map.Entry<Integer, MapNode> e = it.next();
             MapNode nd = e.getValue();
             nd.setY(CoordinateBoundaries.yMax - nd.getY()
                     + CoordinateBoundaries.yMin);

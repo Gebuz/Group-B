@@ -29,10 +29,10 @@ public class CoordinateBoundaries
      * Find the coordinate supremum of a Map&lt;KrakNodeData&gt;.
      * @param nodes Map&lt;Integer, KrakNodeData&gt;
      */
-    public static void findBoundaries(HashMap<Long, MapNode> nodes) {
-        Iterator<Map.Entry<Long, MapNode>> it = nodes.entrySet().iterator();
+    public static void findBoundaries(HashMap<Integer, MapNode> nodes) {
+        Iterator<Map.Entry<Integer, MapNode>> it = nodes.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Long, MapNode> e = it.next();
+            Map.Entry<Integer, MapNode> e = it.next();
             MapNode nd = e.getValue();
             double x = nd.getX();
             double y = nd.getY();

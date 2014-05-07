@@ -13,7 +13,7 @@ public interface MapNode {
      *
      * @return Returns a unique id for this node.
      */
-    long getID();
+    int getID();
 
     /**
      *

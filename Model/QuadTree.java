@@ -14,7 +14,7 @@ import java.util.HashSet;
 public class QuadTree {
 
     private QuadTree nw, ne, sw, se;
-    private final HashMap<Long, MapNode> nodes;
+    private final HashMap<Integer, MapNode> nodes;
     private ArrayList<MapEdge> edges;
     private double x, y, length, height;
 
@@ -65,8 +65,8 @@ public class QuadTree {
             ArrayList<MapEdge> ese = new ArrayList<>();
 
             for (MapEdge e : edges) {
-                MapNode fn = nodes.get(Long.valueOf(e.getFNode()));
-                MapNode tn = nodes.get(Long.valueOf(e.getTNode()));
+                MapNode fn = nodes.get(e.getFNode());
+                MapNode tn = nodes.get(e.getTNode());
                 if (fn != null && tn != null) {
                     if (fn.getX() <= midx && fn.getY() <= midy) {
                         enw.add(e);
@@ -456,7 +456,7 @@ public class QuadTree {
      * Gets the HashMap containing all nodes.
      * @return returns the HashMap containing all nodes.
      */
-    public HashMap<Long, MapNode> getNodes()
+    public HashMap<Integer, MapNode> getNodes()
     {
         return nodes;
     }

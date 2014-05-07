@@ -9,11 +9,11 @@ import interfaces.MapNode;
  */
 public class OSMNodeData implements MapNode {
 
-    private long id;    // Unique id
+    private int id;    // Unique id
     private double lat;    // Latitude
     private double lon;    // Longitude
 
-    public OSMNodeData(long id, double lat, double lon) {
+    public OSMNodeData(int id, double lat, double lon) {
         this.id = id;
         this.lat = lat;
         this.lon = lon;
@@ -30,7 +30,7 @@ public class OSMNodeData implements MapNode {
     }
 
     @Override
-    public long getID() {
+    public int getID() {
         return id;
     }
     

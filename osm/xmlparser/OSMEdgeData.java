@@ -12,8 +12,8 @@ import interfaces.MapEdge;
  */
 public class OSMEdgeData implements MapEdge {
 
-    private long FNODE;
-    private long TNODE;
+    private int FNODE;
+    private int TNODE;
     private double LENGTH = 0.0;
     private int TYPE;
     private String NAME;
@@ -21,7 +21,7 @@ public class OSMEdgeData implements MapEdge {
     private String ONE_WAY = "";
     private int ID; // Maybe use Way ID attribute.
 
-    public OSMEdgeData(long FNODE, long TNODE, int TYPE, int ID, String NAME, int MAXSPEED, String ONE_WAY) {
+    public OSMEdgeData(int FNODE, int TNODE, int TYPE, int ID, String NAME, int MAXSPEED, String ONE_WAY) {
         this.FNODE = FNODE;
         this.TNODE = TNODE;
         this.TYPE = TYPE;
@@ -97,12 +97,12 @@ public class OSMEdgeData implements MapEdge {
     }
 
     @Override
-    public long getFNode() {
+    public int getFNode() {
         return FNODE;
     }
 
     @Override
-    public long getTNode() {
+    public int getTNode() {
         return TNODE;
     }
 

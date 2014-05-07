@@ -9,18 +9,18 @@ import interfaces.MapNode;
  */
 public class CoastlineNode implements MapNode{
 
-    private long ID;
+    private int ID;
     private double X;
     private double Y;
 
-    public CoastlineNode(long ID, double X, double Y) {
+    public CoastlineNode(int ID, double X, double Y) {
         this.ID = ID;
         this.X = X;
         this.Y = Y;
     }
     
     @Override
-    public long getID() {
+    public int getID() {
         return ID;
     }
 

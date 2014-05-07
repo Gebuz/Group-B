@@ -20,14 +20,14 @@ public class MirrorCoordinates {
      * HashMap.
      * @param nodes HashMap whose KrakNodeData's y-coordinate to mirror.
      */
-    public static void MirrorY(HashMap<Long, MapNode> nodes) {
+    public static void MirrorY(HashMap<Integer, MapNode> nodes) {
         
         // Just to make sure that the boundaries have been found.
         CoordinateBoundaries.findBoundaries(nodes);
         
-        Iterator<Map.Entry<Long, MapNode>> it = nodes.entrySet().iterator();
+        Iterator<Map.Entry<Integer, MapNode>> it = nodes.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Long, MapNode> e = it.next();
+            Map.Entry<Integer, MapNode> e = it.next();
             MapNode nd = e.getValue();
             nd.setY(CoordinateBoundaries.yMax - nd.getY() + 
                     CoordinateBoundaries.yMin);

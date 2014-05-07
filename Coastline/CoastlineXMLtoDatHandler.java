@@ -20,19 +20,19 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class CoastlineXMLtoDatHandler extends DefaultHandler {
 
-    static HashMap<Long, MapNode> nodes = new HashMap<>();
+    static HashMap<Integer, MapNode> nodes = new HashMap<>();
     
     boolean inWay = false; // Are we inside a Way element or not.
     boolean inNode = false; // Are we inside a Node element or not.
     
     // Borders
-    double MIN_LON = 7.85;
-    double MAX_LON = 15.48582;
+    double MIN_LON = 7.7011;
+    double MAX_LON = 15.52582;
     double MIN_LAT = 54.37361;
-    double MAX_LAT = 57.82074;
-    
+    double MAX_LAT = 58.02074;
+    // <bounds minlat="54.37361" maxlat="58.02074" maxlon="15.52582" minlon="7.7011"></bounds>
     // Current way nodeRef queue
-    Queue<Long> nodeRefQueue = new LinkedList<>();
+    Queue<Integer> nodeRefQueue = new LinkedList<>();
     
     // Keep all Way nodeRef Queues in this list
     static ArrayList<Queue<MapEdge>> queues = new ArrayList<>();
@@ -67,8 +67,8 @@ public class CoastlineXMLtoDatHandler extends DefaultHandler {
                 String ref = attributes.getValue("ref");
                 if (ref != null) {
                     try {
-                        long parseLong = Long.parseLong(ref);
-                        nodeRefQueue.add(parseLong);
+                        int parsedInt = Integer.parseInt(ref);
+                        nodeRefQueue.add(parsedInt);
                     } catch (NumberFormatException ex) {
                         Logger.getLogger(Coastline.CoastlineXMLHandler.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -96,7 +96,7 @@ public class CoastlineXMLtoDatHandler extends DefaultHandler {
         String lonStr = attributes.getValue("lon");
         // Avoid null pointer reference!
         if (idStr != null && latStr != null && lonStr != null) {
-            long id = Long.parseLong(idStr);
+            int id = Integer.parseInt(idStr);
 
             try {
                 double lat = Double.parseDouble(latStr);
@@ -118,9 +118,9 @@ public class CoastlineXMLtoDatHandler extends DefaultHandler {
         Queue<MapEdge> tempQueue = new LinkedList<>();
 
         while (!nodeRefQueue.isEmpty()) {
-            long fn = nodeRefQueue.poll();
+            int fn = nodeRefQueue.poll();
             if (!nodeRefQueue.isEmpty()) {
-                long tn = nodeRefQueue.peek();
+                int tn = nodeRefQueue.peek();
                 tempQueue.add(new CoastlineEdge(edgeID, fn, tn));
             }
         }

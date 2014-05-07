@@ -11,13 +11,13 @@ public interface MapEdge {
      * 
      * @return Returns the From-node.
      */
-    long getFNode();
+    int getFNode();
 
     /**
      *
      * @return Returns the To-node.
      */
-    long getTNode();
+    int getTNode();
 
     /**
      *

@@ -15,12 +15,18 @@ import java.util.logging.Logger;
 public abstract class CoastlineLoader {
 
     private int edgeID;
-    private long nodeID;
+    private int nodeID;
     private double x;
     private double y;
-    Queue<Long> nodeRefQueue = new LinkedList<>();
+    Queue<Integer> nodeRefQueue = new LinkedList<>();
 
-    public CoastlineLoader(int startEdgeID, long startNodeID) {
+    /**
+     * Create a new CoastlineLoader object.
+     * 
+     * @param startEdgeID Starting value for edge IDs
+     * @param startNodeID Starting value for node IDs
+     */
+    public CoastlineLoader(int startEdgeID, int startNodeID) {
         this.edgeID = startEdgeID;
         this.nodeID = startNodeID;
     }
@@ -37,9 +43,9 @@ public abstract class CoastlineLoader {
         while ((line = br.readLine()) != null) {
             if (line.contains(">")) {
                 while (!nodeRefQueue.isEmpty()) {
-                    long fn = nodeRefQueue.poll();
+                    int fn = nodeRefQueue.poll();
                     if (!nodeRefQueue.isEmpty()) {
-                        long tn = nodeRefQueue.peek();
+                        int tn = nodeRefQueue.peek();
                         processEdge(new CoastlineEdge(edgeID, fn, tn));
                         edgeID++;
                     }
@@ -56,8 +62,8 @@ public abstract class CoastlineLoader {
                     continue;
                 }
 
-                double easting = x; //GeoConvert.toUtmX(32, x, y)[0];
-                double northing = y; //GeoConvert.toUtmX(32, x, y)[1];
+                double easting = x;
+                double northing = y;
 
                 processNode(new CoastlineNode(nodeID, easting, northing));
 

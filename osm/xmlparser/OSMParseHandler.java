@@ -25,7 +25,7 @@ public abstract class OSMParseHandler extends DefaultHandler {
     boolean inWay = false; // Are we inside a Way element or not.
     boolean inNode = false; // Are we inside a Node element or not.
     boolean boundsFound = false;
-    Queue<Long> nodeRefQueue = new LinkedList<>();
+    Queue<Integer> nodeRefQueue = new LinkedList<>();
     Projection p; // Maybe do projection later.
     // Temporary fields for each Way element.
     private int typ = 0;
@@ -68,7 +68,7 @@ public abstract class OSMParseHandler extends DefaultHandler {
                 String ref = attributes.getValue("ref");
                 if (ref != null) {
                     try {
-                        nodeRefQueue.add(Long.parseLong(ref));
+                        nodeRefQueue.add(Integer.parseInt(ref));
                     } catch (NumberFormatException ex) {
                         Logger.getLogger(OSMParseHandler.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -164,7 +164,7 @@ public abstract class OSMParseHandler extends DefaultHandler {
         // Avoid null pointer reference!
         if (idStr != null && latStr != null && lonStr != null) {
             try {
-                long id = Long.parseLong(idStr);
+                int id = Integer.parseInt(idStr);
                 double lat = Double.parseDouble(latStr);
                 double lon = Double.parseDouble(lonStr);
 
@@ -210,9 +210,9 @@ public abstract class OSMParseHandler extends DefaultHandler {
 
     private void createEdges() {
         while (!nodeRefQueue.isEmpty()) {
-            long fn = nodeRefQueue.poll();
+            int fn = nodeRefQueue.poll();
             if (!nodeRefQueue.isEmpty()) {
-                long tn = nodeRefQueue.peek();
+                int tn = nodeRefQueue.peek();
                 OSMEdgeData edge = new OSMEdgeDataBuilder().setFNODE(fn).setTNODE(tn).setTYPE(typ).setID(vejnr).setNAME(vejnavn).setMAXSPEED(maxspeed).setONE_WAY(oneway).createOSMEdgeData();
                 processEdge(edge);
             }

@@ -20,10 +20,10 @@ public abstract class CoastlineXMLHandler extends DefaultHandler {
     public abstract void processNode(CoastlineNode nd);
 
     public abstract void processEdge(CoastlineEdge ed);
-//    ArrayList<OSMEdgeData> osmEdges = new ArrayList<>();
+
     boolean inWay = false; // Are we inside a Way element or not.
     boolean inNode = false; // Are we inside a Node element or not.
-    Queue<Long> nodeRefQueue = new LinkedList<>();
+    Queue<Integer> nodeRefQueue = new LinkedList<>();
     private int edgeID = 0;
 
     @Override
@@ -51,8 +51,8 @@ public abstract class CoastlineXMLHandler extends DefaultHandler {
                 String ref = attributes.getValue("ref");
                 if (ref != null) {
                     try {
-                        long parseLong = Long.parseLong(ref);
-                        nodeRefQueue.add(parseLong);
+                        int parseInt = Integer.parseInt(ref);
+                        nodeRefQueue.add(parseInt);
                     } catch (NumberFormatException ex) {
                         Logger.getLogger(CoastlineXMLHandler.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -79,7 +79,7 @@ public abstract class CoastlineXMLHandler extends DefaultHandler {
         String lonStr = attributes.getValue("lon");
         // Avoid null pointer reference!
         if (idStr != null && latStr != null && lonStr != null) {
-            long id = Long.parseLong(idStr);
+            int id = Integer.parseInt(idStr);
 
             try {
                 double lat = Double.parseDouble(latStr);
@@ -101,9 +101,9 @@ public abstract class CoastlineXMLHandler extends DefaultHandler {
 
     private void createEdges() {
         while (!nodeRefQueue.isEmpty()) {
-            long fn = nodeRefQueue.poll();
+            int fn = nodeRefQueue.poll();
             if (!nodeRefQueue.isEmpty()) {
-                long tn = nodeRefQueue.peek();
+                int tn = nodeRefQueue.peek();
                 processEdge(new CoastlineEdge(edgeID, fn, tn));
             }
         }

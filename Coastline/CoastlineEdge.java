@@ -9,27 +9,27 @@ import interfaces.MapEdge;
  */
 public class CoastlineEdge implements MapEdge {
     private int ID;
-    private long FNODE;
-    private long TNODE;
+    private int FNODE;
+    private int TNODE;
     private double LENGTH = 0;
     private int TYPE = 100;
     private String NAME = "";
     private String ONEWAY = "";
     private int MAX_SPEED = 0;
 
-    public CoastlineEdge(int ID, long FNODE, long TNODE) {
+    public CoastlineEdge(int ID, int FNODE, int TNODE) {
         this.ID = ID;
         this.FNODE = FNODE;
         this.TNODE = TNODE;
     }
     
     @Override
-    public long getFNode() {
+    public int getFNode() {
         return FNODE;
     }
 
     @Override
-    public long getTNode() {
+    public int getTNode() {
         return TNODE;
     }
 

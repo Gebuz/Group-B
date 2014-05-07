@@ -44,7 +44,7 @@ public class CoastlineXMLtoDat {
             FileWriter fw = new FileWriter(file.getAbsoluteFile());
             BufferedWriter bw = new BufferedWriter(fw);
 
-            HashMap<Long, MapNode> nodesRef = CoastlineXMLtoDatHandler.nodes;
+            HashMap<Integer, MapNode> nodesRef = CoastlineXMLtoDatHandler.nodes;
 
             for (Queue<MapEdge> queue : CoastlineXMLtoDatHandler.queues) {
                 
