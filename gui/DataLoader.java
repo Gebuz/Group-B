@@ -125,7 +125,7 @@ public class DataLoader {
             // Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
             // Invoke the loader class.
-            loader.load(dir + "kdv_node_unload.txt", dir + "kdv_unload.txt");
+            loader.load(dir + "kdv_node_unload.txt", dir + "kdv_unload_fixedStorebaeltsbroen.txt");
         } catch (IOException ex) {
             System.out.println("ERROR: Could not find kdv_node_unload.txt or "
                     + "kdv_unload.txt in specified directory " + dir);

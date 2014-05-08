@@ -12,7 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
@@ -232,6 +231,8 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         }
         else if (e.getComponent() == map && SwingUtilities.isRightMouseButton(e)) {
             if(e.isPopupTrigger() && e.isShiftDown()) {
+                popUpPosX = e.getX();
+                popUpPosY = e.getY();
                 view.popUp.show(e.getComponent(), e.getX(), e.getY());
             }
         }
@@ -325,22 +326,18 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         }
         else if (e.getSource() == view.setFrom) {
             if(toSet) {
-                int type;
                 fromEdge = map.getClosestRoad(popUpPosX, popUpPosY);
-                int edgeType = fromEdge.getType();
-                if(edgeType != 8 || edgeType != 48) {
+                int type;
+                
+                // HER GÅR DET GALT.
+                if(fromEdge.getType() != 8 || fromEdge.getType() != 48) {
                     type = 0;
                 }
                 else {
                     type = 1;
                 }
-                System.out.println("Road " + fromEdge.getName() + " has the type: " + type);
-//                System.out.println("Road " + fromEdge.getName() + " has the x coordinate: " + DataLoader.nodes.get(fromEdge.getFNode()).getX() + " and the y coordinate : " + DataLoader.nodes.get(fromEdge.getFNode()).getY());
                 ArrayList<MapEdge> path = PathFinder.getShortestPath(type, fromEdge, toEdge);
-                System.out.print("Path from " + fromEdge.getName() + " to " + toEdge.getName() + ":");
-                for(MapEdge ed : path) {
-                    System.out.print(" " + ed.getName());
-                }
+                
                 map.drawShortestPath(path);
                 toSet = false;
             }
@@ -351,27 +348,24 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         }
         else if (e.getSource() == view.setTo) {
             if(fromSet) {
-                int type;
                 toEdge = map.getClosestRoad(popUpPosX, popUpPosY);
-                int edgeType = toEdge.getType();
-                if(edgeType != 8 || edgeType != 48) {
+                int type;
+                
+                // HER GÅR DET GALT.
+                if(toEdge.getType() != 8 || toEdge.getType() != 48) {
                     type = 0;
                 }
                 else {
                     type = 1;
                 }
-                System.out.println("Road " + toEdge.getName() + " has the type: " + type);
-                System.out.println("Road " + toEdge.getName() + " has the x coordinate: " + DataLoader.nodes.get(toEdge.getFNode()).getX() + " and the y coordinate : " + DataLoader.nodes.get(toEdge.getFNode()).getY());
                 ArrayList<MapEdge> path = PathFinder.getShortestPath(type, fromEdge, toEdge);
-                System.out.print("Path from " + fromEdge.getName() + " to " + toEdge.getName() + ":");
-                for(MapEdge ed : path) {
-                    System.out.print(" " + ed.getName());
-                }
+
                 map.drawShortestPath(path);
                 fromSet = false;
             }
             else {
                 toEdge = map.getClosestRoad(popUpPosX, popUpPosY);
+
                 toSet = true;
             }
         }
