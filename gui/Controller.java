@@ -21,10 +21,15 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import osm.xmlparser.OSMParseHandler;
 
 /**
  *
@@ -336,9 +341,13 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 else {
                     type = 1;
                 }
-                ArrayList<MapEdge> path = PathFinder.getShortestPath(type, fromEdge, toEdge);
                 
-                map.drawShortestPath(path);
+                try {
+                    getAndDrawShortestPath(type, fromEdge, toEdge, 8000);
+                } catch (Exception ex) {
+                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
                 toSet = false;
             }
             else {
@@ -349,7 +358,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         else if (e.getSource() == view.setTo) {
             if(fromSet) {
                 toEdge = map.getClosestRoad(popUpPosX, popUpPosY);
-                int type;
+                final int type;
                 
                 // HER GÅR DET GALT.
                 if(toEdge.getType() != 8 || toEdge.getType() != 48) {
@@ -358,9 +367,13 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 else {
                     type = 1;
                 }
-                ArrayList<MapEdge> path = PathFinder.getShortestPath(type, fromEdge, toEdge);
-
-                map.drawShortestPath(path);
+                
+                try {
+                    getAndDrawShortestPath(type, fromEdge, toEdge, 8000);
+                } catch (Exception ex) {
+                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
                 fromSet = false;
             }
             else {
@@ -436,6 +449,43 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 view.repaint();
                 map.updateMap();
             }
+        }
+    }
+    
+    /**
+     * Helper method to find the shortest path. This method adds a timeout to
+     * the PathFinder.getShortestPath() method. Set the timeout in milliseconds.
+     * @param type Integer indicating which graph to use. 0 for Car, 1 for Walk.
+     * @param fromEdge The beginning point.
+     * @param toEdge The end point.
+     * @param timeout Timeout in milliseconds.
+     * @throws Exception 
+     */
+    private void getAndDrawShortestPath(final int type, 
+            final MapEdge fromEdge, final MapEdge toEdge, int timeout) throws Exception {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                ArrayList<MapEdge> path = PathFinder.getShortestPath(type, fromEdge, toEdge);
+                map.drawShortestPath(path);
+                } catch (NullPointerException ex) {
+                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (Exception ex) {
+                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        thread.start();
+        long endTimeMillis = System.currentTimeMillis() + timeout;
+        while (thread.isAlive()) {
+            if (System.currentTimeMillis() > endTimeMillis) {
+                throw new Exception("Timeout: Could not find the a route between"
+                        + " the points.");
+            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException t) {}
         }
     }
 }

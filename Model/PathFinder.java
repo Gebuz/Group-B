@@ -28,8 +28,8 @@ public class PathFinder {
     private static EdgeWeightedDigraph graphCar;
     private static EdgeWeightedDigraph graphWalk;
     private static AstarSP tree;
-    private static HashMap<Point2D.Double, Integer> nodesCar;
-    private static HashMap<Point2D.Double, Integer> nodesWalk;
+    private static HashMap<Point2D.Double, Integer> nodesCar = new HashMap<>();
+    private static HashMap<Point2D.Double, Integer> nodesWalk = new HashMap<>();
     private static int count;
 
     /**
@@ -59,13 +59,9 @@ public class PathFinder {
 
     private static EdgeWeightedDigraph Graphs(int type, ArrayList<MapEdge> edges) {
         // Der er for mange vertices tror jeg.
-        EdgeWeightedDigraph graph = new EdgeWeightedDigraph(edges.size() * 2); // at most 2*size because of two way streets.
+        EdgeWeightedDigraph graph = new EdgeWeightedDigraph((int) (edges.size() * 1.54)); // at most 2*size because of two way streets.
         count = 0;
-        if (type == 0) {
-            nodesCar = new HashMap<>();
-        } else {
-            nodesWalk = new HashMap<>();
-        }
+
         for (MapEdge ed : edges) {
             if (type == 0) {
                 switch (ed.getType()) {
@@ -110,7 +106,7 @@ public class PathFinder {
 
                         if (ed.getOneWay().equals("n") || ed.getMaxSpeed() == 0) {
                             break;
-                           
+
                         } else if (ed.getOneWay().equals("ft")) {
                             graph.addEdge(new DirectedEdge(i, j, length / ed.getMaxSpeed() / 3.6 + 10, ed));
                         } else if (ed.getOneWay().equals("tf")) {
@@ -133,7 +129,7 @@ public class PathFinder {
 
                         Point2D.Double xy1 = new Point2D.Double(fn.getX(), fn.getY());
                         Point2D.Double xy2 = new Point2D.Double(tn.getX(), tn.getY());
-                        
+
                         // Get length of the edge by calculating the distance between
                         // the nodes. This is done because OSM data doesnt contain
                         // the length of each Edge segment.
@@ -152,7 +148,7 @@ public class PathFinder {
                             graph.addXY(xy1, count);
                             i = count++;
                         } else {
-                            
+
                             i = nodesWalk.get(xy1);
                         }
 
@@ -162,10 +158,10 @@ public class PathFinder {
                             graph.addXY(xy2, count);
                             j = count++;
                         } else {
-                            
+
                             j = nodesWalk.get(xy2);
                         }
-                        
+
                         if (ed.getOneWay().equals("n") || ed.getMaxSpeed() == 0) {
                             break;
                         } else if (ed.getOneWay().equals("ft")) {
@@ -188,7 +184,7 @@ public class PathFinder {
         return graph;
     }
 
-    private static ArrayList<MapEdge> createTree(int type, MapEdge start, MapEdge end) {
+    private static ArrayList<MapEdge> createTree(int type, MapEdge start, MapEdge end) throws NullPointerException {
         MapNode fn1 = DataLoader.nodes.get(start.getFNode());
         Point2D.Double xy1 = new Point2D.Double(fn1.getX(), fn1.getY());
         MapNode fn2 = DataLoader.nodes.get(end.getFNode());
@@ -206,12 +202,17 @@ public class PathFinder {
             idStart = nodesWalk.get(xy1);
             idEnd = nodesWalk.get(xy2);
         }
+
+        if (idStart == null && idEnd == null) {
+            throw new NullPointerException("Could not find nodes in the HashMap.");
+        }
+
         tree = new AstarSP(graph, idStart, idEnd);
         return shortestPath(idEnd);
 
     }
 
-    private static ArrayList<MapEdge> shortestPath(int id) {
+    private static ArrayList<MapEdge> shortestPath(Integer id) {
         ArrayList<MapEdge> edges = new ArrayList<>();
         Iterable<DirectedEdge> list = tree.pathTo(id);
         tree = null; // Help garbage control.
@@ -231,7 +232,7 @@ public class PathFinder {
      * @param end
      * @return
      */
-    public static ArrayList<MapEdge> getShortestPath(int type, MapEdge start, MapEdge end) {
+    public static ArrayList<MapEdge> getShortestPath(int type, MapEdge start, MapEdge end) throws NullPointerException {
         return createTree(type, start, end);
     }
 }

@@ -109,7 +109,7 @@ public class MapPanel extends JPanel implements Observer {
                 CoordinateBoundaries.yMin,
                 CoordinateBoundaries.xMax - CoordinateBoundaries.xMin,
                 CoordinateBoundaries.yMax - CoordinateBoundaries.yMin);
-        qtShapesLandPolygons.split(500);
+        qtShapesLandPolygons.split(2000);
         
         colour = Colour.BLUE;
 
@@ -172,15 +172,14 @@ public class MapPanel extends JPanel implements Observer {
                         edges.addAll(qtGreen.getBranch(s).getEdges());
                     }
                     break;
-            }   
-            
-
+            }
             
             if(zoomConstant < 0.10){
                 RenderingHints rh = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 rh.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 mapG.setRenderingHints(rh);
             }
+
 
             // Get the land polygons to draw
             HashSet<String> shapeLandTrees;
@@ -194,6 +193,7 @@ public class MapPanel extends JPanel implements Observer {
                 shapeLandPolygons.add(DataLoader.shapesLandPolygons.get(ed.getID()));
             }
             
+            
             // Draw landpolygons first
             mapG.setColor(new Color(180, 255, 173, 255));
             for (GMTShape landpolygon : shapeLandPolygons) {
@@ -202,27 +202,24 @@ public class MapPanel extends JPanel implements Observer {
                 }
             }
             
-            
-            // Get the shapes buildings to draw
-            HashSet<String> shapeBuildingTrees;
-            ArrayList<MapEdge> shapeBuildingEdges = new ArrayList<>();
-            HashSet<GMTShape> shapeBuildings = new HashSet<>();
+            // Get the shapes to draw
+            HashSet<String> shapeTrees;
+            ArrayList<MapEdge> shapeEdges = new ArrayList<>();
+            HashSet<GMTShape> shapes = new HashSet<>();
             switch(colour) {
                 case GREEN:
-                    shapeBuildingTrees = qtShapesGreen.getRoadsImproved(pressX, pressY, releaseX, releaseY);
-                    for(String s : shapeBuildingTrees) {
-                            shapeBuildingEdges.addAll(qtShapesGreen.getBranch(s).getEdges());
+                    shapeTrees = qtShapesGreen.getRoadsImproved(pressX, pressY, releaseX, releaseY);
+                    for(String s : shapeTrees) {
+                            shapeEdges.addAll(qtShapesGreen.getBranch(s).getEdges());
                     }
-                    for (MapEdge ed : shapeBuildingEdges) {
-                        shapeBuildings.add(DataLoader.shapes.get(ed.getID()));
+                    for (MapEdge ed : shapeEdges) {
+                        shapes.add(DataLoader.shapes.get(ed.getID()));
                     }
                     break;
             }
             
-
-            
             // Draw shapes (buildings, lakes, etc)
-            for (GMTShape shape : shapeBuildings) {
+            for (GMTShape shape : shapes) {
                 if (shape.getxPoly().length > 0) {
                     String shapeType = shape.getTYPE();
                     switch (shapeType.toLowerCase()) {
@@ -726,7 +723,8 @@ public class MapPanel extends JPanel implements Observer {
     
     public String getRoadName(double x, double y) {
         MapEdge edge = getClosestRoad(x, y);
-        return edge.getName() + " - " + edge.getOneWay()  + " - " +  edge.getMaxSpeed();
+//        return edge.getName() + " - " + edge.getOneWay()  + " - " +  edge.getMaxSpeed() + " " + edge.getFNode() + " " + edge.getTNode();
+        return edge.getName();
     }
     
     public MapEdge getClosestRoad(double x, double y) {
