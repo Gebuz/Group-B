@@ -250,6 +250,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         mousePosX = e.getX()*map.getResizeConstant();
         mousePosY = e.getY()*map.getResizeConstant();
         view.road.setText(map.getRoadName(mousePosX, mousePosY));
+        map.repaint();
     }
     
     @Override
@@ -335,7 +336,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 int type;
                 
                 // HER GÅR DET GALT.
-                if(fromEdge.getType() != 8 || fromEdge.getType() != 48) {
+                if(fromEdge.getType() != 8 && fromEdge.getType() != 48) {
                     type = 0;
                 }
                 else {
@@ -361,7 +362,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 final int type;
                 
                 // HER GÅR DET GALT.
-                if(toEdge.getType() != 8 || toEdge.getType() != 48) {
+                if(toEdge.getType() != 8 && toEdge.getType() != 48) {
                     type = 0;
                 }
                 else {

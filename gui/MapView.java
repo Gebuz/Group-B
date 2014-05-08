@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 public class MapView extends JFrame {
     public final HelpWindow helpWindow;
+    public final JPanel glass;
     public final JPanel mapPanel;
     public final JPanel northPanel, eastPanel, upPanel, downPanel, roadPanel, xyPanel, arrowPanel, zoomPanel;
     public final JLabel x, y, road;
@@ -84,6 +85,10 @@ public class MapView extends JFrame {
         //Initializing components  
         this.mapPanel = mapPanel;
         mapPanel.setFocusable(true);
+        
+        glass = (JPanel) getGlassPane();
+        glass.setVisible(true);
+        glass.setLayout(new BorderLayout());
         
         northPanel = new JPanel();
         xyPanel = new JPanel();
@@ -199,7 +204,7 @@ public class MapView extends JFrame {
         upPanel.setLayout(new BoxLayout(upPanel, BoxLayout.LINE_AXIS));
         downPanel.setLayout(new BoxLayout(downPanel, BoxLayout.LINE_AXIS));
         
-        //roadPanel.setLayout(new FlowLayout());
+        roadPanel.setLayout(new BorderLayout());
         
         //Adding components
         //zoomIn.setBorderPainted(false);
@@ -223,15 +228,18 @@ public class MapView extends JFrame {
         
         eastPanel.add(arrowPanel, gbc);
         
-        roadPanel.add(road);
+        roadPanel.add(road, BorderLayout.WEST);
+        roadPanel.setBackground(new Color(212, 212, 212, 100));
         
-        eastPanel.add(road, gbc);
+        glass.add(roadPanel, BorderLayout.SOUTH);
+        
+        //eastPanel.add(road, gbc);
         
         //x-y panel
-        xyPanel.add(new JLabel("x: "));
-        xyPanel.add(x);
-        xyPanel.add(new JLabel(" y: "));
-        xyPanel.add(y);
+//        xyPanel.add(new JLabel("x: "));
+//        xyPanel.add(x);
+//        xyPanel.add(new JLabel(" y: "));
+//        xyPanel.add(y);
         
         //northPanel.add(Box.createHorizontalGlue());
         
