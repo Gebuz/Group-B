@@ -28,7 +28,7 @@ public class PathFinder2 {
     }
 
     private static EdgeWeightedDigraph graphs(int type, ArrayList<MapEdge> edges) {
-        EdgeWeightedDigraph graph = new EdgeWeightedDigraph(edges.size() * 5);  // Ved ikke hvorfor 5 er det rigtige tal.
+        EdgeWeightedDigraph graph = new EdgeWeightedDigraph(edges.size() * 2);  // at most 2*size because of two way streets.
         for (MapEdge ed : edges) {
             if (type == 0) {
                 switch (ed.getType()) {

@@ -54,12 +54,12 @@ public class PathFinder {
      */
     public static void createGraph(ArrayList<MapEdge> edges) {
         graphCar = Graphs(0, edges);
-        graphWalk = Graphs(1, edges);
+//        graphWalk = Graphs(1, edges);
     }
 
     private static EdgeWeightedDigraph Graphs(int type, ArrayList<MapEdge> edges) {
         // Der er for mange vertices tror jeg.
-        EdgeWeightedDigraph graph = new EdgeWeightedDigraph(edges.size() * 5); // Ved ikke hvorfor 5 er det rigtige tal.
+        EdgeWeightedDigraph graph = new EdgeWeightedDigraph(edges.size() * 2); // at most 2*size because of two way streets.
         count = 0;
         if (type == 0) {
             nodesCar = new HashMap<>();
@@ -110,6 +110,7 @@ public class PathFinder {
 
                         if (ed.getOneWay().equals("n") || ed.getMaxSpeed() == 0) {
                             break;
+                           
                         } else if (ed.getOneWay().equals("ft")) {
                             graph.addEdge(new DirectedEdge(i, j, length / ed.getMaxSpeed() / 3.6 + 10, ed));
                         } else if (ed.getOneWay().equals("tf")) {
@@ -151,6 +152,7 @@ public class PathFinder {
                             graph.addXY(xy1, count);
                             i = count++;
                         } else {
+                            
                             i = nodesWalk.get(xy1);
                         }
 
@@ -160,9 +162,10 @@ public class PathFinder {
                             graph.addXY(xy2, count);
                             j = count++;
                         } else {
+                            
                             j = nodesWalk.get(xy2);
                         }
-
+                        
                         if (ed.getOneWay().equals("n") || ed.getMaxSpeed() == 0) {
                             break;
                         } else if (ed.getOneWay().equals("ft")) {
@@ -181,6 +184,7 @@ public class PathFinder {
         System.out.println("ArrayList<MapEdge> edges size is = " + edges.size());
         System.out.println("Edges in the graph = " + graph.E());
         System.out.println("Vertices in the graph = " + graph.V());
+        System.out.println(nodesCar.size());
         return graph;
     }
 
