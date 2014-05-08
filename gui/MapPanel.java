@@ -460,6 +460,7 @@ public class MapPanel extends JPanel implements Observer {
  
             foundID = roadListHashSet.contains(roadNum);
             foundName = roadListNameHashSet.contains(roadName);
+            if (foundID || foundName) return;
 
             double xMid = (fnX + tnX)/2.0;
             double yMid = (fnY + tnY)/2.0;
@@ -476,11 +477,9 @@ public class MapPanel extends JPanel implements Observer {
             double radians = Math.toRadians(degrees);
 
             if(xMid < getWidth() && xMid > 0 && yMid < getHeight() && yMid > 0) {
-                if(!foundID && !foundName) {
-                    roadListHashSet.add(roadNum);
-                    roadListNameHashSet.add(roadName);
-                    drawString(g2, roadName, xMid, yMid, radians);
-                }
+                roadListHashSet.add(roadNum);
+                roadListNameHashSet.add(roadName);
+                drawString(g2, roadName, xMid, yMid, radians);
             }
         }
     }
@@ -723,8 +722,7 @@ public class MapPanel extends JPanel implements Observer {
     
     public String getRoadName(double x, double y) {
         MapEdge edge = getClosestRoad(x, y);
-//        return edge.getName() + " - " + edge.getOneWay()  + " - " +  edge.getMaxSpeed() + " " + edge.getFNode() + " " + edge.getTNode();
-        return edge.getName();
+        return edge.getName() + " - " + edge.getOneWay()  + " - " +  edge.getMaxSpeed() + " " + edge.getType();
     }
     
     public MapEdge getClosestRoad(double x, double y) {

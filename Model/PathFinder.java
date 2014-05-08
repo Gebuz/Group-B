@@ -54,12 +54,12 @@ public class PathFinder {
      */
     public static void createGraph(ArrayList<MapEdge> edges) {
         graphCar = Graphs(0, edges);
-//        graphWalk = Graphs(1, edges);
+        graphWalk = Graphs(1, edges);
     }
 
     private static EdgeWeightedDigraph Graphs(int type, ArrayList<MapEdge> edges) {
         // Der er for mange vertices tror jeg.
-        EdgeWeightedDigraph graph = new EdgeWeightedDigraph((int) (edges.size() * 1.54)); // at most 2*size because of two way streets.
+        EdgeWeightedDigraph graph = new EdgeWeightedDigraph(edges.size() * 2); // at most 2*size because of two way streets.
         count = 0;
 
         for (MapEdge ed : edges) {
@@ -73,16 +73,6 @@ public class PathFinder {
                         MapNode tn = DataLoader.nodes.get(ed.getTNode());
                         Point2D.Double xy1 = new Point2D.Double(fn.getX(), fn.getY());
                         Point2D.Double xy2 = new Point2D.Double(tn.getX(), tn.getY());
-
-                        // Get length of the edge by calculating the distance between
-                        // the nodes. This is done because OSM data doesnt contain
-                        // the length of each Edge segment.
-                        double length;
-                        if ((ed.getLength() - 0.00000001) < 0.0) {
-                            length = xy1.distance(xy2);
-                        } else {
-                            length = ed.getLength();
-                        }
 
                         Integer i;
                         Integer j;
@@ -104,16 +94,32 @@ public class PathFinder {
                             j = nodesCar.get(xy2);
                         }
 
-                        if (ed.getOneWay().equals("n") || ed.getMaxSpeed() == 0) {
+                        // Get length of the edge by calculating the distance between
+                        // the nodes. This is done because OSM data doesnt contain
+                        // the length of each Edge segment.
+                        double length;
+                        if ((ed.getLength() - 0.00000001) < 0.0) {
+                            length = xy1.distance(xy2);
+                        } else {
+                            length = ed.getLength();
+                        }
+                        
+                        int maxSpeed = ed.getMaxSpeed();
+                        if (ed.getType() == 80) { 
+                            maxSpeed = 10;
+                            length *= 4; // To avoid the ferry always being the shortest path.
+                        }
+                        
+                        if (ed.getOneWay().equals("n") || maxSpeed == 0) {
                             break;
 
                         } else if (ed.getOneWay().equals("ft")) {
-                            graph.addEdge(new DirectedEdge(i, j, length / ed.getMaxSpeed() / 3.6 + 10, ed));
+                            graph.addEdge(new DirectedEdge(i, j, length/(maxSpeed/3.6) + 10, ed));
                         } else if (ed.getOneWay().equals("tf")) {
-                            graph.addEdge(new DirectedEdge(j, i, length / ed.getMaxSpeed() / 3.6 + 10, ed));
+                            graph.addEdge(new DirectedEdge(j, i, length/(maxSpeed/3.6) + 10, ed));
                         } else {
-                            graph.addEdge(new DirectedEdge(i, j, length / ed.getMaxSpeed() / 3.6 + 10, ed));
-                            graph.addEdge(new DirectedEdge(j, i, length / ed.getMaxSpeed() / 3.6 + 10, ed));
+                            graph.addEdge(new DirectedEdge(i, j, length/(maxSpeed/3.6) + 10, ed));
+                            graph.addEdge(new DirectedEdge(j, i, length/(maxSpeed/3.6) + 10, ed));
                         }
                         break;
                 }
@@ -134,7 +140,7 @@ public class PathFinder {
                         // the nodes. This is done because OSM data doesnt contain
                         // the length of each Edge segment.
                         double length;
-                        if ((ed.getLength() - 0.00000001) < 0.0) {
+                        if ((ed.getLength() - 0.00001) < 0.0) {
                             length = xy1.distance(xy2);
                         } else {
                             length = ed.getLength();
@@ -162,15 +168,18 @@ public class PathFinder {
                             j = nodesWalk.get(xy2);
                         }
 
-                        if (ed.getOneWay().equals("n") || ed.getMaxSpeed() == 0) {
-                            break;
-                        } else if (ed.getOneWay().equals("ft")) {
-                            graph.addEdge(new DirectedEdge(i, j, length / ed.getMaxSpeed() / 3.6 + 10, ed));
-                        } else if (ed.getOneWay().equals("tf")) {
-                            graph.addEdge(new DirectedEdge(j, i, length / ed.getMaxSpeed() / 3.6 + 10, ed));
-                        } else {
-                            graph.addEdge(new DirectedEdge(i, j, length / ed.getMaxSpeed() / 3.6 + 10, ed));
-                            graph.addEdge(new DirectedEdge(j, i, length / ed.getMaxSpeed() / 3.6 + 10, ed));
+                        // People can of course walk both ways on any road.
+                        try {
+                            int maxSpeed;
+                            if (ed.getType() == 80) { // Ferries
+                                maxSpeed = 20;
+                            } else {
+                                maxSpeed = 5;
+                            }
+                            graph.addEdge(new DirectedEdge(i, j, length/(maxSpeed/3.6) + 10, ed));
+                            graph.addEdge(new DirectedEdge(j, i, length/(maxSpeed/3.6) + 10, ed));
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
                         break;
                 }
