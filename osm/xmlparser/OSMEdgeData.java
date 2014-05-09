@@ -57,11 +57,8 @@ public class OSMEdgeData implements MapEdge {
                     MAXSPEED = 80;
                     break;
                 case 3:
-                    MAXSPEED = 50;
-                    break;
                 case 4:
-                    MAXSPEED = 50;
-                    break;
+                case 5:
                 case 6:
                     MAXSPEED = 50;
                     break;
@@ -90,7 +87,7 @@ public class OSMEdgeData implements MapEdge {
                     MAXSPEED = 5;
                     break;
                 default:
-                    MAXSPEED = 0;
+                    MAXSPEED = 10; // Give all roads that have unspecified speed some speed; 10.
                     break;
             }
         }

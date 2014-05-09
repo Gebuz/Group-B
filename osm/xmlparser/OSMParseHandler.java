@@ -33,6 +33,10 @@ public abstract class OSMParseHandler extends DefaultHandler {
     private int maxspeed = 0;
     private String oneway = "";
     private String vejnavn = "";
+    
+    // Ferry speed and type
+    private int ferrySpeed = 2;
+    private int ferryType = 80;
 
     // Temporary fields for each Node element go here:
     @Override
@@ -82,6 +86,20 @@ public abstract class OSMParseHandler extends DefaultHandler {
                         int type = OSMHighwayTypeIndicator.getType(v);
                         if (type > 0) {
                             typ = type;
+                            if (typ == 31) { // highway=motorway_link implies oneway=yes)
+                                oneway = "yes";
+                            }
+                        } else {
+                            typ = 5; // unclassified.
+                            maxspeed = 40;
+                        }
+                        
+                        
+                    } else if (k.equals("route")) {
+                        String v = attributes.getValue("v");
+                        if (v.equalsIgnoreCase("ferry")){
+                            typ = ferryType;
+                            maxspeed = ferrySpeed;
                         }
                     } else if (k.equals("name")) {
                         String v = attributes.getValue("v");
@@ -116,7 +134,7 @@ public abstract class OSMParseHandler extends DefaultHandler {
                     } else if (k.equals("oneway")) {
                         String v = attributes.getValue("v");
                         if (v != null) {
-                            if (oneway.equalsIgnoreCase("yes")) {
+                            if (v.equalsIgnoreCase("yes")) {
                                 oneway = "ft";
                             } else if (oneway.equalsIgnoreCase("no")) {
                                 oneway = "";
@@ -124,6 +142,15 @@ public abstract class OSMParseHandler extends DefaultHandler {
                                 oneway = "tf";
                             } else {
                                 oneway = "";
+                            }
+                        }
+                    } else if (k.equals("motor_vehicle") || k.equals("motorcar")) {
+                        String v = attributes.getValue("v");
+                        if (v != null) {
+                            if (v.equalsIgnoreCase("yes")) {
+                                oneway = ""; // Both directions
+                            } else {
+                                oneway = "n"; // No directions
                             }
                         }
                     }

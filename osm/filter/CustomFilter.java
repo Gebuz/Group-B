@@ -25,9 +25,9 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 /**
- * Filter an OSM file from any country into two separate XML files. One
- * containing all Way elements containing tags with specified attributes. The
- * other containing all the Node elements that are references in the filtered
+ * Filter an OSM file from any country into one XML files. The output file will
+ * contain all Way elements containing tags with specified attributes. Also
+ * the file will contain all the Node elements that are references in the filtered
  * Way elements. This class runs through the input OSM file twice to avoid
  * keeping all Nodes in memory. On the other hand all the NodeReference (&lt;nd
  * ref"long"/&gt;) values are kept in memory in a HashSet to avoid duplicates.
@@ -175,9 +175,7 @@ public class CustomFilter {
     public static void main(String[] args) throws FileNotFoundException,
             XMLStreamException {
 
-        boolean firstPass = true;
-        
-        FileOutputStream foutS = new FileOutputStream(MyInputFile.fileUrl + " parsed.xml");
+        FileOutputStream foutS = new FileOutputStream(MyInputFile.fileUrl + " parsed ferry.xml");
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(foutS));
 
         try (InputStream inFirstPass = new FileInputStream(MyInputFile.fileUrl); 
@@ -229,6 +227,8 @@ public class CustomFilter {
 
                         boolean highwayTagFound = false;
                         boolean coastLineTagFound = false;
+                        boolean ferryTagFound = false;
+                        boolean ferryRouteNameFound = false;
 
                         while (reader.hasNext()) {
 
@@ -270,16 +270,33 @@ public class CustomFilter {
                                 if (k != null && (k.getValue().equalsIgnoreCase("highway"))) {
                                     if (v != null) {
                                         highwayTagFound = true;
-                                        for (String nonos : WhatToKeep.highwayToSkip) {
-                                            if (v.getValue().equalsIgnoreCase(nonos)) {
+                                        for (String typesToSkip : WhatToKeep.highwayToSkip) {
+                                            if (v.getValue().equalsIgnoreCase(typesToSkip)) {
                                                 highwayTagFound = false;
                                                 break;
                                             }
                                         }
                                     }
-                                } 
-                                else if (v != null && v.getValue().equalsIgnoreCase("coastlineASD")) {
-                                    coastLineTagFound = false;
+                                } else if (k != null && k.getValue().equalsIgnoreCase("route")) {
+                                    if (v != null) {
+                                        ferryTagFound = false;
+                                        if (v.getValue().equalsIgnoreCase("ferry")){
+                                            ferryTagFound = true;
+                                        }
+                                    }
+                                } else if (v != null && v.getValue().equalsIgnoreCase("coastline")) {
+                                    coastLineTagFound = false; //Set true if you want coastline to be included.
+                                // Check if name equals one of our listed routes.
+                                } else if (k != null && k.getValue().equalsIgnoreCase("name")) {
+                                    if (v != null) {
+                                        ferryRouteNameFound = false;
+                                        for (String routesToKeep : WhatToKeep.ferryRoutesToKeep) {
+                                            if (v.getValue().equalsIgnoreCase(routesToKeep)) {
+                                                ferryRouteNameFound = true;
+                                                break;
+                                            }
+                                        }
+                                    }
                                 }
 
                                 if (startElem.getName().getLocalPart().equalsIgnoreCase("tag")
@@ -307,7 +324,8 @@ public class CustomFilter {
                             }
                         }
 
-                        if (highwayTagFound || coastLineTagFound) {
+                        if (highwayTagFound || coastLineTagFound 
+                                || (ferryTagFound && ferryRouteNameFound)) {
                             for (XMLEvent e : wayEvents) {
                                 writer.add(e);
                             }
@@ -327,8 +345,7 @@ public class CustomFilter {
 
             inFirstPass.close();
 
-            firstPass = false;
-
+            // Second pass.
             reader = factory.createXMLEventReader(MyInputFile.fileUrl, inSecondPass);
             
             while (reader.hasNext()) {

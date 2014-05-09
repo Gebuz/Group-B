@@ -31,6 +31,8 @@ public class PathFinder {
     private static HashMap<Point2D.Double, Integer> nodesCar = new HashMap<>();
     private static HashMap<Point2D.Double, Integer> nodesWalk = new HashMap<>();
     private static int count;
+    
+    private static int noCarsAllowedOnRoad;
 
     /**
      *
@@ -51,15 +53,22 @@ public class PathFinder {
      *
      * @param type vehicle type
      * @param edges all edges
+     * @param 
      */
-    public static void createGraph(ArrayList<MapEdge> edges) {
+    public static void createGraph(ArrayList<MapEdge> edges, int carsNotAllowed) {
+        noCarsAllowedOnRoad = carsNotAllowed;
         graphCar = Graphs(0, edges);
         graphWalk = Graphs(1, edges);
     }
 
     private static EdgeWeightedDigraph Graphs(int type, ArrayList<MapEdge> edges) {
-        // Der er for mange vertices tror jeg.
-        EdgeWeightedDigraph graph = new EdgeWeightedDigraph(edges.size() * 2); // at most 2*size because of two way streets.
+        EdgeWeightedDigraph graph;
+        if (type == 0) { /* car */
+            graph = new EdgeWeightedDigraph(edges.size() + 1 - noCarsAllowedOnRoad); // at most 2*size because of two way streets.
+        } else {
+            graph = new EdgeWeightedDigraph(edges.size() + 1); // Because almost all roads are included
+        }
+
         count = 0;
 
         for (MapEdge ed : edges) {
@@ -106,7 +115,7 @@ public class PathFinder {
                         
                         int maxSpeed = ed.getMaxSpeed();
                         if (ed.getType() == 80) { 
-                            maxSpeed = 10;
+                            maxSpeed = 2;
                             length *= 4; // To avoid the ferry always being the shortest path.
                         }
                         
@@ -154,7 +163,6 @@ public class PathFinder {
                             graph.addXY(xy1, count);
                             i = count++;
                         } else {
-
                             i = nodesWalk.get(xy1);
                         }
 
@@ -164,7 +172,6 @@ public class PathFinder {
                             graph.addXY(xy2, count);
                             j = count++;
                         } else {
-
                             j = nodesWalk.get(xy2);
                         }
 

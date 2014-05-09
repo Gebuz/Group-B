@@ -60,6 +60,10 @@ public class DataLoader {
     private int lineCount = 0;
     private int progress = 0;
     
+    // Counter to keep track of how many MapEdges have car restriction. oneway = "n";
+    // This counter is used for the instantiation of the "Car" PathFinder graph.
+    private int noCarsOnRoadCounter = 0;
+    
     private String dir = "data/"; // directory where the data files are stored
 
     public DataLoader(int bool) {
@@ -74,7 +78,7 @@ public class DataLoader {
             
         }
 
-        PathFinder.createGraph(edgesGreen);
+        PathFinder.createGraph(edgesGreen, noCarsOnRoadCounter);
     }
 
 /**
@@ -95,6 +99,15 @@ public class DataLoader {
 
             @Override
             public void processEdge(KrakEdgeData ed) {
+                
+                if (ed.getOneWay().equalsIgnoreCase("n")) {
+                    noCarsOnRoadCounter += 2;
+                }
+                if (ed.getOneWay().equalsIgnoreCase("ft") || 
+                        ed.getOneWay().equalsIgnoreCase("tf") ||
+                        ed.getOneWay().equalsIgnoreCase("-1")) {
+                    noCarsOnRoadCounter += 1;
+                }
                 
                 loadingbarCounter(24009);
                 
@@ -181,6 +194,16 @@ public class DataLoader {
 
             @Override
             public void processEdge(OSMEdgeData ed) {
+                
+                if (ed.getOneWay().equalsIgnoreCase("n")) {
+                    noCarsOnRoadCounter += 2;
+                }
+                if (ed.getOneWay().equalsIgnoreCase("ft") || 
+                        ed.getOneWay().equalsIgnoreCase("tf") ||
+                        ed.getOneWay().equalsIgnoreCase("-1")) {
+                    noCarsOnRoadCounter += 1;
+                }
+                
                 loadingbarCounter(73221);
                 edgesGreen.add(ed);
                 switch (ed.getType()) {
@@ -210,7 +233,7 @@ public class DataLoader {
             reader = XMLReaderFactory.createXMLReader();
 
             reader.setContentHandler(ph);
-            reader.parse(dir + "denmark-latest.osm parsed.xml");
+            reader.parse(dir + "denmark-latest.osm parsed ferry.xml");
 
         } catch (SAXException ex) {
             Logger.getLogger(DataLoader.class.getName()).log(Level.SEVERE, null, ex);
