@@ -62,7 +62,7 @@ public class DataLoader {
     
     // Counter to keep track of how many MapEdges have car restriction. oneway = "n";
     // This counter is used for the instantiation of the "Car" PathFinder graph.
-    private int noCarsOnRoadCounter = 0;
+    private static int noCarsOnRoadCounter = 0;
     
     private String dir = "data/"; // directory where the data files are stored
 
@@ -77,8 +77,7 @@ public class DataLoader {
             loadOSM();
             
         }
-
-        PathFinder.createGraph(edgesGreen, noCarsOnRoadCounter);
+        PathFinder.createGraph(0, edgesGreen, noCarsOnRoadCounter);
     }
 
 /**
@@ -194,7 +193,6 @@ public class DataLoader {
 
             @Override
             public void processEdge(OSMEdgeData ed) {
-                
                 if (ed.getOneWay().equalsIgnoreCase("n")) {
                     noCarsOnRoadCounter += 2;
                 }
@@ -227,7 +225,7 @@ public class DataLoader {
                 }
             }
         };
-
+        
         try {
             XMLReader reader;
             reader = XMLReaderFactory.createXMLReader();
@@ -295,6 +293,7 @@ public class DataLoader {
         // Create edges and nodes for each land polygon.
         createEdgesAndNodesFromLandPolygons(shapesLandPolygons, 
                 landPolygonNodes, landPolygonEdges);
+        //System.out.println("Removable edges: " + removeCount);
         
     }
 
@@ -596,5 +595,9 @@ public class DataLoader {
                 }
             }
         }
+    }
+    
+    public static int getRoadCounter() {
+        return noCarsOnRoadCounter;
     }
 }

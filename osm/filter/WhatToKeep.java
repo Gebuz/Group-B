@@ -49,7 +49,8 @@ public class WhatToKeep {
         "speed_camera",
         "proposed",
         "raceway",
-       	"bus_guideway"
+       	"bus_guideway",
+        //"unclassified"
     };
     
     // What ferry routes to keep for Denmark. This list is manually picked from 

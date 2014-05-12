@@ -17,12 +17,14 @@ public class MapView extends JFrame {
     public final HelpWindow helpWindow;
     public final JPanel glass;
     public final JPanel mapPanel;
-    public final JPanel northPanel, eastPanel, upPanel, downPanel, roadPanel, xyPanel, arrowPanel, zoomPanel;
-    public final JLabel x, y, road;
+    public final JPanel northPanel, eastPanel, upPanel, downPanel, roadPanel, xyPanel, arrowPanel, zoomPanel, routePanel;
+    public final JLabel x, y, road, route;
     public final JButton up, down, left, right, showFull, zoomIn, zoomOut;
     public final JMenuBar menuBar;
     public final JMenu mapOptionsMenu, helpMenu;
     public final JCheckBoxMenuItem enableRoad, enableRelative, enableNavigation;
+    public final JRadioButton walk, car;
+    public final ButtonGroup bgroup;
     public final JMenuItem setFrom, setTo, showHelp;
     public final JPopupMenu popUp;
     private int condition;
@@ -99,10 +101,11 @@ public class MapView extends JFrame {
         arrowPanel = new JPanel();
         zoomPanel = new JPanel();
         roadPanel = new JPanel();
+        routePanel = new JPanel();
         
         x = new JLabel("0");
         y = new JLabel("0");
-        road = new JLabel("jgvvj");
+        road = new JLabel("");
         
         showFull = new JButton ("▣");
         zoomIn = new JButton("+");
@@ -112,6 +115,11 @@ public class MapView extends JFrame {
         down = new JButton("↓");
         left = new JButton("←");
         right = new JButton("→");
+        
+        bgroup = new ButtonGroup();
+        route = new JLabel("Find route for:");
+        car = new JRadioButton("Car", true);
+        walk = new JRadioButton("Pedestrian");
         
         //Mapping key inputs to button
         KeyStroke keyUp = KeyStroke.getKeyStroke("UP"); 
@@ -226,6 +234,14 @@ public class MapView extends JFrame {
         arrowPanel.add(right, BorderLayout.EAST);
         arrowPanel.add(showFull, BorderLayout.CENTER);
         
+        bgroup.add(car);
+        bgroup.add(walk);
+        
+        routePanel.add(car);
+        routePanel.add(walk);
+        
+        eastPanel.add(route, gbc);
+        eastPanel.add(routePanel, gbc);
         eastPanel.add(arrowPanel, gbc);
         
         roadPanel.add(road, BorderLayout.WEST);

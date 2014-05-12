@@ -70,6 +70,8 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         view.showHelp.addActionListener(this);
         view.setFrom.addActionListener(this);
         view.setTo.addActionListener(this);
+        view.car.addActionListener(this);
+        view.walk.addActionListener(this);
         view.addComponentListener(this);
         view.enableRelative.addItemListener(this);
         view.enableRoad.addItemListener(this);
@@ -134,7 +136,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             xPressLocal += xDiff;
             yPressLocal += yDiff;
             map.changeX(xDiff);
-            map.changeY(yDiff);
+            map.changeY(yDiff);            
         }
 
         else if(SwingUtilities.isLeftMouseButton(e) && !cancelDrag) {
@@ -331,71 +333,58 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             view.helpWindow.setVisible(true);
         }
         else if (e.getSource() == view.setFrom) {
+            double x = popUpPosX*map.getResizeConstant();
+            double y = popUpPosY*map.getResizeConstant();
             if(toSet) {
-                fromEdge = map.getClosestRoad(popUpPosX, popUpPosY);
-                int type;
-                
-                // HER GÅR DET GALT.
-                if(fromEdge.getType() != 8 && fromEdge.getType() != 48) {
-                    type = 0;
-                }
-                else {
-                    type = 1;
-                }
-                
+                fromEdge = map.getClosestRoad(x, y);
                 try {
-                    getAndDrawShortestPath(type, fromEdge, toEdge, 8000);
+                    getAndDrawShortestPath(fromEdge, toEdge, 8000);
                 } catch (Exception ex) {
                     Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
                 }
-
-                toSet = false;
-            }
-            else {
-                fromEdge = map.getClosestRoad(popUpPosX, popUpPosY);
+                
                 fromSet = true;
             }
+            else {
+                fromEdge = map.getClosestRoad(x, y);
+                fromSet = true;
+            }
+            map.assignPinPos(x, y, 0);
         }
         else if (e.getSource() == view.setTo) {
+            double x = popUpPosX*map.getResizeConstant();
+            double y = popUpPosY*map.getResizeConstant();
             if(fromSet) {
-                toEdge = map.getClosestRoad(popUpPosX, popUpPosY);
-                final int type;
-                
-                // HER GÅR DET GALT.
-                if(toEdge.getType() != 8 && toEdge.getType() != 48) {
-                    type = 0;
-                }
-                else {
-                    type = 1;
-                }
-                
+                toEdge = map.getClosestRoad(x, y);
                 try {
-                    getAndDrawShortestPath(type, fromEdge, toEdge, 8000);
+                    getAndDrawShortestPath(fromEdge, toEdge, 8000);
                 } catch (Exception ex) {
                     Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 
-                fromSet = false;
-            }
-            else {
-                toEdge = map.getClosestRoad(popUpPosX, popUpPosY);
-
                 toSet = true;
             }
+            else {
+                toEdge = map.getClosestRoad(x, y);
+                toSet = true;
+            }
+            map.assignPinPos(x, y, 1);
         }
-//        else if (e.getSource() == view.roadOn) {
-//            view.roadOn.setEnabled(false);
-//            view.roadOff.setEnabled(true);
-//            view.roadOnOff.setText("Show Road Names: ON");
-//            map.roadSwitch();
-//        }
-//        else if (e.getSource() == view.roadOff) {
-//            view.roadOff.setEnabled(false);
-//            view.roadOn.setEnabled(true);
-//            view.roadOnOff.setText("Show Road Names: OFF");
-//            map.roadSwitch();
-//        }
-        
+        else if (e.getSource() == view.car) {
+            PathFinder.deleteGraph();
+            long start = System.currentTimeMillis();
+            PathFinder.createGraph(0, DataLoader.edgesGreen, DataLoader.getRoadCounter());
+            long end = System.currentTimeMillis();
+            System.out.println("Time to create car graph: " + (end - start) + " milliseconds.");
+        }
+        else if (e.getSource() == view.walk) {
+            PathFinder.deleteGraph();
+            long start = System.currentTimeMillis();
+            System.out.println("road counter: " + DataLoader.getRoadCounter());
+            PathFinder.createGraph(1, DataLoader.edgesGreen, DataLoader.getRoadCounter());
+            long end = System.currentTimeMillis();
+            System.out.println("Time to create walk graph: " + (end - start) + " milliseconds.");
+        }
         else if (e.getSource() == view.up) {
             if      (map.getZoom() >= 0.4)  map.changeY(20);
             else if (map.getZoom() >= 0.15) map.changeY(10);
@@ -462,13 +451,13 @@ public class Controller implements MouseListener, MouseMotionListener, Component
      * @param timeout Timeout in milliseconds.
      * @throws Exception 
      */
-    private void getAndDrawShortestPath(final int type, 
-            final MapEdge fromEdge, final MapEdge toEdge, int timeout) throws Exception {
+    private void getAndDrawShortestPath(final MapEdge fromEdge, 
+            final MapEdge toEdge, int timeout) throws Exception {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                ArrayList<MapEdge> path = PathFinder.getShortestPath(type, fromEdge, toEdge);
+                ArrayList<MapEdge> path = PathFinder.getShortestPath(fromEdge, toEdge);
                 map.drawShortestPath(path);
                 } catch (NullPointerException ex) {
                     Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);

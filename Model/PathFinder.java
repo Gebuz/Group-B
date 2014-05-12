@@ -30,6 +30,7 @@ public class PathFinder {
     private static AstarSP tree;
     private static HashMap<Point2D.Double, Integer> nodesCar = new HashMap<>();
     private static HashMap<Point2D.Double, Integer> nodesWalk = new HashMap<>();
+    private static int state;
     private static int count;
     
     private static int noCarsAllowedOnRoad;
@@ -55,15 +56,20 @@ public class PathFinder {
      * @param edges all edges
      * @param 
      */
-    public static void createGraph(ArrayList<MapEdge> edges, int carsNotAllowed) {
+    public static void createGraph(int type, ArrayList<MapEdge> edges, int carsNotAllowed) {
+        state = type;
         noCarsAllowedOnRoad = carsNotAllowed;
-        graphCar = Graphs(0, edges);
-        graphWalk = Graphs(1, edges);
+        if (state == 0) {
+            graphCar = Graphs(edges);
+        }
+        else {
+            graphWalk = Graphs(edges);
+        }
     }
 
-    private static EdgeWeightedDigraph Graphs(int type, ArrayList<MapEdge> edges) {
+    private static EdgeWeightedDigraph Graphs(ArrayList<MapEdge> edges) {
         EdgeWeightedDigraph graph;
-        if (type == 0) { /* car */
+        if (state == 0) { /* car */
             graph = new EdgeWeightedDigraph(edges.size() + 1 - noCarsAllowedOnRoad); // at most 2*size because of two way streets.
         } else {
             graph = new EdgeWeightedDigraph(edges.size() + 1); // Because almost all roads are included
@@ -72,7 +78,7 @@ public class PathFinder {
         count = 0;
 
         for (MapEdge ed : edges) {
-            if (type == 0) {
+            if (state == 0) {
                 switch (ed.getType()) {
                     case 8:
                     case 48:
@@ -203,8 +209,8 @@ public class PathFinder {
     private static ArrayList<MapEdge> createTree(int type, MapEdge start, MapEdge end) throws NullPointerException {
         MapNode fn1 = DataLoader.nodes.get(start.getFNode());
         Point2D.Double xy1 = new Point2D.Double(fn1.getX(), fn1.getY());
-        MapNode fn2 = DataLoader.nodes.get(end.getFNode());
-        Point2D.Double xy2 = new Point2D.Double(fn2.getX(), fn2.getY());
+        MapNode tn2 = DataLoader.nodes.get(end.getTNode());
+        Point2D.Double xy2 = new Point2D.Double(tn2.getX(), tn2.getY());
         Integer idStart;
         Integer idEnd;
         EdgeWeightedDigraph graph;
@@ -219,7 +225,7 @@ public class PathFinder {
             idEnd = nodesWalk.get(xy2);
         }
 
-        if (idStart == null && idEnd == null) {
+        if (idStart == null || idEnd == null || graph == null) {
             throw new NullPointerException("Could not find nodes in the HashMap.");
         }
 
@@ -248,7 +254,16 @@ public class PathFinder {
      * @param end
      * @return
      */
-    public static ArrayList<MapEdge> getShortestPath(int type, MapEdge start, MapEdge end) throws NullPointerException {
-        return createTree(type, start, end);
+    public static ArrayList<MapEdge> getShortestPath(MapEdge start, MapEdge end) throws NullPointerException {
+        return createTree(state, start, end);
+    }
+    
+    public static void deleteGraph() {
+        if(state == 0) {
+            graphCar = null;
+        }
+        else {
+            graphWalk = null;
+        }
     }
 }

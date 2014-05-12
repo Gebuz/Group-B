@@ -12,12 +12,17 @@ import Model.QuadTree;
 import static gui.Colour.BLUE;
 import interfaces.MapEdge;
 import interfaces.MapNode;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 
 /**
  *
  * @author flemmingxu
  */
-public class MapPanel extends JPanel implements Observer {
+public class MapPanel extends JPanel {
 
     public final QuadTree qtBlue;
     public final QuadTree qtPink;
@@ -38,6 +43,7 @@ public class MapPanel extends JPanel implements Observer {
     public double k = 550;
     private double resizeConstant = 1, zoomConstant = 1;
     private double xk = 0, yk = 0;
+    private int nxk = 0, nyk = 0;
     public final double ratio;
     public final float dash[] = {7.0f};
     
@@ -57,6 +63,10 @@ public class MapPanel extends JPanel implements Observer {
     public double lastHeight = INIT_HEIGHT;
     
     double pressX, pressY, releaseX, releaseY;
+    private MapEdge greenEdge, redEdge;
+    private BufferedImage greenPin = null;
+    private BufferedImage redPin = null;
+
     
 
     public MapPanel(int bool) { 
@@ -65,6 +75,13 @@ public class MapPanel extends JPanel implements Observer {
 
         loader = new DataLoader(bool);
 
+        try {
+            greenPin = ImageIO.read(new File("data/needles/needle1.png"));
+            redPin = ImageIO.read((new File("data/needles/needle.png")));
+        } catch (IOException ex) {
+            Logger.getLogger(MapPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         // Set K
         this.k = (CoordinateBoundaries.yMax-CoordinateBoundaries.yMin) / INIT_HEIGHT;
         
@@ -141,16 +158,7 @@ public class MapPanel extends JPanel implements Observer {
             releaseX = (release.x*k) - (xk*k) + widthDiff*k + CoordinateBoundaries.xMin; 
             releaseY = (release.y*k) - (yk*k) + heightDiff*k + CoordinateBoundaries.yMin;  
 
-            // If press or release is outside the boundaries for the quadtrees
-            // set press or release to the boundaries so not all quadtrees are
-            // returned.
-            if (pressX   < CoordinateBoundaries.xMin)   pressX = CoordinateBoundaries.xMin;
-            if (pressY   < CoordinateBoundaries.yMin)   pressY = CoordinateBoundaries.yMin;
-            if (releaseX > CoordinateBoundaries.xMax) releaseX = CoordinateBoundaries.xMax;
-            if (releaseY > CoordinateBoundaries.yMax) releaseY = CoordinateBoundaries.yMax;
-            
-
-            
+                       
             HashSet<String> trees;
             ArrayList<MapEdge> edges = new ArrayList<>();
             switch(colour) {
@@ -271,28 +279,40 @@ public class MapPanel extends JPanel implements Observer {
 
                 drawSpecified(fnX, fnY, tnX, tnY, type, ed, mapG);
             }
-            
-            if(!path.isEmpty()) {
-                for(MapEdge ed : path) {
-                    fn = DataLoader.nodes.get(ed.getFNode());
-                    tn = DataLoader.nodes.get(ed.getTNode());
-
-                    fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);
-                    fnY = (((fn.getY() - CoordinateBoundaries.yMin) / k) + yk); 
-                    tnX = (((tn.getX() - CoordinateBoundaries.xMin) / k) + xk);
-                    tnY = (((tn.getY() - CoordinateBoundaries.yMin) / k) + yk);
-
-                    drawSpecified(fnX, fnY, tnX, tnY, -100, ed, mapG);
-                }
-            }
-			
+            		
             roadListHashSet.clear();
             roadListNameHashSet.clear();
-
         }
         g2.drawImage(map, 0, 0, null);
-
         mapG.dispose();
+        
+        if(!path.isEmpty()) {
+            for(MapEdge ed : path) {
+                fn = DataLoader.nodes.get(ed.getFNode());
+                tn = DataLoader.nodes.get(ed.getTNode());
+
+                fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);
+                fnY = (((fn.getY() - CoordinateBoundaries.yMin) / k) + yk); 
+                tnX = (((tn.getX() - CoordinateBoundaries.xMin) / k) + xk);
+                tnY = (((tn.getY() - CoordinateBoundaries.yMin) / k) + yk);
+
+                drawSpecified(fnX, fnY, tnX, tnY, -100, ed, g2);
+            }
+        }
+        if(greenEdge != null) {            
+            fn = DataLoader.nodes.get(greenEdge.getFNode());
+            fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);
+            fnY = (((fn.getY() - CoordinateBoundaries.yMin) / k) + yk); 
+
+            drawPin(fnX, fnY, g2, 0);
+        }
+        if(redEdge != null) {            
+            fn = DataLoader.nodes.get(redEdge.getFNode());
+            fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);
+            fnY = (((fn.getY() - CoordinateBoundaries.yMin) / k) + yk); 
+
+            drawPin(fnX, fnY, g2, 1);
+        }
         if (rect != null) {
             area.add(new Area(new Rectangle2D.Float(0, 0, getWidth(), getHeight())));
             g2.setColor(Color.BLACK.brighter());
@@ -302,7 +322,7 @@ public class MapPanel extends JPanel implements Observer {
             drawRect(rect, g2);
         }
     }
-    
+        
     private void drawSpecified(double fnX, double fnY, double tnX, double tnY, int type, MapEdge edge, Graphics2D g2) {
         //at this point, only the relevant coordinates (those within the rectangle) are accessed.
         fnX = fnX - press.x;
@@ -679,18 +699,18 @@ public class MapPanel extends JPanel implements Observer {
         this.vectorLastRelease.setLocation(x, y);
     }
 
-    public void changeX(double j) {
+    public void changeX(double i) {
         drawMap = true;
-        xk += j;
+        xk += i;
         repaint();
     }
 
-    public void changeY(double j) {
+    public void changeY(double i) {
         drawMap = true;
-        yk += j;
+        yk += i;
         repaint();
     }
-
+    
     public DataLoader getData() {
         return loader;
     }
@@ -726,11 +746,11 @@ public class MapPanel extends JPanel implements Observer {
     }
     
     public MapEdge getClosestRoad(double x, double y) {
-        double widthDiff  = (getWidth()  * resizeConstant - INIT_WIDTH)  * zoomConstant;
+        double widthDiff  = (getWidth()  * resizeConstant - INIT_WIDTH) * zoomConstant;
         double heightDiff = (getHeight() * resizeConstant - INIT_HEIGHT) * zoomConstant;
         
-        x = pressX + ((releaseX-widthDiff*k) - pressX)*x/INIT_WIDTH;
-        y = pressY + ((releaseY-heightDiff*k) - pressY)*y/INIT_HEIGHT;
+        x = pressX + ((releaseX-(widthDiff*k)) - pressX)*x/INIT_WIDTH;
+        y = pressY + ((releaseY-(heightDiff*k)) - pressY)*y/INIT_HEIGHT;
         MapEdge edge;
         switch(colour) {
             case BLUE:
@@ -748,15 +768,42 @@ public class MapPanel extends JPanel implements Observer {
 	
     public void drawShortestPath(ArrayList<MapEdge> path) {
         this.path = path;
-        drawMap = true;
         repaint();
     }
 
-    @Override
-    public void update(Observable o, Object arg) {
-    } 
-
     public double getResizeConstant() {
         return resizeConstant;
+    }
+    
+    public void drawPin(double fnX, double fnY, Graphics2D g2, int color) { 
+        fnX = fnX - press.x;
+        fnY = fnY - press.y;
+
+        fnX /= zoomConstant;
+        fnY /= zoomConstant;
+        
+        fnX /= resizeConstant;
+        fnY /= resizeConstant;
+        
+        fnX -= (greenPin.getWidth()/2);
+        fnY -= greenPin.getHeight();
+        
+        if(color == 0) {
+            g2.drawImage(greenPin,(int) fnX,(int) fnY, null);
+        }
+        else {
+            g2.drawImage(redPin,(int) fnX,(int) fnY, null);
+        }
+    }
+    
+    //0 for green, 1 for red.
+    public void assignPinPos(double pinPosX, double pinPosY, int color) {                
+        if(color == 0) {
+            greenEdge = getClosestRoad(pinPosX, pinPosY);
+        }
+        else {
+            redEdge = getClosestRoad(pinPosX, pinPosY);
+        }
+        repaint();
     }
 }
