@@ -40,7 +40,7 @@ public class MapPanel extends JPanel {
     private HashSet<Integer> roadListHashSet = new HashSet<>();
     private boolean roadOn = true;
     
-    public double k = 550;
+    public double k = 0;
     private double resizeConstant = 1, zoomConstant = 1;
     private double xk = 0, yk = 0;
     private int nxk = 0, nyk = 0;
@@ -59,8 +59,8 @@ public class MapPanel extends JPanel {
     public final int INIT_WIDTH = 850;
     public final int INIT_HEIGHT = 660;
     
-    public double lastWidth = INIT_WIDTH;
-    public double lastHeight = INIT_HEIGHT;
+    private double lastWidth = INIT_WIDTH;
+    private double lastHeight = INIT_HEIGHT;
     
     double pressX, pressY, releaseX, releaseY;
     private MapEdge greenEdge, redEdge;
@@ -77,12 +77,11 @@ public class MapPanel extends JPanel {
 
         try {
             greenPin = ImageIO.read(new File("data/needles/needle1.png"));
-            redPin = ImageIO.read((new File("data/needles/needle.png")));
+            redPin = ImageIO.read((new File("data/needles/needle2.png")));
         } catch (IOException ex) {
             Logger.getLogger(MapPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        // Set K
         this.k = (CoordinateBoundaries.yMax-CoordinateBoundaries.yMin) / INIT_HEIGHT;
         
         vectorLastPress = new Point2D.Double(0.0, 0.0);
@@ -307,11 +306,11 @@ public class MapPanel extends JPanel {
             drawPin(fnX, fnY, g2, 0);
         }
         if(redEdge != null) {            
-            fn = DataLoader.nodes.get(redEdge.getFNode());
-            fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);
-            fnY = (((fn.getY() - CoordinateBoundaries.yMin) / k) + yk); 
+            tn = DataLoader.nodes.get(redEdge.getTNode());
+            tnX = (((tn.getX() - CoordinateBoundaries.xMin) / k) + xk);
+            tnY = (((tn.getY() - CoordinateBoundaries.yMin) / k) + yk); 
 
-            drawPin(fnX, fnY, g2, 1);
+            drawPin(tnX, tnY, g2, 1);
         }
         if (rect != null) {
             area.add(new Area(new Rectangle2D.Float(0, 0, getWidth(), getHeight())));
@@ -774,6 +773,24 @@ public class MapPanel extends JPanel {
     public double getResizeConstant() {
         return resizeConstant;
     }
+
+    public double getLastWidth() {
+        return lastWidth;
+    }
+
+    public double getLastHeight() {
+        return lastHeight;
+    }
+
+    public void setLastWidth(double lastWidth) {
+        this.lastWidth = lastWidth;
+    }
+
+    public void setLastHeight(double lastHeight) {
+        this.lastHeight = lastHeight;
+    }
+    
+    
     
     public void drawPin(double fnX, double fnY, Graphics2D g2, int color) { 
         fnX = fnX - press.x;

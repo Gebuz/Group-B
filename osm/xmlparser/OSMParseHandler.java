@@ -2,6 +2,7 @@ package osm.xmlparser;
 
 import Model.CoordinateBoundaries;
 import Model.Projection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
@@ -18,15 +19,25 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public abstract class OSMParseHandler extends DefaultHandler {
 
+    // Map the node IDs into this HashMap and give each node a new ID from 1 and up.
+    private static HashMap<Long, Integer> idMap = new HashMap<>();
+    private static int nodeIDCounter = 1;
+    
+    // Use boolean to choose which hashmap for ID mapping should be used.
+    // This is so the class works for both OSMs standard .osm format where Nodes
+    // come first in the file.
+    // vs our format where Way elements come first.
+    boolean mappingNodesFirst = true;
+    
     public abstract void processNode(OSMNodeData nd);
 
     public abstract void processEdge(OSMEdgeData ed);
-//    ArrayList<OSMEdgeData> osmEdges = new ArrayList<>();
+
     boolean inWay = false; // Are we inside a Way element or not.
     boolean inNode = false; // Are we inside a Node element or not.
     boolean boundsFound = false;
-    Queue<Integer> nodeRefQueue = new LinkedList<>();
-    Projection p; // Maybe do projection later.
+    Queue<Long> nodeRefQueue = new LinkedList<>();
+
     // Temporary fields for each Way element.
     private int typ = 0;
     private int vejnr = 0;
@@ -47,6 +58,8 @@ public abstract class OSMParseHandler extends DefaultHandler {
             getBounds(attributes);
             boundsFound = true;
         } else if (localName.equalsIgnoreCase("node")) {
+
+            
             inNode = true;
             OSMNodeData node = getNodeInformation(attributes);
             if (node != null) {
@@ -55,6 +68,9 @@ public abstract class OSMParseHandler extends DefaultHandler {
 
         } else if (localName.equalsIgnoreCase("way")) {
             inWay = true;
+            
+            if (mappingNodesFirst && idMap.isEmpty())
+                mappingNodesFirst = false;            
 
             String id = attributes.getValue("id");
             if (id != null) {
@@ -72,7 +88,7 @@ public abstract class OSMParseHandler extends DefaultHandler {
                 String ref = attributes.getValue("ref");
                 if (ref != null) {
                     try {
-                        nodeRefQueue.add(Integer.parseInt(ref));
+                        nodeRefQueue.add(Long.parseLong(ref));
                     } catch (NumberFormatException ex) {
                         Logger.getLogger(OSMParseHandler.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -123,12 +139,13 @@ public abstract class OSMParseHandler extends DefaultHandler {
                                 } else if (v.contains("signal") && typ == 31) {
                                     v = "90";
                                 }
+                                
                                 maxspeed = Integer.parseInt(v);
 
                             } catch (NumberFormatException ex) {
                                 Logger.getLogger(OSMParseHandler.class.getName()).log(Level.SEVERE, null, ex);
 
-                                maxspeed = -1;
+                                maxspeed = 0;
                             }
                         }
                     } else if (k.equals("oneway")) {
@@ -191,11 +208,19 @@ public abstract class OSMParseHandler extends DefaultHandler {
         // Avoid null pointer reference!
         if (idStr != null && latStr != null && lonStr != null) {
             try {
-                int id = Integer.parseInt(idStr);
+                Long id = Long.parseLong(idStr);
+                if (mappingNodesFirst && !idMap.containsKey(id))
+                    idMap.put(id, nodeIDCounter);
+                int mappedID = nodeIDCounter++;
+                
+                if (!mappingNodesFirst) {
+                    mappedID = idMap.get(id);
+                }
+                
                 double lat = Double.parseDouble(latStr);
                 double lon = Double.parseDouble(lonStr);
 
-                return new OSMNodeData(id, lat, lon);
+                return new OSMNodeData(mappedID, lat, lon);
                 
             } catch (NumberFormatException ex) {
                 Logger.getLogger(OSMParseHandler.class.getName()).log(Level.SEVERE, null, ex);
@@ -237,11 +262,32 @@ public abstract class OSMParseHandler extends DefaultHandler {
 
     private void createEdges() {
         while (!nodeRefQueue.isEmpty()) {
-            int fn = nodeRefQueue.poll();
+            Long fn = nodeRefQueue.poll();
             if (!nodeRefQueue.isEmpty()) {
-                int tn = nodeRefQueue.peek();
-                OSMEdgeData edge = new OSMEdgeDataBuilder().setFNODE(fn).setTNODE(tn).setTYPE(typ).setID(vejnr).setNAME(vejnavn).setMAXSPEED(maxspeed).setONE_WAY(oneway).createOSMEdgeData();
-                processEdge(edge);
+                Long tn = nodeRefQueue.peek();
+                
+                if (mappingNodesFirst && !idMap.isEmpty()) {
+                    int mappedFN = idMap.get(fn);
+                    int mappedTN = idMap.get(tn);
+                    
+                    OSMEdgeData edge = new OSMEdgeDataBuilder().setFNODE(mappedFN).setTNODE(mappedTN).setTYPE(typ).setID(vejnr).setNAME(vejnavn).setMAXSPEED(maxspeed).setONE_WAY(oneway).createOSMEdgeData();
+                    processEdge(edge);
+                    
+                } else if (!mappingNodesFirst) {
+                    if (!idMap.containsKey(tn)) {
+                        idMap.put(tn, nodeIDCounter++);
+                    }
+                    if (!idMap.containsKey(fn)) {
+                        idMap.put(fn, nodeIDCounter++);
+                    }
+                    
+                    int mappedFN = idMap.get(fn);
+                    int mappedTN = idMap.get(tn);
+                    
+                    OSMEdgeData edge = new OSMEdgeDataBuilder().setFNODE(mappedFN).setTNODE(mappedTN).setTYPE(typ).setID(vejnr).setNAME(vejnavn).setMAXSPEED(maxspeed).setONE_WAY(oneway).createOSMEdgeData();
+                    processEdge(edge);
+                }
+
             }
         }
     }

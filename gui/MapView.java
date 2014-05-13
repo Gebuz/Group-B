@@ -277,4 +277,23 @@ public class MapView extends JFrame {
         setLocationRelativeTo(null);
         setVisible(false);
     }
+    
+    public void showWarningForSelectedRoad(int graphState) {
+
+        String message = "";
+        String messageTitle = "";
+        
+        if (graphState == 0) {
+            messageTitle = "Invalid road for cars!";
+            message = "No cars allowed on the marked road."
+                + "\nPlease choose another road.";
+        } else if (graphState == 1) {
+            messageTitle = "Invalid road for pedestrians!";
+            message = "Pedestrians cannot walk on the marked road."
+                + "\nPlease choose another road.";
+        }
+
+        JOptionPane.showMessageDialog(this, message, messageTitle, 
+                JOptionPane.WARNING_MESSAGE);
+    }
 }

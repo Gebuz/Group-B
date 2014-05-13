@@ -214,7 +214,7 @@ public class PathFinder {
         Integer idStart;
         Integer idEnd;
         EdgeWeightedDigraph graph;
-        // HER GÅR DET GALT. Se Controlleren!
+
         if (type == 0) {
             graph = graphCar;
             idStart = nodesCar.get(xy1);
@@ -265,5 +265,9 @@ public class PathFinder {
         else {
             graphWalk = null;
         }
+    }
+    
+    public static int getState() {
+        return state;
     }
 }

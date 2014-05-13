@@ -25,11 +25,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import osm.xmlparser.OSMParseHandler;
 
 /**
  *
@@ -259,8 +256,8 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     public void componentResized(ComponentEvent e) {
         double resizeHeight = map.getHeight();
         double resizeWidth = map.getWidth();
-        double widthDiff = resizeWidth - map.lastWidth;
-        double heightRatio = resizeHeight/map.lastHeight;
+        double widthDiff = resizeWidth - map.getLastWidth();
+        double heightRatio = resizeHeight/map.getLastHeight();
         
         if (resizeHeight < initHeight || resizeHeight > initHeight) {
             double constant = (initHeight+1) / resizeHeight;
@@ -268,7 +265,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         }
            
         widthDiff = widthDiff * map.getResizeConstant() * map.getZoom() / 2;
-        heightRatio = (heightRatio * map.lastWidth - map.lastWidth) * map.getZoom() * map.getResizeConstant() / 2;
+        heightRatio = (heightRatio * map.getLastWidth() - map.getLastWidth()) * map.getZoom() * map.getResizeConstant() / 2;
         
         map.changeX(widthDiff - heightRatio);
         
@@ -276,8 +273,8 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         Point2D.Double release = map.getRelease();
         
         // Update maps last width.
-        map.lastWidth = resizeWidth;
-        map.lastHeight = resizeHeight;
+        map.setLastWidth(resizeWidth);
+        map.setLastHeight(resizeHeight);
 
         map.setVectorLastRelease(release.x - map.getWidth(),
                 release.y - map.getHeight());
@@ -337,8 +334,14 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             double y = popUpPosY*map.getResizeConstant();
             if(toSet) {
                 fromEdge = map.getClosestRoad(x, y);
+                
+                if (!isRoadValid(fromEdge)) {
+                    fromSet = false;
+                    return;
+                }
+                
                 try {
-                    getAndDrawShortestPath(fromEdge, toEdge, 8000);
+                    getAndDrawShortestPath(fromEdge, toEdge);
                 } catch (Exception ex) {
                     Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -347,6 +350,12 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             }
             else {
                 fromEdge = map.getClosestRoad(x, y);
+                
+                if (!isRoadValid(fromEdge)) {
+                    fromSet = false;
+                    return;
+                }
+                
                 fromSet = true;
             }
             map.assignPinPos(x, y, 0);
@@ -356,8 +365,14 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             double y = popUpPosY*map.getResizeConstant();
             if(fromSet) {
                 toEdge = map.getClosestRoad(x, y);
+                
+                if (!isRoadValid(toEdge)) {
+                   toSet = false; 
+                   return;
+                } 
+               
                 try {
-                    getAndDrawShortestPath(fromEdge, toEdge, 8000);
+                    getAndDrawShortestPath(fromEdge, toEdge);
                 } catch (Exception ex) {
                     Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -366,6 +381,12 @@ public class Controller implements MouseListener, MouseMotionListener, Component
             }
             else {
                 toEdge = map.getClosestRoad(x, y);
+                
+                if (!isRoadValid(toEdge)) {
+                    toSet = false;
+                    return;
+                }
+                
                 toSet = true;
             }
             map.assignPinPos(x, y, 1);
@@ -443,39 +464,35 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     }
     
     /**
-     * Helper method to find the shortest path. This method adds a timeout to
-     * the PathFinder.getShortestPath() method. Set the timeout in milliseconds.
-     * @param type Integer indicating which graph to use. 0 for Car, 1 for Walk.
+     * Helper method to find the shortest path.
      * @param fromEdge The beginning point.
      * @param toEdge The end point.
-     * @param timeout Timeout in milliseconds.
      * @throws Exception 
      */
-    private void getAndDrawShortestPath(final MapEdge fromEdge, 
-            final MapEdge toEdge, int timeout) throws Exception {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                ArrayList<MapEdge> path = PathFinder.getShortestPath(fromEdge, toEdge);
-                map.drawShortestPath(path);
-                } catch (NullPointerException ex) {
-                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (Exception ex) {
-                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
-                }
+    private void getAndDrawShortestPath(MapEdge fromEdge, MapEdge toEdge) throws Exception {
+        ArrayList<MapEdge> path = PathFinder.getShortestPath(fromEdge, toEdge);
+        map.drawShortestPath(path);
+    }
+    
+    private boolean isRoadValid(MapEdge edge) {
+        int graphState = PathFinder.getState();
+        int type = edge.getType();
+        String oneway = edge.getOneWay();
+
+        if (graphState == 0) { /* car graph */
+            if (oneway.equalsIgnoreCase("n") || edge.getMaxSpeed() == 0) {
+                view.showWarningForSelectedRoad(graphState);
+                return false;
+            } else {
+                return true;
             }
-        });
-        thread.start();
-        long endTimeMillis = System.currentTimeMillis() + timeout;
-        while (thread.isAlive()) {
-            if (System.currentTimeMillis() > endTimeMillis) {
-                throw new Exception("Timeout: Could not find the a route between"
-                        + " the points.");
+        } else { /* walk graph */
+            if (type == 1 || type == 31 || type == 41) { /* Highway */
+                view.showWarningForSelectedRoad(graphState);
+                return false;
+            } else {
+                return true;
             }
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException t) {}
         }
     }
 }
