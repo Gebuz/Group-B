@@ -151,11 +151,11 @@ public abstract class OSMParseHandler extends DefaultHandler {
                     } else if (k.equals("oneway")) {
                         String v = attributes.getValue("v");
                         if (v != null) {
-                            if (v.equalsIgnoreCase("yes")) {
+                            if (v.equalsIgnoreCase("yes") || v.equalsIgnoreCase("true") || v.equalsIgnoreCase("1")) {
                                 oneway = "ft";
-                            } else if (oneway.equalsIgnoreCase("no")) {
+                            } else if (v.equalsIgnoreCase("no") || v.equalsIgnoreCase("false") || v.equalsIgnoreCase("0")) {
                                 oneway = "";
-                            } else if (oneway.equalsIgnoreCase("-1")) {
+                            } else if (v.equalsIgnoreCase("-1") || v.equalsIgnoreCase("reverse")) {
                                 oneway = "tf";
                             } else {
                                 oneway = "";

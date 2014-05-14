@@ -132,8 +132,8 @@ public class MapView extends JFrame {
         toPanel = new JPanel();
         fromLabel = new JLabel("From");
         toLabel = new JLabel("    To");
-        from = new JTextField(12);
-        to = new JTextField(12);
+        from = new JTextField(14);
+        to = new JTextField(14);
         from.setEditable(false);
         to.setEditable(false);
         
@@ -315,6 +315,14 @@ public class MapView extends JFrame {
                 + "\nPlease choose another road.";
         }
 
+        JOptionPane.showMessageDialog(this, message, messageTitle, 
+                JOptionPane.WARNING_MESSAGE);
+    }
+    
+    public void showWarningNoPathFound() {
+        String messageTitle = "No path found!";
+        String message = "Could not find a path between the selected roads."
+                + "\nPlease try again.";
         JOptionPane.showMessageDialog(this, message, messageTitle, 
                 JOptionPane.WARNING_MESSAGE);
     }

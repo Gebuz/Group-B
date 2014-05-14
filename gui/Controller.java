@@ -482,8 +482,17 @@ public class Controller implements MouseListener, MouseMotionListener, Component
      * @throws Exception 
      */
     private void getAndDrawShortestPath(MapEdge fromEdge, MapEdge toEdge) throws Exception {
-        ArrayList<MapEdge> path = PathFinder.getShortestPath(fromEdge, toEdge);
-        map.drawShortestPath(path);
+        try {
+            ArrayList<MapEdge> path = PathFinder.getShortestPath(fromEdge, toEdge);
+            if (path.isEmpty()) {
+                view.showWarningNoPathFound();
+                clear();
+            }
+            else map.drawShortestPath(path);
+        } catch (NullPointerException ex) {
+            view.showWarningNoPathFound();
+            clear();
+        }
     }
     
     private boolean isRoadValid(MapEdge edge) {
