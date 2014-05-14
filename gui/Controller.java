@@ -25,8 +25,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import osm.xmlparser.OSMParseHandler;
 
 /**
  *
@@ -65,6 +68,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         view.left.addActionListener(this);
         view.right.addActionListener(this);
         view.showHelp.addActionListener(this);
+        view.clearMap.addActionListener(this);
         view.setFrom.addActionListener(this);
         view.setTo.addActionListener(this);
         view.car.addActionListener(this);
@@ -227,7 +231,8 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 // Fix this part.
                 double heightRatio = map.getHeight()/(map.INIT_HEIGHT * 1.0);
                 double widthDiff = (map.getWidth() - map.INIT_WIDTH )* map.getResizeConstant() * map.getZoom() / 2;
-                heightRatio = (heightRatio * map.INIT_HEIGHT - map.INIT_HEIGHT)* map.getResizeConstant() * map.getZoom() / 2;    
+                heightRatio = (heightRatio * map.INIT_HEIGHT - map.INIT_HEIGHT)* map.getResizeConstant() * map.getZoom() / 2;  
+    
 
                 map.changeX(widthDiff - heightRatio);
 
@@ -258,6 +263,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         double resizeWidth = map.getWidth();
         double widthDiff = resizeWidth - map.getLastWidth();
         double heightRatio = resizeHeight/map.getLastHeight();
+
         
         if (resizeHeight < initHeight || resizeHeight > initHeight) {
             double constant = (initHeight+1) / resizeHeight;
@@ -275,6 +281,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         // Update maps last width.
         map.setLastWidth(resizeWidth);
         map.setLastHeight(resizeHeight);
+
 
         map.setVectorLastRelease(release.x - map.getWidth(),
                 release.y - map.getHeight());
@@ -316,29 +323,31 @@ public class Controller implements MouseListener, MouseMotionListener, Component
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if      (e.getSource() == view.zoomIn) {
+        Object source = e.getSource();
+        if      (source == view.zoomIn) {
             map.zoomIn(0.10);
         }
-        else if (e.getSource() == view.zoomOut) {
+        else if (source == view.zoomOut) {
             map.zoomOut(0.10);
         }
-        else if (e.getSource() == view.showFull) {
+        else if (source == view.showFull) {
             map.defaultMap();
             view.pack();
         }
-        else if (e.getSource() == view.showHelp) {
+        else if (source == view.showHelp) {
             view.helpWindow.setVisible(true);
+        }
+        else if (source == view.clearMap) {
+            clear();
         }
         else if (e.getSource() == view.setFrom) {
             double x = popUpPosX*map.getResizeConstant();
             double y = popUpPosY*map.getResizeConstant();
             if(toSet) {
-                fromEdge = map.getClosestRoad(x, y);
-                
-                if (!isRoadValid(fromEdge)) {
-                    fromSet = false;
+                if (!isRoadValid(map.getClosestRoad(x, y))) {
                     return;
                 }
+                fromEdge = map.getClosestRoad(x, y);
                 
                 try {
                     getAndDrawShortestPath(fromEdge, toEdge);
@@ -349,27 +358,25 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 fromSet = true;
             }
             else {
-                fromEdge = map.getClosestRoad(x, y);
-                
-                if (!isRoadValid(fromEdge)) {
-                    fromSet = false;
+                if (!isRoadValid(map.getClosestRoad(x, y))) {
+                    fromSet = true; //avoid resetting the whole pathfinding process.
+                    toSet = true;
                     return;
-                }
-                
+                }  
+                fromEdge = map.getClosestRoad(x, y);
                 fromSet = true;
             }
+            view.from.setText(fromEdge.getName());
             map.assignPinPos(x, y, 0);
         }
         else if (e.getSource() == view.setTo) {
             double x = popUpPosX*map.getResizeConstant();
             double y = popUpPosY*map.getResizeConstant();
-            if(fromSet) {
-                toEdge = map.getClosestRoad(x, y);
-                
-                if (!isRoadValid(toEdge)) {
-                   toSet = false; 
+            if(fromSet) {      
+                if (!isRoadValid(map.getClosestRoad(x, y))) {
                    return;
                 } 
+                toEdge = map.getClosestRoad(x, y);
                
                 try {
                     getAndDrawShortestPath(fromEdge, toEdge);
@@ -380,54 +387,56 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 toSet = true;
             }
             else {
-                toEdge = map.getClosestRoad(x, y);
-                
-                if (!isRoadValid(toEdge)) {
-                    toSet = false;
+                if (!isRoadValid(map.getClosestRoad(x, y))) {
+                    toSet = true; //avoid resetting the whole pathfinding process.
+                    fromSet = true;
                     return;
                 }
-                
+                toEdge = map.getClosestRoad(x, y);
                 toSet = true;
             }
+            view.to.setText(toEdge.getName());
             map.assignPinPos(x, y, 1);
         }
-        else if (e.getSource() == view.car) {
+        else if (source == view.car) {
             PathFinder.deleteGraph();
             long start = System.currentTimeMillis();
             PathFinder.createGraph(0, DataLoader.edgesGreen, DataLoader.getRoadCounter());
             long end = System.currentTimeMillis();
             System.out.println("Time to create car graph: " + (end - start) + " milliseconds.");
+            clear();
         }
-        else if (e.getSource() == view.walk) {
+        else if (source == view.walk) {
             PathFinder.deleteGraph();
             long start = System.currentTimeMillis();
             System.out.println("road counter: " + DataLoader.getRoadCounter());
             PathFinder.createGraph(1, DataLoader.edgesGreen, DataLoader.getRoadCounter());
             long end = System.currentTimeMillis();
             System.out.println("Time to create walk graph: " + (end - start) + " milliseconds.");
+            clear();
         }
-        else if (e.getSource() == view.up) {
+        else if (source == view.up) {
             if      (map.getZoom() >= 0.4)  map.changeY(20);
             else if (map.getZoom() >= 0.15) map.changeY(10);
             else if (map.getZoom() >= 0.09) map.changeY(5);
             else if (map.getZoom() >= 0.03) map.changeY(1);
             else if (map.getZoom() <  0.03) map.changeY(0.08);
         }
-        else if (e.getSource() == view.down) {
+        else if (source == view.down) {
             if     (map.getZoom() >= 0.4)   map.changeY(-20);
             else if(map.getZoom() >= 0.15)  map.changeY(-10);
             else if(map.getZoom() >= 0.09)  map.changeY(-5);
             else if(map.getZoom() >= 0.03)  map.changeY(-1);
             else if(map.getZoom() <  0.03)  map.changeY(-0.08);
         }
-        else if (e.getSource() == view.left) {
+        else if (source == view.left) {
             if     (map.getZoom() >= 0.4)   map.changeX(20);
             else if(map.getZoom() >= 0.15)  map.changeX(10);
             else if(map.getZoom() >= 0.09)  map.changeX(5);
             else if(map.getZoom() >= 0.03)  map.changeX(1);
             else if(map.getZoom() <  0.03)  map.changeX(0.08);
         }
-        else if (e.getSource() == view.right) {
+        else if (source == view.right) {
             if     (map.getZoom() >= 0.4)   map.changeX(-20);
             else if(map.getZoom() >= 0.15)  map.changeX(-10);
             else if(map.getZoom() >= 0.09)  map.changeX(-5);
@@ -464,9 +473,12 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     }
     
     /**
-     * Helper method to find the shortest path.
+     * Helper method to find the shortest path. This method adds a timeout to
+     * the PathFinder.getShortestPath() method. Set the timeout in milliseconds.
+     * @param type Integer indicating which graph to use. 0 for Car, 1 for Walk.
      * @param fromEdge The beginning point.
      * @param toEdge The end point.
+     * @param timeout Timeout in milliseconds.
      * @throws Exception 
      */
     private void getAndDrawShortestPath(MapEdge fromEdge, MapEdge toEdge) throws Exception {
@@ -494,5 +506,13 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 return true;
             }
         }
+    }
+    
+    private void clear() {
+        map.clearPath();
+        view.from.setText("");
+        view.to.setText("");
+        fromSet = false;
+        toSet = false;
     }
 }

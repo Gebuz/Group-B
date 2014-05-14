@@ -5,6 +5,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
 
 
@@ -35,7 +38,11 @@ public class StartFrame extends JFrame implements ActionListener {
         
         @Override
         protected Void doInBackground() {  
-            map = new MapPanel(bool);
+            try {
+                map = new MapPanel(bool);
+            } catch (MalformedURLException ex) {
+                Logger.getLogger(StartFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
             view = new MapView("Super duper map", map);
             controller = new Controller(view);
             return null;

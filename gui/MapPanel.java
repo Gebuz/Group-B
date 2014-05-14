@@ -14,6 +14,8 @@ import interfaces.MapEdge;
 import interfaces.MapNode;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -40,10 +42,9 @@ public class MapPanel extends JPanel {
     private HashSet<Integer> roadListHashSet = new HashSet<>();
     private boolean roadOn = true;
     
-    public double k = 0;
+    private double k = 0;
     private double resizeConstant = 1, zoomConstant = 1;
     private double xk = 0, yk = 0;
-    private int nxk = 0, nyk = 0;
     public final double ratio;
     public final float dash[] = {7.0f};
     
@@ -62,26 +63,27 @@ public class MapPanel extends JPanel {
     private double lastWidth = INIT_WIDTH;
     private double lastHeight = INIT_HEIGHT;
     
-    double pressX, pressY, releaseX, releaseY;
+    private double pressX, pressY, releaseX, releaseY;
     private MapEdge greenEdge, redEdge;
     private BufferedImage greenPin = null;
     private BufferedImage redPin = null;
 
     
 
-    public MapPanel(int bool) { 
+    public MapPanel(int bool) throws MalformedURLException { 
 
         area = new Area();
 
         loader = new DataLoader(bool);
-
+        
         try {
-            greenPin = ImageIO.read(new File("data/needles/needle1.png"));
-            redPin = ImageIO.read((new File("data/needles/needle2.png")));
+            greenPin = ImageIO.read(new File("data/needles/needle1.png")); //Toolkit.getDefaultToolkit().createImage("data/needles/needle1.png"); 
+            redPin = ImageIO.read((new File("data/needles/needle.png"))); //Toolkit.getDefaultToolkit().createImage("data/needles/needle.png");
         } catch (IOException ex) {
             Logger.getLogger(MapPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+        // Set K
         this.k = (CoordinateBoundaries.yMax-CoordinateBoundaries.yMin) / INIT_HEIGHT;
         
         vectorLastPress = new Point2D.Double(0.0, 0.0);
@@ -773,7 +775,7 @@ public class MapPanel extends JPanel {
     public double getResizeConstant() {
         return resizeConstant;
     }
-
+    
     public double getLastWidth() {
         return lastWidth;
     }
@@ -789,27 +791,26 @@ public class MapPanel extends JPanel {
     public void setLastHeight(double lastHeight) {
         this.lastHeight = lastHeight;
     }
-    
-    
-    
-    public void drawPin(double fnX, double fnY, Graphics2D g2, int color) { 
-        fnX = fnX - press.x;
-        fnY = fnY - press.y;
 
-        fnX /= zoomConstant;
-        fnY /= zoomConstant;
+    
+    public void drawPin(double x, double y, Graphics2D g2, int color) { 
+        x = x - press.x;
+        y = y - press.y;
+
+        x /= zoomConstant;
+        y /= zoomConstant;
         
-        fnX /= resizeConstant;
-        fnY /= resizeConstant;
+        x /= resizeConstant;
+        y /= resizeConstant;
         
-        fnX -= (greenPin.getWidth()/2);
-        fnY -= greenPin.getHeight();
+        x -= (greenPin.getWidth(this)/2);
+        y -= greenPin.getHeight(this);
         
         if(color == 0) {
-            g2.drawImage(greenPin,(int) fnX,(int) fnY, null);
+            g2.drawImage(greenPin, (int) x, (int) y, null);
         }
         else {
-            g2.drawImage(redPin,(int) fnX,(int) fnY, null);
+            g2.drawImage(redPin,(int) x,(int) y, null);
         }
     }
     
@@ -821,6 +822,13 @@ public class MapPanel extends JPanel {
         else {
             redEdge = getClosestRoad(pinPosX, pinPosY);
         }
+        repaint();
+    }
+    
+    public void clearPath() {
+        greenEdge = null;
+        redEdge = null;
+        path.clear();
         repaint();
     }
 }

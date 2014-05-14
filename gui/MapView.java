@@ -17,16 +17,17 @@ public class MapView extends JFrame {
     public final HelpWindow helpWindow;
     public final JPanel glass;
     public final JPanel mapPanel;
-    public final JPanel northPanel, eastPanel, upPanel, downPanel, roadPanel, xyPanel, arrowPanel, zoomPanel, routePanel;
-    public final JLabel x, y, road, route;
+    public final JPanel northPanel, eastPanel, upPanel, downPanel, roadPanel, xyPanel, arrowPanel, zoomPanel, routePanel, fromPanel, toPanel;
+    public final JLabel x, y, road, route, fromLabel, toLabel;
     public final JButton up, down, left, right, showFull, zoomIn, zoomOut;
     public final JMenuBar menuBar;
     public final JMenu mapOptionsMenu, helpMenu;
     public final JCheckBoxMenuItem enableRoad, enableRelative, enableNavigation;
     public final JRadioButton walk, car;
     public final ButtonGroup bgroup;
-    public final JMenuItem setFrom, setTo, showHelp;
+    public final JMenuItem setFrom, setTo, showHelp, clearMap;
     public final JPopupMenu popUp;
+    public final JTextField from, to;
     private int condition;
     
     public MapView(String name, final MapPanel mapPanel) {
@@ -69,6 +70,12 @@ public class MapView extends JFrame {
         enableNavigation.setEnabled(true);
         enableNavigation.setSelected(true);
         mapOptionsMenu.add(enableNavigation);
+        
+        mapOptionsMenu.addSeparator();
+        
+        clearMap = new JMenuItem("Clear map");
+        clearMap.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK));
+        mapOptionsMenu.add(clearMap);
         
         helpMenu = new JMenu("Help");
         menuBar.add(helpMenu);
@@ -120,6 +127,15 @@ public class MapView extends JFrame {
         route = new JLabel("Find route for:");
         car = new JRadioButton("Car", true);
         walk = new JRadioButton("Pedestrian");
+        
+        fromPanel = new JPanel();
+        toPanel = new JPanel();
+        fromLabel = new JLabel("From");
+        toLabel = new JLabel("    To");
+        from = new JTextField(12);
+        to = new JTextField(12);
+        from.setEditable(false);
+        to.setEditable(false);
         
         //Mapping key inputs to button
         KeyStroke keyUp = KeyStroke.getKeyStroke("UP"); 
@@ -240,6 +256,13 @@ public class MapView extends JFrame {
         routePanel.add(car);
         routePanel.add(walk);
         
+        fromPanel.add(fromLabel);
+        fromPanel.add(from);
+        toPanel.add(toLabel);
+        toPanel.add(to);
+        
+        eastPanel.add(fromPanel, gbc);
+        eastPanel.add(toPanel, gbc);
         eastPanel.add(route, gbc);
         eastPanel.add(routePanel, gbc);
         eastPanel.add(arrowPanel, gbc);
@@ -279,7 +302,6 @@ public class MapView extends JFrame {
     }
     
     public void showWarningForSelectedRoad(int graphState) {
-
         String message = "";
         String messageTitle = "";
         
