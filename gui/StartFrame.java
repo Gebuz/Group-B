@@ -20,7 +20,6 @@ public class StartFrame extends JFrame implements ActionListener {
     
     private MapPanel map;
     private MapView view;
-    private NavigationWindow navigationWindow;
     private Controller controller;
     public StartFrame sf = this;
     

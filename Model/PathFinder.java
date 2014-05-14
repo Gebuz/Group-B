@@ -25,8 +25,7 @@ import gui.DataLoader;
 public class PathFinder {
 
     private static final PathFinder pathFinder = new PathFinder();
-    private static EdgeWeightedDigraph graphCar;
-    private static EdgeWeightedDigraph graphWalk;
+    private static EdgeWeightedDigraph theGraph;
     private static AstarSP tree;
     private static HashMap<Point2D.Double, Integer> nodesCar = new HashMap<>();
     private static HashMap<Point2D.Double, Integer> nodesWalk = new HashMap<>();
@@ -59,12 +58,7 @@ public class PathFinder {
     public static void createGraph(int type, ArrayList<MapEdge> edges, int carsNotAllowed) {
         state = type;
         noCarsAllowedOnRoad = carsNotAllowed;
-        if (state == 0) {
-            graphCar = Graphs(edges);
-        }
-        else {
-            graphWalk = Graphs(edges);
-        }
+        theGraph = Graphs(edges);
     }
 
     private static EdgeWeightedDigraph Graphs(ArrayList<MapEdge> edges) {
@@ -216,11 +210,11 @@ public class PathFinder {
         EdgeWeightedDigraph graph;
 
         if (type == 0) {
-            graph = graphCar;
+            graph = theGraph;
             idStart = nodesCar.get(xy1);
             idEnd = nodesCar.get(xy2);
         } else {
-            graph = graphWalk;
+            graph = theGraph;
             idStart = nodesWalk.get(xy1);
             idEnd = nodesWalk.get(xy2);
         }
@@ -259,12 +253,7 @@ public class PathFinder {
     }
     
     public static void deleteGraph() {
-        if(state == 0) {
-            graphCar = null;
-        }
-        else {
-            graphWalk = null;
-        }
+        theGraph = null;
     }
     
     public static int getState() {
