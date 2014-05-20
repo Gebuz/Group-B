@@ -39,7 +39,10 @@ public class OSMEdgeData implements MapEdge {
         return ("FN = " + FNODE
                 + ", TN = " + TNODE
                 + ", TYPE = " + TYPE
-                + ", ID = " + ID);
+                + ", ID = " + ID
+                + ", NAME = " + NAME
+                + ", MAXSPEED = " + MAXSPEED
+                + ", ONE_WAY = " + ONE_WAY);
     }
 
     /**

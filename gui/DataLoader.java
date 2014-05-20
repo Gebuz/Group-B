@@ -80,7 +80,7 @@ public class DataLoader {
         PathFinder.createGraph(0, edgesGreen, noCarsOnRoadCounter);
     }
 
-/**
+    /**
      * Load the Krak data.
      */
     private void loadKrak() {
@@ -148,6 +148,7 @@ public class DataLoader {
         loadBar.bar.setString("Load complete!");
         loadBar.changeText("Now drawing map. Please wait...");
         
+        // Find the boundaries for all nodes.
         CoordinateBoundaries.findBoundaries(nodes);
         MirrorCoordinates.MirrorY(nodes);
         
@@ -158,7 +159,9 @@ public class DataLoader {
 //            dir + "gmt/landuse.gmt",
 //            dir + "gmt/natural.gmt"
         };
-
+        
+        //Loads different kinds of shape files, like buildings, but it takes
+        //a lot of resources. 
 //        loadShapes(shapefiles, shapes);
 
         //Mirror coordinates for the shapes and apply UTM32 projection
@@ -292,7 +295,6 @@ public class DataLoader {
         // Create edges and nodes for each land polygon.
         createEdgesAndNodesFromLandPolygons(shapesLandPolygons, 
                 landPolygonNodes, landPolygonEdges);
-        
     }
 
     

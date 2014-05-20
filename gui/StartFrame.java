@@ -37,11 +37,7 @@ public class StartFrame extends JFrame implements ActionListener {
         
         @Override
         protected Void doInBackground() {  
-            try {
-                map = new MapPanel(bool);
-            } catch (MalformedURLException ex) {
-                Logger.getLogger(StartFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            map = new MapPanel(bool);
             view = new MapView("Super duper map", map);
             controller = new Controller(view);
             return null;
@@ -64,7 +60,7 @@ public class StartFrame extends JFrame implements ActionListener {
     public StartFrame() {
         
         //Initializing components, containers and setting layouts
-        textLabel = new JLabel("Vælg kort af Danmark:");
+        textLabel = new JLabel("Choose map of Denmark:");
         krakButton = new JButton("Krak (2001)");
         osmButton = new JButton("Open Street Map (2014)");
         krakButton.addActionListener(this);

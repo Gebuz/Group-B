@@ -193,10 +193,6 @@ public class PathFinder {
             }
 
         }
-        System.out.println("ArrayList<MapEdge> edges size is = " + edges.size());
-        System.out.println("Edges in the graph = " + graph.E());
-        System.out.println("Vertices in the graph = " + graph.V());
-        System.out.println(nodesCar.size());
         return graph;
     }
 

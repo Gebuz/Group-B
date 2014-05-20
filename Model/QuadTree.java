@@ -307,7 +307,7 @@ public class QuadTree {
      * @param y The y coordinate of the point.
      * @return Returns the MapEdge with the road closest to a given point.
      */
-    public MapEdge getClosestRoad(double x, double y) {
+    public MapEdge getClosestRoad(double x, double y, boolean withName) {
         x = outOfBoundsX(x);
         y = outOfBoundsY(y);
         MapEdge ed;
@@ -325,9 +325,17 @@ public class QuadTree {
             MapNode fn = nodes.get(e.getFNode());
             MapNode tn = nodes.get(e.getTNode());
             double d = distanceFromLine(fn.getX(), fn.getY(), tn.getX(), tn.getY(), x, y);
-            if(d < distance && !(e.getName().equals(""))) {
+            if(withName) {
+                if(d < distance && !(e.getName().equals(""))) {
+                    distance = d;
+                    ed = e;
+                }
+            }
+            else {
+                if(d < distance) {
                 distance = d;
                 ed = e;
+                }
             }
         }
         return ed;

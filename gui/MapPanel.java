@@ -14,8 +14,6 @@ import interfaces.MapEdge;
 import interfaces.MapNode;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -70,15 +68,15 @@ public class MapPanel extends JPanel {
 
     
 
-    public MapPanel(int bool) throws MalformedURLException { 
+    public MapPanel(int bool) { 
 
         area = new Area();
 
         loader = new DataLoader(bool);
         
         try {
-            greenPin = ImageIO.read(new File("data/needles/needle1.png")); //Toolkit.getDefaultToolkit().createImage("data/needles/needle1.png"); 
-            redPin = ImageIO.read((new File("data/needles/needle.png"))); //Toolkit.getDefaultToolkit().createImage("data/needles/needle.png");
+            greenPin = ImageIO.read(new File("data/needles/needle1.png")); 
+            redPin = ImageIO.read((new File("data/needles/needle.png"))); 
         } catch (IOException ex) {
             Logger.getLogger(MapPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -267,7 +265,8 @@ public class MapPanel extends JPanel {
                     mapG.fill(GMTShapeConverter.createPolygon(shape, k, xk, yk, CoordinateBoundaries.xMin, CoordinateBoundaries.yMin, zoomConstant, resizeConstant, press.x, press.y));
                 }
             }
-
+            
+            //draw all edges in specific quad tree
             for (MapEdge ed : edges) {
                 fn = DataLoader.nodes.get(ed.getFNode());
                 tn = DataLoader.nodes.get(ed.getTNode());
@@ -287,6 +286,7 @@ public class MapPanel extends JPanel {
         g2.drawImage(map, 0, 0, null);
         mapG.dispose();
         
+        //draw shortest path
         if(!path.isEmpty()) {
             for(MapEdge ed : path) {
                 fn = DataLoader.nodes.get(ed.getFNode());
@@ -300,6 +300,8 @@ public class MapPanel extends JPanel {
                 drawSpecified(fnX, fnY, tnX, tnY, -100, ed, g2);
             }
         }
+        
+        //draw red or green pin
         if(greenEdge != null) {            
             fn = DataLoader.nodes.get(greenEdge.getFNode());
             fnX = (((fn.getX() - CoordinateBoundaries.xMin) / k) + xk);
@@ -314,6 +316,8 @@ public class MapPanel extends JPanel {
 
             drawPin(tnX, tnY, g2, 1);
         }
+        
+        //draw rectangle
         if (rect != null) {
             area.add(new Area(new Rectangle2D.Float(0, 0, getWidth(), getHeight())));
             g2.setColor(Color.BLACK.brighter());
@@ -504,8 +508,7 @@ public class MapPanel extends JPanel {
             }
         }
     }
-
-    
+ 
     public void defaultMap() {
         press = new Point2D.Double(0, 0);
         release = new Point2D.Double(INIT_WIDTH, INIT_HEIGHT);
@@ -742,11 +745,11 @@ public class MapPanel extends JPanel {
     }
     
     public String getRoadName(double x, double y) {
-        MapEdge edge = getClosestRoad(x, y);
-        return edge.getName() + " - " + edge.getOneWay()  + " - " +  edge.getMaxSpeed() + " " + edge.getType();
+        MapEdge edge = getClosestRoad(x, y, true);
+        return edge.getName();
     }
     
-    public MapEdge getClosestRoad(double x, double y) {
+    public MapEdge getClosestRoad(double x, double y, boolean withName) {
         double widthDiff  = (getWidth()  * resizeConstant - INIT_WIDTH) * zoomConstant;
         double heightDiff = (getHeight() * resizeConstant - INIT_HEIGHT) * zoomConstant;
         
@@ -755,13 +758,13 @@ public class MapPanel extends JPanel {
         MapEdge edge;
         switch(colour) {
             case BLUE:
-                edge = qtBlue.getClosestRoad(x, y);
+                edge = qtBlue.getClosestRoad(x, y, withName);
                 break;
             case PINK:
-                edge = qtPink.getClosestRoad(x, y);
+                edge = qtPink.getClosestRoad(x, y, withName);
                 break;
             default:
-                edge = qtGreen.getClosestRoad(x, y);
+                edge = qtGreen.getClosestRoad(x, y, withName);
                 break;
         }
         return edge;
@@ -817,10 +820,10 @@ public class MapPanel extends JPanel {
     //0 for green, 1 for red.
     public void assignPinPos(double pinPosX, double pinPosY, int color) {                
         if(color == 0) {
-            greenEdge = getClosestRoad(pinPosX, pinPosY);
+            greenEdge = getClosestRoad(pinPosX, pinPosY, false);
         }
         else {
-            redEdge = getClosestRoad(pinPosX, pinPosY);
+            redEdge = getClosestRoad(pinPosX, pinPosY, false);
         }
         repaint();
     }

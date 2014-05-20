@@ -231,8 +231,6 @@ public class MapView extends JFrame {
         roadPanel.setLayout(new BorderLayout());
         
         //Adding components
-        //zoomIn.setBorderPainted(false);
-        //zoomIn.setAlignmentY(0.0f);
         mapPanel.add(zoomIn);
         mapPanel.add(zoomOut);
         
@@ -271,22 +269,7 @@ public class MapView extends JFrame {
         roadPanel.setBackground(new Color(212, 212, 212, 100));
         
         glass.add(roadPanel, BorderLayout.SOUTH);
-        
-        //eastPanel.add(road, gbc);
-        
-        //x-y panel
-//        xyPanel.add(new JLabel("x: "));
-//        xyPanel.add(x);
-//        xyPanel.add(new JLabel(" y: "));
-//        xyPanel.add(y);
-        
-        //northPanel.add(Box.createHorizontalGlue());
-        
-        //northPanel.add(roadPanel);
-        
-        //Adding components to panels
-        //northPanel.add(xyPanel);
-        
+          
         //Adding final touches to content pane.
         getContentPane().add(mapPanel, BorderLayout.CENTER);
         getContentPane().add(eastPanel, BorderLayout.EAST);

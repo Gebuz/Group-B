@@ -340,15 +340,15 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         else if (source == view.clearMap) {
             clear();
         }
-        else if (e.getSource() == view.setFrom) {
+        else if (source == view.setFrom) {
             double x = popUpPosX*map.getResizeConstant();
             double y = popUpPosY*map.getResizeConstant();
             if(toSet) {
-                if (!isRoadValid(map.getClosestRoad(x, y))) {
+                if (!isRoadValid(map.getClosestRoad(x, y, false))) {
                     return;
                 }
-                fromEdge = map.getClosestRoad(x, y);
-                
+                fromEdge = map.getClosestRoad(x, y, false);
+        
                 try {
                     getAndDrawShortestPath(fromEdge, toEdge);
                 } catch (Exception ex) {
@@ -358,25 +358,25 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 fromSet = true;
             }
             else {
-                if (!isRoadValid(map.getClosestRoad(x, y))) {
+                if (!isRoadValid(map.getClosestRoad(x, y, false))) {
                     fromSet = true; //avoid resetting the whole pathfinding process.
                     toSet = true;
                     return;
                 }  
-                fromEdge = map.getClosestRoad(x, y);
+                fromEdge = map.getClosestRoad(x, y, false);
                 fromSet = true;
             }
             view.from.setText(fromEdge.getName());
             map.assignPinPos(x, y, 0);
         }
-        else if (e.getSource() == view.setTo) {
+        else if (source == view.setTo) {
             double x = popUpPosX*map.getResizeConstant();
             double y = popUpPosY*map.getResizeConstant();
             if(fromSet) {      
-                if (!isRoadValid(map.getClosestRoad(x, y))) {
+                if (!isRoadValid(map.getClosestRoad(x, y, false))) {
                    return;
                 } 
-                toEdge = map.getClosestRoad(x, y);
+                toEdge = map.getClosestRoad(x, y, false);
                
                 try {
                     getAndDrawShortestPath(fromEdge, toEdge);
@@ -387,12 +387,12 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 toSet = true;
             }
             else {
-                if (!isRoadValid(map.getClosestRoad(x, y))) {
+                if (!isRoadValid(map.getClosestRoad(x, y, false))) {
                     toSet = true; //avoid resetting the whole pathfinding process.
                     fromSet = true;
                     return;
                 }
-                toEdge = map.getClosestRoad(x, y);
+                toEdge = map.getClosestRoad(x, y, false);
                 toSet = true;
             }
             view.to.setText(toEdge.getName());
@@ -400,19 +400,12 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         }
         else if (source == view.car) {
             PathFinder.deleteGraph();
-            long start = System.currentTimeMillis();
             PathFinder.createGraph(0, DataLoader.edgesGreen, DataLoader.getRoadCounter());
-            long end = System.currentTimeMillis();
-            System.out.println("Time to create car graph: " + (end - start) + " milliseconds.");
             clear();
         }
         else if (source == view.walk) {
             PathFinder.deleteGraph();
-            long start = System.currentTimeMillis();
-            System.out.println("road counter: " + DataLoader.getRoadCounter());
             PathFinder.createGraph(1, DataLoader.edgesGreen, DataLoader.getRoadCounter());
-            long end = System.currentTimeMillis();
-            System.out.println("Time to create walk graph: " + (end - start) + " milliseconds.");
             clear();
         }
         else if (source == view.up) {
@@ -481,7 +474,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
      * @param timeout Timeout in milliseconds.
      * @throws Exception 
      */
-    private void getAndDrawShortestPath(MapEdge fromEdge, MapEdge toEdge) throws Exception {
+    public void getAndDrawShortestPath(MapEdge fromEdge, MapEdge toEdge) {
         try {
             ArrayList<MapEdge> path = PathFinder.getShortestPath(fromEdge, toEdge);
             if (path.isEmpty()) {
@@ -495,13 +488,13 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         }
     }
     
-    private boolean isRoadValid(MapEdge edge) {
+    public boolean isRoadValid(MapEdge edge) {
         int graphState = PathFinder.getState();
         int type = edge.getType();
         String oneway = edge.getOneWay();
 
         if (graphState == 0) { /* car graph */
-            if (oneway.equalsIgnoreCase("n") || edge.getMaxSpeed() == 0) {
+            if (oneway.equalsIgnoreCase("n") || edge.getMaxSpeed() == 0 || type == 8 || type == 48) {
                 view.showWarningForSelectedRoad(graphState);
                 return false;
             } else {
