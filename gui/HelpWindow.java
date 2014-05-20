@@ -12,6 +12,9 @@ public class HelpWindow extends JFrame {
     private JTabbedPane tabPane;
     private JLabel one, two;
     
+    /**
+     * Initializes all components of this window.
+     */
     public HelpWindow() {
         super("Help");
         
@@ -36,7 +39,7 @@ public class HelpWindow extends JFrame {
 "<ul>\n" +
 "<li>It&#39;s not your computer. The OSM just has much more content, about three times as much, so it takes quite a bit longer to load. Thank you for your patience, if you&#39;re reading this from the OSM map!</li>\n" +
 "</ul>\n" +
-"<p>3.. I just zoomed in to my home and it appears the whole neighbourhood has been flooded!</p>\n" +
+"<p>3. I just zoomed in to my home and it appears the whole neighbourhood has been flooded!</p>\n" +
 "<ul>\n" +
 "<li>Don&#39;t worry, consider it as a feature. You should actually feel very lucky if that happens to your home!</li>\n" +
 "</ul>\n" +

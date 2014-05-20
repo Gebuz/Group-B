@@ -3,18 +3,21 @@ package gui;
 
 import javax.swing.*;
 import java.awt.*;
-import static javax.swing.JFrame.EXIT_ON_CLOSE;
 /**
  *
  * @author flemmingxu
  */
 public class LoadingBar extends JFrame {
+
     public final JProgressBar bar;
     public final JLabel loadText, seriousLabel;
     public final JPanel loadPanel, barPanel, textPanel, seriousPanel;
     private ImageIcon seriousImage;
     
     
+    /**
+     * Initializes all components of this window.
+     */
     public LoadingBar() {
         super("Super Exxo Loader v2.0");
         
@@ -46,6 +49,9 @@ public class LoadingBar extends JFrame {
         getContentPane().add(loadPanel, BorderLayout.CENTER);   
     }
     
+    /**
+     * Shows the loading bar.
+     */
     public void showLoadingBar() {
         setMinimumSize(new Dimension(250,100));
         setResizable(false);
@@ -54,34 +60,11 @@ public class LoadingBar extends JFrame {
         setVisible(true);
     }
     
+    /**
+     * Changes the text above the loading bar to the specified text.
+     * @param s The specified text.
+     */
     public void changeText(String s) {
         loadText.setText(s);
     }
-    
-//    public void changeText() {
-//        if(bar.getPercentComplete() <= 0.1) {
-//            loadText.setText("Readying buffer2000...");
-//        }
-//        else if(bar.getPercentComplete() <= 0.2 ) {
-//            loadText.setText("Brushing dust off data...");
-//        }
-//        else if(bar.getPercentComplete () <= 0.5) {
-//            loadText.setText("Calling Krak...");
-//        }
-//        else if(bar.getPercentComplete() <= 0.7) {
-//            loadText.setText("Giving up...");
-//        }
-//        else if(bar.getPercentComplete() <= 0.8) {
-//            loadText.setText("Contemplating suicide...");
-//        }
-//        else if(bar.getPercentComplete() <= 0.9) {
-//            loadText.setText("Manning up...");
-//        }
-//        else if(bar.getPercentComplete() <= 0.95) {
-//            loadText.setText("FATAL ERROR TERMINATING...");
-//        }
-//        else if(bar.getPercentComplete() <= 1.0) {
-//            loadText.setText("Just kidding...");
-//        }
-//    }
 }

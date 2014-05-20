@@ -30,6 +30,11 @@ public class MapView extends JFrame {
     public final JTextField from, to;
     private int condition;
     
+    /**
+     * Initializes all components of this window as well as abstract actions for key mappings.
+     * @param name The name of the window.
+     * @param mapPanel The map.
+     */
     public MapView(String name, final MapPanel mapPanel) {
         super(name);
         
@@ -284,6 +289,10 @@ public class MapView extends JFrame {
         setVisible(false);
     }
     
+    /**
+     * Pops up a warning JOptionPane when the user selects an invalid road.
+     * @param graphState The state of the graph. 0 for driver, 1 for pedestrian.
+     */
     public void showWarningForSelectedRoad(int graphState) {
         String message = "";
         String messageTitle = "";
@@ -302,6 +311,9 @@ public class MapView extends JFrame {
                 JOptionPane.WARNING_MESSAGE);
     }
     
+    /**
+     * Pops up a warning JOptionPane when the user has marked an invalid path.
+     */
     public void showWarningNoPathFound() {
         String messageTitle = "No path found!";
         String message = "Could not find a path between the selected roads."

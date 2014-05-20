@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gui;
 
 import Model.PathFinder;
@@ -25,11 +21,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import osm.xmlparser.OSMParseHandler;
 
 /**
  *
@@ -49,6 +42,10 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     private boolean centerZoom;
     private boolean cancelDrag;
     
+    /**
+     * Sets the view, map and all necessary listeners.
+     * @param view The main window.
+     */
     public Controller(MapView view) {
         
         this.view = view;
@@ -77,9 +74,6 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         view.enableRelative.addItemListener(this);
         view.enableRoad.addItemListener(this);
         view.enableNavigation.addItemListener(this);
-//        view.roadOn.addActionListener(this);
-//        view.roadOff.addActionListener(this);
-//        view.relativeZoomCheckBox.addItemListener(this);
         
         map.addMouseListener(this);
         map.addMouseMotionListener(this);
@@ -227,8 +221,7 @@ public class Controller implements MouseListener, MouseMotionListener, Component
                 map.getVectorLastRelease().y + vectorNewReleaseY);
                
                 map.assignCoords(press, release);
-                
-                // Fix this part.
+
                 double heightRatio = map.getHeight()/(map.INIT_HEIGHT * 1.0);
                 double widthDiff = (map.getWidth() - map.INIT_WIDTH )* map.getResizeConstant() * map.getZoom() / 2;
                 heightRatio = (heightRatio * map.INIT_HEIGHT - map.INIT_HEIGHT)* map.getResizeConstant() * map.getZoom() / 2;  
@@ -468,11 +461,8 @@ public class Controller implements MouseListener, MouseMotionListener, Component
     /**
      * Helper method to find the shortest path. This method adds a timeout to
      * the PathFinder.getShortestPath() method. Set the timeout in milliseconds.
-     * @param type Integer indicating which graph to use. 0 for Car, 1 for Walk.
      * @param fromEdge The beginning point.
      * @param toEdge The end point.
-     * @param timeout Timeout in milliseconds.
-     * @throws Exception 
      */
     public void getAndDrawShortestPath(MapEdge fromEdge, MapEdge toEdge) {
         try {
@@ -488,6 +478,11 @@ public class Controller implements MouseListener, MouseMotionListener, Component
         }
     }
     
+    /**
+     * Checks if the specified edge is valid for the graph in use.
+     * @param edge The specified edge.
+     * @return Returns false if not valid, true if valid.
+     */
     public boolean isRoadValid(MapEdge edge) {
         int graphState = PathFinder.getState();
         int type = edge.getType();

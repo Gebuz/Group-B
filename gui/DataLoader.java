@@ -39,22 +39,20 @@ import osm.xmlparser.OSMParseHandler;
 public class DataLoader {
 
     // Edges for roads and coastline
-    public static HashMap<Integer, MapNode> nodes = new HashMap<>();
-    public static ArrayList<MapEdge> edgesBlue = new ArrayList<>();
-    public static ArrayList<MapEdge> edgesPink = new ArrayList<>();
-    public static ArrayList<MapEdge> edgesGreen = new ArrayList<>();
+    public static final HashMap<Integer, MapNode> nodes = new HashMap<>();
+    public static final ArrayList<MapEdge> edgesBlue = new ArrayList<>();
+    public static final ArrayList<MapEdge> edgesPink = new ArrayList<>();
+    public static final ArrayList<MapEdge> edgesGreen = new ArrayList<>();
     
     // Shape objects for buildings
-    public static HashMap<Integer, GMTShape> shapes = new HashMap<>();
-    public static HashMap<Integer, MapNode> shapeNodes = new HashMap<>();
-    public static ArrayList<MapEdge> shapeEdges = new ArrayList<>();
+    public static final HashMap<Integer, GMTShape> shapes = new HashMap<>();
+    public static final HashMap<Integer, MapNode> shapeNodes = new HashMap<>();
+    public static final ArrayList<MapEdge> shapeEdges = new ArrayList<>();
     
     // Shape objects for land polygons.
-    public static HashMap<Integer, GMTShape> shapesLandPolygons = new HashMap<>();
-    public static HashMap<Integer, MapNode> landPolygonNodes = new HashMap<>();
-    public static ArrayList<MapEdge> landPolygonEdges = new ArrayList<>();
-    
-    public static boolean isOSM = false;
+    public static final HashMap<Integer, GMTShape> shapesLandPolygons = new HashMap<>();
+    public static final HashMap<Integer, MapNode> landPolygonNodes = new HashMap<>();
+    public static final ArrayList<MapEdge> landPolygonEdges = new ArrayList<>();
     
     public static final LoadingBar loadBar = new LoadingBar();
     private int lineCount = 0;
@@ -597,6 +595,10 @@ public class DataLoader {
         }
     }
     
+    /**
+     * 
+     * @return Returns the number of roads that do not allow cars.
+     */
     public static int getRoadCounter() {
         return noCarsOnRoadCounter;
     }

@@ -24,16 +24,17 @@ import javax.imageio.ImageIO;
  */
 public class MapPanel extends JPanel {
 
+
     public final QuadTree qtBlue;
     public final QuadTree qtPink;
     public final QuadTree qtGreen;
-   
     public final QuadTree qtShapesGreen;
     public final QuadTree qtShapesLandPolygons;
     
     private ArrayList<MapEdge> path = new ArrayList<MapEdge>();
     
     private Colour colour;
+    
     public final DataLoader loader;
     
     private HashSet<String> roadListNameHashSet = new HashSet<>();
@@ -55,7 +56,13 @@ public class MapPanel extends JPanel {
     
     private final Area area;
     
+    /**
+     * The panel's original width.
+     */
     public final int INIT_WIDTH = 850;
+    /**
+     * The panel's original height.
+     */
     public final int INIT_HEIGHT = 660;
     
     private double lastWidth = INIT_WIDTH;
@@ -68,6 +75,10 @@ public class MapPanel extends JPanel {
 
     
 
+    /**
+     * Initializes the most vital parts of the map, such as data and quad trees.
+     * @param bool 0 for Krak, 1 for OSM.
+     */
     public MapPanel(int bool) { 
 
         area = new Area();
@@ -398,7 +409,14 @@ public class MapPanel extends JPanel {
         drawMap = false;
     }
     
-    public void drawLine(Graphics2D g2, Line2D line, Color color, float width) {
+    /**
+     * 
+     * @param g2
+     * @param line
+     * @param color
+     * @param width
+     */
+    private void drawLine(Graphics2D g2, Line2D line, Color color, float width) {
         g2.setColor(color);
         if(color == Color.ORANGE) 
             g2.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10.0f, dash, 0.0f));
@@ -407,12 +425,22 @@ public class MapPanel extends JPanel {
         g2.draw(line);
     }
     
-    public void drawRect(Rectangle r, Graphics2D g2) {
+    /**
+     *
+     * @param r
+     * @param g2
+     */
+    private void drawRect(Rectangle r, Graphics2D g2) {
         g2.setColor(Color.BLACK);
         g2.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10.0f, dash, 0.0f));
         g2.drawRect(rect.x, rect.y, rect.width, rect.height);
     }
     
+    /**
+     *
+     * @param press
+     * @param release
+     */
     public void assignCoords(Point2D.Double press, Point2D.Double release) {
         this.press = press;
         this.release = release;
@@ -426,9 +454,12 @@ public class MapPanel extends JPanel {
 
     /**
      * Source: Stack Overflow forum
+     * @param g 
+     * @param s 
+     * @return 
      * @see http://stackoverflow.com/a/14376141
      */
-    public BufferedImage createStringImage(Graphics g, String s) {
+    private BufferedImage createStringImage(Graphics g, String s) {
         int w = g.getFontMetrics().stringWidth(s) + 5;
         int h = g.getFontMetrics().getHeight();
 
@@ -475,7 +506,18 @@ public class MapPanel extends JPanel {
         return Math.toDegrees(Math.atan2(yDiff, xDiff)); 
     }
     
-    public void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int fontSize, MapEdge edge, Graphics2D g2) {
+    /**
+     *
+     * @param fnX
+     * @param tnX
+     * @param fnY
+     * @param tnY
+     * @param zoomLimit
+     * @param fontSize
+     * @param edge
+     * @param g2
+     */
+    private void drawRoadNames(double fnX, double tnX, double fnY, double tnY, double zoomLimit, int fontSize, MapEdge edge, Graphics2D g2) {
                                  /* Ignore roadnames that are the empty string. */ 
         if(zoomConstant < zoomLimit && !edge.getName().equals("")) {
             boolean foundID;
@@ -509,6 +551,9 @@ public class MapPanel extends JPanel {
         }
     }
  
+    /**
+     *
+     */
     public void defaultMap() {
         press = new Point2D.Double(0, 0);
         release = new Point2D.Double(INIT_WIDTH, INIT_HEIGHT);
@@ -528,13 +573,21 @@ public class MapPanel extends JPanel {
         repaint();
     }
 
+    /**
+     *
+     * @param j
+     */
     public void updateResize(double j) {
         resizeConstant = j;
         drawMap = true;
         repaint();
     }
 
-    public void updateZoom(double j) {
+    /**
+     *
+     * @param j
+     */
+    private void updateZoom(double j) {
         zoomConstant = j;
         colour = colour.getColour(zoomConstant);
         repaint();
@@ -595,6 +648,12 @@ public class MapPanel extends JPanel {
                 vectorLastRelease.y + deltaY);
     }
     
+    /**
+     * Relative to mouse zoom in by a certain factor.
+     * @param factor
+     * @param mousePosX
+     * @param mousePosY
+     */
     public void zoomInRelativeToMouse(double factor, double mousePosX, double mousePosY) { 
         
         double relativeFactor = factor * zoomConstant;
@@ -625,6 +684,12 @@ public class MapPanel extends JPanel {
         changeX(zoomNudge);
     }
    
+    /**
+     * Relative to mouse zoom out by a certain factor.
+     * @param factor
+     * @param mousePosX
+     * @param mousePosY
+     */
     public void zoomOutRelativeToMouse(double factor, double mousePosX, double mousePosY) {
         
         double relativeFactor = factor * zoomConstant;
@@ -671,67 +736,130 @@ public class MapPanel extends JPanel {
     }
     
         
+    /**
+     * 
+     * @return Returns the panel's press coordinates.
+     */
     public Point2D.Double getPress() {
         return press;
     }
 
+    /**
+     * 
+     * @return Returns the panel's release coordinates.
+     */
     public Point2D.Double getRelease() {
         return release;
     }
     
+    /**
+     * Sets the panel's press coordinates.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     */
     public void setPress(double x, double y) {
         this.press = new Point2D.Double(x, y);
     }
     
+    /**
+     * Sets the panel's release coordinates.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     */
     public void setRelease(double x, double y) {
         this.release = new Point2D.Double(x, y);
     }
 
+    /**
+     * 
+     * @return Returns the panel's last press vector.
+     */
     public Point2D.Double getVectorLastPress() {
         return vectorLastPress;
     }
 
+    /**
+     *
+     * @return Returns the panel's last release vector.
+     */
     public Point2D.Double getVectorLastRelease() {
         return vectorLastRelease;
     }
 
+    /**
+     * Sets the panel's last press vector.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     */
     public void setVectorLastPress(double x, double y) {
         this.vectorLastPress.setLocation(x, y);
     }
 
+    /**
+     * Sets the panel's last release vector.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     */
     public void setVectorLastRelease(double x, double y) {
         this.vectorLastRelease.setLocation(x, y);
     }
 
+    /**
+     * Changes all x-coordinates with specified value.
+     * @param i
+     */
     public void changeX(double i) {
         drawMap = true;
         xk += i;
         repaint();
     }
 
+    /**
+     * Changes all y-coordinates with specified value.
+     * @param i
+     */
     public void changeY(double i) {
         drawMap = true;
         yk += i;
         repaint();
     }
     
+    /**
+     * 
+     * @return Returns DataLoader object.
+     */
     public DataLoader getData() {
         return loader;
     }
 
+    /**
+     * 
+     * @return Returns the zoom constant.
+     */
     public double getZoom() {
         return zoomConstant;
     }
     
+    /**
+     * Assigns the specified rectangle object as field.
+     * @param r The assigned rectangle.
+     */
     public void assignRect(Rectangle r) {
         rect = new Rectangle(r.x, r.y, r.width, r.height);
         repaint();
     }
     
+    /**
+     * Removes rectangle.
+     */
     public void removeRect() {
         rect = null;
     }
     
+    /**
+     * Changes the roadOn boolean, which determines whether road names should 
+     * be drawn on the map.
+     */
     public void roadSwitch() {
         if(roadOn) roadOn = false;
         else roadOn = true;
@@ -739,16 +867,32 @@ public class MapPanel extends JPanel {
         repaint();
     }
     
+    /**
+     * Updates the map by drawing it again.
+     */
     public void updateMap() {
         drawMap = true;
         repaint();
     }
     
+    /**
+     * 
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return Returns the name of the closest road to the specified point.
+     */
     public String getRoadName(double x, double y) {
         MapEdge edge = getClosestRoad(x, y, true);
         return edge.getName();
     }
     
+    /**
+     *
+     * @param x
+     * @param y
+     * @param withName If true the method ignores edges without a name. If false it will include roads without names.
+     * @return Returns the MapEdge object of the closest road to the specified point.
+     */
     public MapEdge getClosestRoad(double x, double y, boolean withName) {
         double widthDiff  = (getWidth()  * resizeConstant - INIT_WIDTH) * zoomConstant;
         double heightDiff = (getHeight() * resizeConstant - INIT_HEIGHT) * zoomConstant;
@@ -770,32 +914,63 @@ public class MapPanel extends JPanel {
         return edge;
     }
 	
+    /**
+     * Draws the specified path on the map.
+     * @param path The specified path.
+     */
     public void drawShortestPath(ArrayList<MapEdge> path) {
         this.path = path;
         repaint();
     }
 
+    /**
+     * 
+     * @return Returns the resize constant.
+     */
     public double getResizeConstant() {
         return resizeConstant;
     }
     
+    /**
+     *
+     * @return Returns the panel's last width.
+     */
     public double getLastWidth() {
         return lastWidth;
     }
 
+    /**
+     *
+     * @return Returns the panel's last height.
+     */
     public double getLastHeight() {
         return lastHeight;
     }
 
+    /**
+     * Sets the panel's last width.
+     * @param lastWidth
+     */
     public void setLastWidth(double lastWidth) {
         this.lastWidth = lastWidth;
     }
 
+    /**
+     * Sets the panel's last height.
+     * @param lastHeight
+     */
     public void setLastHeight(double lastHeight) {
         this.lastHeight = lastHeight;
     }
 
     
+    /**
+     * Draws the specified coloured pin on the specified point of the map.
+     * @param x
+     * @param y
+     * @param g2
+     * @param color 0 for green, 1 for red.
+     */
     public void drawPin(double x, double y, Graphics2D g2, int color) { 
         x = x - press.x;
         y = y - press.y;
@@ -817,7 +992,12 @@ public class MapPanel extends JPanel {
         }
     }
     
-    //0 for green, 1 for red.
+    /**
+     * Assigns the edges on which the pins are going to be situated. 
+     * @param pinPosX
+     * @param pinPosY
+     * @param color 0 for green, 1 for red.
+     */
     public void assignPinPos(double pinPosX, double pinPosY, int color) {                
         if(color == 0) {
             greenEdge = getClosestRoad(pinPosX, pinPosY, false);
@@ -828,6 +1008,9 @@ public class MapPanel extends JPanel {
         repaint();
     }
     
+    /**
+     * Clears the drawn path as well as the pins.
+     */
     public void clearPath() {
         greenEdge = null;
         redEdge = null;

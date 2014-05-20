@@ -1,13 +1,9 @@
-
 package gui;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.MalformedURLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
 
 
@@ -21,7 +17,7 @@ public class StartFrame extends JFrame implements ActionListener {
     private MapPanel map;
     private MapView view;
     private Controller controller;
-    public StartFrame sf = this;
+    public final StartFrame sf = this;
     
     public final JButton krakButton;
     public final JButton osmButton;
@@ -29,7 +25,7 @@ public class StartFrame extends JFrame implements ActionListener {
     private JPanel buttonPanel;
     private JPanel krakPanel;
     private JPanel osmPanel;
-    Task task;
+    private Task task;
     private int bool;
 
     
@@ -57,6 +53,9 @@ public class StartFrame extends JFrame implements ActionListener {
     }
     
     
+    /**
+     * Initializes all components of this window.
+     */
     public StartFrame() {
         
         //Initializing components, containers and setting layouts

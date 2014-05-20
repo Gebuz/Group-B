@@ -1,10 +1,6 @@
 package gui;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class X {
 
